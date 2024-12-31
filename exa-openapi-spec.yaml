@@ -1,0 +1,393 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: Exa Search API
+  description: A comprehensive API for internet-scale search, allowing users to perform queries and retrieve results from a wide variety of sources using embeddings-based and traditional search.
+servers:
+  - url: https://api.exa.ai
+paths:
+  /search:
+    post:
+      operationId: search
+      summary: Search
+      description: Perform a search with a Exa prompt-engineered query and retrieve a list of relevant results. Optionally get contents.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    query:
+                      type: string
+                      example: "Latest developments in LLM capabilities"
+                      description: The query string.
+                    useAutoprompt:
+                      type: boolean
+                      description: Autoprompt converts your query to an Exa query. Default false. Neural and auto search only.
+                      example: true
+                    type:
+                      type: string
+                      enum:
+                        - keyword
+                        - neural
+                        - auto
+                      description: The type of search. Default auto, which automatically decides between keyword and neural.
+                      example: "auto"
+                    category:
+                      type: string
+                      enum:
+                        - company
+                        - research paper
+                        - news
+                        - pdf
+                        - github
+                        - tweet
+                        - personal site
+                        - linkedin profile
+                        - financial report
+                      description: A data category to focus on.
+                      example: "research paper"
+                  required:
+                    - query
+                - $ref: "#/components/schemas/CommonRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/SearchResponse"
+  /findSimilar:
+    post:
+      operationId: findSimilar
+      summary: Find similar links
+      description: Find similar links to the link provided. Optionally get contents.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    url:
+                      type: string
+                      example: "https://arxiv.org/abs/2307.06435"
+                      description: The url for which you would like to find similar links
+                  required:
+                    - url
+                - $ref: "#/components/schemas/CommonRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/FindSimilarResponse"
+  /contents:
+    post:
+      summary: Get Contents
+      operationId: "getContents"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              allOf:
+                - type: object
+                  properties:
+                    ids:
+                      type: array
+                      description: Array of document IDs obtained from searches
+                      items:
+                        type: string
+                      example: ["https://arxiv.org/pdf/2307.06435"]
+                  required:
+                    - ids
+                - $ref: "#/components/schemas/ContentsRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ContentsResponse"
+components:
+  securitySchemes:
+    apikey:
+      type: apiKey
+      name: x-api-key
+      in: header
+  schemas:
+    ContentsRequest:
+      type: object
+      properties:
+        text:
+          type: object
+          description: Parsed contents of the page.
+          properties:
+            maxCharacters:
+              type: integer
+              description: Max length in characters for the text returned
+              example: 1000
+            includeHtmlTags:
+              type: boolean
+              description: Whether HTML tags, which can help the LLM understand structure of text, should be included. Default false
+              example: false
+        highlights:
+          type: object
+          description: Relevant extract(s) from the webpage.
+          properties:
+            numSentences:
+              type: integer
+              description: The number of sentences to be returned in each snippet. Default 5
+              example: 1
+            highlightsPerUrl:
+              type: integer
+              description: The number of snippets to return per page. Default 1
+              example: 1
+            query:
+              type: string
+              description: Query used specifically for the highlights.
+              example: "Key advancements"
+        summary:
+          type: object
+          description: Summary of the webpage
+          properties:
+            query:
+              type: string
+              description: Query used specifically for the summary.
+              example: "Main developments"
+        livecrawl:
+          type: string
+          enum: [never, fallback, always]
+          description: Options for livecrawling contents. Default is "never" for neural/auto search, "fallback" for keyword search.
+          example: "always"
+        livecrawlTimeout:
+          type: integer
+          description: The timeout for livecrawling in milliseconds. Max and default is 10000.
+          example: 1000
+        subpages:
+          type: integer
+          description: The number of subpages to crawl.
+          example: 1
+        subpageTarget:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          description: "The target subpage or subpages. Can be a single string or an array of strings."
+          example: "cited papers"
+        extras:
+          type: object
+          description: Extra parameters to pass.
+          properties:
+            links:
+              type: integer
+              description: The number of links to return.
+              example: 1
+            imageLinks:
+              type: integer
+              description: The number of images to return for each result.
+              example: 1
+
+    CommonRequest:
+      type: object
+      properties:
+        numResults:
+          type: integer
+          description:
+            Number of search results to return. Default 10. Max 10 for basic plans. Up to thousands for custom plans.
+          example: 10
+        includeDomains:
+          type: array
+          items:
+            type: string
+          description:
+            List of domains to include in the search. If specified, results will only come from these domains.
+          example:
+            - arxiv.org
+            - paperswithcode.com
+        excludeDomains:
+          type: array
+          items:
+            type: string
+          description:
+            List of domains to exclude in the search. If specified, results will not include any from these domains.
+          example:
+            - youtube.com
+            - twitter.com
+        startCrawlDate:
+          type: string
+          format: date-time
+          description: Crawl date refers to the date that Exa discovered a link. Results will include links that were crawled after this date. Must be specified in ISO 8601 format.
+          example: 2023-01-01
+        endCrawlDate:
+          type: string
+          format: date-time
+          description: Crawl date refers to the date that Exa discovered a link. Results will include links that were crawled before this date. Must be specified in ISO 8601 format.
+          example: 2023-12-31
+        startPublishedDate:
+          type: string
+          format: date-time
+          description:
+            Only links with a published date after this will be returned. Must be specified in ISO 8601 format.
+          example: 2023-01-01
+        endPublishedDate:
+          type: string
+          format: date-time
+          description:
+            Only links with a published date before this will be returned. Must be specified in ISO 8601 format.
+          example: 2023-12-31
+        includeText:
+          type: array
+          items:
+            type: string
+          description: List of strings that must be present in webpage text of results. Currently, only 1 string is supported, of up to 5 words.
+          example:
+            - large language model
+        excludeText:
+          type: array
+          items:
+            type: string
+          description: List of strings that must not be present in webpage text of results. Currently, only 1 string is supported, of up to 5 words.
+          example:
+            - course
+        contents:
+          $ref: "#/components/schemas/ContentsRequest"
+    Result:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the search result.
+          example: "A Comprehensive Overview of Large Language Models"
+        url:
+          type: string
+          format: uri
+          description: The URL of the search result.
+          example: "https://arxiv.org/pdf/2307.06435.pdf"
+        publishedDate:
+          type: string
+          nullable: true
+          description: An estimate of the creation date, from parsing HTML content. Format is YYYY-MM-DD.
+          example: "2023-11-16T01:36:32.547Z"
+        author:
+          type: string
+          nullable: true
+          description: If available, the author of the content.
+          example: "Humza  Naveed, University of Engineering and Technology (UET), Lahore, Pakistan, Asad Ullah Khan, University of Engineering and Technology (UET), Lahore, Pakistan, Shi  Qiu, Australian National University (ANU), Canberra, Australia, Muhammad  Saqib, University of Technology Sydney (UTS), Sydney, Australia, Saeed  Anwar, King Fahd University of Petroleum and Minerals (KFUPM), Dhahran, Saudi Arabia, Muhammad  Usman, King Fahd University of Petroleum and Minerals (KFUPM), Dhahran, Saudi Arabia, Naveed  Akhtar, The University of Melbourne (UoM), Melbourne, Australia, Nick  Barnes, Australian National University (ANU), Canberra, Australia, Ajmal  Mian, The University of Western Australia (UWA), Perth, Australia"
+        score:
+          type: number
+          nullable: true
+          description: A number from 0 to 1 representing similarity between the query/url and the result.
+          example: 0.4600165784358978
+        id:
+          type: string
+          description: The temporary ID for the document. Useful for /contents endpoint.
+          example: "https://arxiv.org/abs/2307.06435"
+        image:
+          type: string
+          format: uri
+          description: The URL of an image associated with the search result, if available.
+          example: "https://arxiv.org/pdf/2307.06435.pdf/page_1.png"
+        favicon:
+          type: string
+          format: uri
+          description: The URL of the favicon for the search result's domain.
+          example: "https://arxiv.org/favicon.ico"
+    ResultWithContent:
+      allOf:
+        - $ref: "#/components/schemas/Result"
+        - type: object
+          properties:
+            text:
+              type: string
+              description: The full content text of the search result.
+              example: "Asad Ullah Khan, University of Engineering and Technology (UET), Lahore, Pakistan, aukhanee@gmail.com Shi Qiu, HKSAR, China, shiqiu@cse.cuhk.edu.hk Muhammad Saqib, University of Technology Sydney (UTS), Sydney, Australia, muhammad.saqib@data61.csiro.au Saeed Anwar, King Fahd University of Petroleum and Minerals (KFUPM), Dhahran, Saudi Arabia, saeed.anwar@kfupm.edu.sa Muhammad Usman, King Fahd University of Petroleum and Minerals (KFUPM), Dhahran, Saudi Arabia, muhammad.usman@kfupm.edu.sa Naveed Akhtar, The University of Melbourne (UoM), Melbourne, Australia, naveed.akhtar1@unimelb.edu.au Nick Barnes, Australian National University (ANU), Canberra, Australia, nick.barnes@anu.edu.au Ajmal Mian, The University of Western Australia (UWA), Perth, Australia, ajmal.mian@uwa.edu.au Abstract Large Language Models (LLMs) have recently demonstrated remarkable capabilities in natural language processing tasks and beyond. This success of LLMs has led to a large influx of research contributions in t"
+            # TODO: think we need to change this
+            highlights:
+              type: array
+              items:
+                type: string
+              description: Array of highlights extracted from the search result content.
+              example: 
+                - "Such requirements have limited their adoption and opened up opportunities to devise better architectures  ,  ,  ,  and training strategies  ,  ,  ,  ,  ,  ,  ."
+            highlightScores:
+              type: array
+              items:
+                type: number
+                format: float
+              description: Array of cosine similarity scores for each highlighted
+              example: [0.4600165784358978]
+            summary:
+              type: string
+              description: Summary of the webpage
+              example: "This overview paper on Large Language Models (LLMs) highlights key developments in the field. These include architectural innovations, improved training strategies, increased context lengths, fine-tuning techniques, the rise of multi-modal LLMs, applications in robotics, new datasets and benchmarks, and efficiency improvements. The paper also notes a shift towards instruction-tuned models and increased open-source availability."
+            subpages:
+              type: array
+              items:
+                $ref: "#/components/schemas/ResultWithContent"
+              description: Array of subpages for the search result.
+              example: [{
+                "id": "https://arxiv.org/abs/2303.17580",
+                "url": "https://arxiv.org/pdf/2303.17580.pdf",
+                "title": "HuggingGPT: Solving AI Tasks with ChatGPT and its Friends in Hugging Face",
+                "author": "Yongliang  Shen, Microsoft Research Asia, Kaitao  Song, Microsoft Research Asia, Xu  Tan, Microsoft Research Asia, Dongsheng  Li, Microsoft Research Asia, Weiming  Lu, Microsoft Research Asia, Yueting  Zhuang, Microsoft Research Asia, yzhuang@zju.edu.cn, Zhejiang  University, Microsoft Research Asia, Microsoft  Research, Microsoft Research Asia",
+                "publishedDate": "2023-11-16T01:36:20.486Z",
+                "text": "HuggingGPT: Solving AI Tasks with ChatGPT and its Friends in Hugging Face Date Published: 2023-05-25 Authors: Yongliang Shen, Microsoft Research Asia Kaitao Song, Microsoft Research Asia Xu Tan, Microsoft Research Asia Dongsheng Li, Microsoft Research Asia Weiming Lu, Microsoft Research Asia Yueting Zhuang, Microsoft Research Asia, yzhuang@zju.edu.cn Zhejiang University, Microsoft Research Asia Microsoft Research, Microsoft Research Asia Abstract Solving complicated AI tasks with different domains and modalities is a key step toward artificial general intelligence. While there are abundant AI models available for different domains and modalities, they cannot handle complicated AI tasks. Considering large language models (LLMs) have exhibited exceptional ability in language understanding, generation, interaction, and reasoning, we advocate that LLMs could act as a controller to manage existing AI models to solve complicated AI tasks and language could be a generic interface to empower t",
+                "summary": "HuggingGPT is a framework using ChatGPT as a central controller to orchestrate various AI models from Hugging Face to solve complex tasks. ChatGPT plans the task, selects appropriate models based on their descriptions, executes subtasks, and summarizes the results. This approach addresses limitations of LLMs by allowing them to handle multimodal data (vision, speech) and coordinate multiple models for complex tasks, paving the way for more advanced AI systems.",
+                "highlights": [
+                  "2) Recently, some researchers started to investigate the integration of using tools or models in LLMs  ."
+                ],
+                "highlightScores": [
+                  0.32679107785224915
+                ]
+              }]
+            extras:
+              type: object
+              description: Results from extras.
+              properties:
+                links:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of links from the search result.
+                  example: []
+  responses:
+    SearchResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              results:
+                type: array
+                description:
+                  A list of search results containing title, URL, published date, author, and score.
+                items:
+                  $ref: "#/components/schemas/ResultWithContent"
+              searchType:
+                type: string
+                enum: [neural, keyword]
+                description: For auto searches, indicates which search type was selected.
+                example: "auto"
+    FindSimilarResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              results:
+                type: array
+                description:
+                  A list of search results containing title, URL, published date, author, and score.
+                items:
+                  $ref: "#/components/schemas/ResultWithContent"
+    ContentsResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              results:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResultWithContent"
+security:
+  - apikey: []
