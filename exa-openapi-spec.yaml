@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  version: 1.0.0
+  version: 1.1.0
   title: Exa Search API
   description: A comprehensive API for internet-scale search, allowing users to perform queries and retrieve results from a wide variety of sources using embeddings-based and traditional search.
 servers:
@@ -22,19 +22,21 @@ paths:
                     query:
                       type: string
                       example: "Latest developments in LLM capabilities"
-                      description: The query string.
+                      description: The query string for the search.
                     useAutoprompt:
                       type: boolean
-                      description: Autoprompt converts your query to an Exa query. Default false. Neural and auto search only.
+                      description: Autoprompt converts your query to an Exa-style query. Enabled by default for auto search, optional for neural search, and not available for keyword search.
                       example: true
+                      default: true
                     type:
                       type: string
                       enum:
                         - keyword
                         - neural
                         - auto
-                      description: The type of search. Default auto, which automatically decides between keyword and neural.
+                      description: The type of search. Neural uses an embeddings-based model, keyword is google-like SERP. Default is auto, which automatically decides between keyword and neural.
                       example: "auto"
+                      default: "auto"
                     category:
                       type: string
                       enum:
@@ -71,7 +73,7 @@ paths:
                     url:
                       type: string
                       example: "https://arxiv.org/abs/2307.06435"
-                      description: The url for which you would like to find similar links
+                      description: The url for which you would like to find similar links.
                   required:
                     - url
                 - $ref: "#/components/schemas/CommonRequest"
@@ -91,18 +93,61 @@ paths:
               allOf:
                 - type: object
                   properties:
+                    urls:
+                      type: array
+                      description: Array of URLs to crawl (backwards compatible with 'ids' parameter).
+                      items:
+                        type: string
+                      example: ["https://arxiv.org/pdf/2307.06435"]
                     ids:
                       type: array
-                      description: Array of document IDs obtained from searches
+                      deprecated: true
+                      description: Deprecated - use 'urls' instead. Array of document IDs obtained from searches.
                       items:
                         type: string
                       example: ["https://arxiv.org/pdf/2307.06435"]
                   required:
-                    - ids
+                    - urls
                 - $ref: "#/components/schemas/ContentsRequest"
       responses:
         "200":
           $ref: "#/components/responses/ContentsResponse"
+  /answer:
+    post:
+      operationId: answer
+      summary: Generate an answer from search results
+      description: |
+        Performs a search based on the query and generates either a direct answer or a detailed summary with citations, depending on the query type. 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+              properties:
+                query:
+                  type: string
+                  description: The question or query to answer.
+                  example: "What is the latest valuation of SpaceX?"
+                expandedQueriesLimit:
+                  type: integer
+                  minimum: 0
+                  maximum: 4
+                  default: 1
+                  description: Maximum number of query variations to generate for comprehensive search coverage.
+                stream:
+                  type: boolean
+                  default: false
+                  description: Enable streaming responses using Server-Sent Events (SSE).
+                includeText:
+                  type: boolean
+                  default: false
+                  description: Whether to include full text content in the search results, using the get contents endpoint. 
+      responses:
+        "200":
+          $ref: "#/components/responses/AnswerResponse"
 components:
   securitySchemes:
     apikey:
@@ -110,36 +155,87 @@ components:
       name: x-api-key
       in: header
   schemas:
+    AnswerSource:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The temporary ID for the document.
+          example: "https://arxiv.org/abs/2307.06435"
+        url:
+          type: string
+          format: uri
+          description: The URL of the search result.
+          example: "https://arxiv.org/pdf/2307.06435.pdf"
+        title:
+          type: string
+          description: The title of the search result.
+          example: "A Comprehensive Overview of Large Language Models"
+        author:
+          type: string
+          nullable: true
+          description: If available, the author of the content.
+          example: "Humza  Naveed, University of Engineering and Technology (UET), Lahore, Pakistan"
+        publishedDate:
+          type: string
+          nullable: true
+          description: An estimate of the creation date, from parsing HTML content. Format is YYYY-MM-DD.
+          example: "2023-11-16T01:36:32.547Z"
+        text:
+          type: string
+          description: The full text content of each source. Only present when includeText is enabled.
+          example: "Abstract Large Language Models (LLMs) have recently demonstrated remarkable capabilities..."
+
+    AnswerResult:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: Unique identifier for the request
+        answer:
+          type: string
+          description: The generated answer based on search results.
+        sources:
+          type: array
+          description: Search results used to generate the answer.
+          items:
+            $ref: "#/components/schemas/AnswerSource"
     ContentsRequest:
       type: object
       properties:
         text:
-          type: object
-          description: Parsed contents of the page.
-          properties:
-            maxCharacters:
-              type: integer
-              description: Max length in characters for the text returned
-              example: 1000
-            includeHtmlTags:
-              type: boolean
-              description: Whether HTML tags, which can help the LLM understand structure of text, should be included. Default false
-              example: false
+          oneOf:
+            - type: boolean
+              description: If true, returns full page text with default settings. If false, disables text return.
+            - type: object
+              description: Parsed contents of the page with custom settings.
+              properties:
+                maxCharacters:
+                  type: integer
+                  description: Maximum character limit for the full page text.
+                  example: 1000
+                includeHtmlTags:
+                  type: boolean
+                  default: false
+                  description: Include HTML tags, which can help LLMs understand text structure.
+                  example: false
         highlights:
           type: object
-          description: Relevant extract(s) from the webpage.
+          description: Text snippets the LLM identifies as most relevant from each page.
           properties:
             numSentences:
               type: integer
-              description: The number of sentences to be returned in each snippet. Default 5
+              default: 5
+              description: The number of sentences to return for each snippet.
               example: 1
             highlightsPerUrl:
               type: integer
-              description: The number of snippets to return per page. Default 1
+              default: 1
+              description: The number of snippets to return for each result.
               example: 1
             query:
               type: string
-              description: Query used specifically for the highlights.
+              description: Custom query to direct the LLM's selection of highlights.
               example: "Key advancements"
         summary:
           type: object
@@ -147,20 +243,27 @@ components:
           properties:
             query:
               type: string
-              description: Query used specifically for the summary.
+              description: Custom query for the LLM-generated summary.
               example: "Main developments"
         livecrawl:
           type: string
-          enum: [never, fallback, always]
-          description: Options for livecrawling contents. Default is "never" for neural/auto search, "fallback" for keyword search.
+          enum: [never, fallback, always, auto]
+          description: |
+            Options for livecrawling pages.
+            'never': Disable livecrawling (default for neural search).
+            'fallback': Livecrawl when cache is empty (default for keyword search).
+            'always': Always livecrawl.
+            'auto': Use an LLM to detect if query needs real-time content.
           example: "always"
         livecrawlTimeout:
           type: integer
-          description: The timeout for livecrawling in milliseconds. Max and default is 10000.
+          default: 10000
+          description: The timeout for livecrawling in milliseconds.
           example: 1000
         subpages:
           type: integer
-          description: The number of subpages to crawl.
+          default: 0
+          description: The number of subpages to crawl. The actual number crawled may be limited by system constraints.
           example: 1
         subpageTarget:
           oneOf:
@@ -168,19 +271,21 @@ components:
             - type: array
               items:
                 type: string
-          description: "The target subpage or subpages. Can be a single string or an array of strings."
-          example: "cited papers"
+          description: Keyword to find specific subpages of search results. Can be a single string or an array of strings, comma delimited.
+          example: "sources"
         extras:
           type: object
           description: Extra parameters to pass.
           properties:
             links:
               type: integer
-              description: The number of links to return.
+              default: 0
+              description: Number of URLs to return from each webpage.
               example: 1
             imageLinks:
               type: integer
-              description: The number of images to return for each result.
+              default: 0
+              description: Number of images to return for each result.
               example: 1
 
     CommonRequest:
@@ -188,15 +293,15 @@ components:
       properties:
         numResults:
           type: integer
-          description:
-            Number of search results to return. Default 10. Max 10 for basic plans. Up to thousands for custom plans.
+          maximum: 10
+          default: 10
+          description: Number of results to return (up to thousands of results available for custom plans)
           example: 10
         includeDomains:
           type: array
           items:
             type: string
-          description:
-            List of domains to include in the search. If specified, results will only come from these domains.
+          description: List of domains to include in the search. If specified, results will only come from these domains.
           example:
             - arxiv.org
             - paperswithcode.com
@@ -204,11 +309,7 @@ components:
           type: array
           items:
             type: string
-          description:
-            List of domains to exclude in the search. If specified, results will not include any from these domains.
-          example:
-            - youtube.com
-            - twitter.com
+          description: List of domains to exclude from search results. If specified, no results will be returned from these domains.
         startCrawlDate:
           type: string
           format: date-time
@@ -222,14 +323,12 @@ components:
         startPublishedDate:
           type: string
           format: date-time
-          description:
-            Only links with a published date after this will be returned. Must be specified in ISO 8601 format.
+          description: Only links with a published date after this will be returned. Must be specified in ISO 8601 format.
           example: 2023-01-01
         endPublishedDate:
           type: string
           format: date-time
-          description:
-            Only links with a published date before this will be returned. Must be specified in ISO 8601 format.
+          description: Only links with a published date before this will be returned. Must be specified in ISO 8601 format.
           example: 2023-12-31
         includeText:
           type: array
@@ -247,6 +346,7 @@ components:
             - course
         contents:
           $ref: "#/components/schemas/ContentsRequest"
+
     Result:
       type: object
       properties:
@@ -268,7 +368,7 @@ components:
           type: string
           nullable: true
           description: If available, the author of the content.
-          example: "Humza  Naveed, University of Engineering and Technology (UET), Lahore, Pakistan, Asad Ullah Khan, University of Engineering and Technology (UET), Lahore, Pakistan, Shi  Qiu, Australian National University (ANU), Canberra, Australia, Muhammad  Saqib, University of Technology Sydney (UTS), Sydney, Australia, Saeed  Anwar, King Fahd University of Petroleum and Minerals (KFUPM), Dhahran, Saudi Arabia, Muhammad  Usman, King Fahd University of Petroleum and Minerals (KFUPM), Dhahran, Saudi Arabia, Naveed  Akhtar, The University of Melbourne (UoM), Melbourne, Australia, Nick  Barnes, Australian National University (ANU), Canberra, Australia, Ajmal  Mian, The University of Western Australia (UWA), Perth, Australia"
+          example: "Humza  Naveed, University of Engineering and Technology (UET), Lahore, Pakistan"
         score:
           type: number
           nullable: true
@@ -288,6 +388,7 @@ components:
           format: uri
           description: The URL of the favicon for the search result's domain.
           example: "https://arxiv.org/favicon.ico"
+
     ResultWithContent:
       allOf:
         - $ref: "#/components/schemas/Result"
@@ -296,15 +397,14 @@ components:
             text:
               type: string
               description: The full content text of the search result.
-              example: "Asad Ullah Khan, University of Engineering and Technology (UET), Lahore, Pakistan, aukhanee@gmail.com Shi Qiu, HKSAR, China, shiqiu@cse.cuhk.edu.hk Muhammad Saqib, University of Technology Sydney (UTS), Sydney, Australia, muhammad.saqib@data61.csiro.au Saeed Anwar, King Fahd University of Petroleum and Minerals (KFUPM), Dhahran, Saudi Arabia, saeed.anwar@kfupm.edu.sa Muhammad Usman, King Fahd University of Petroleum and Minerals (KFUPM), Dhahran, Saudi Arabia, muhammad.usman@kfupm.edu.sa Naveed Akhtar, The University of Melbourne (UoM), Melbourne, Australia, naveed.akhtar1@unimelb.edu.au Nick Barnes, Australian National University (ANU), Canberra, Australia, nick.barnes@anu.edu.au Ajmal Mian, The University of Western Australia (UWA), Perth, Australia, ajmal.mian@uwa.edu.au Abstract Large Language Models (LLMs) have recently demonstrated remarkable capabilities in natural language processing tasks and beyond. This success of LLMs has led to a large influx of research contributions in t"
-            # TODO: think we need to change this
+              example: "Abstract Large Language Models (LLMs) have recently demonstrated remarkable capabilities..."
             highlights:
               type: array
               items:
                 type: string
               description: Array of highlights extracted from the search result content.
               example: 
-                - "Such requirements have limited their adoption and opened up opportunities to devise better architectures  ,  ,  ,  and training strategies  ,  ,  ,  ,  ,  ,  ."
+                - "Such requirements have limited their adoption..."
             highlightScores:
               type: array
               items:
@@ -315,7 +415,7 @@ components:
             summary:
               type: string
               description: Summary of the webpage
-              example: "This overview paper on Large Language Models (LLMs) highlights key developments in the field. These include architectural innovations, improved training strategies, increased context lengths, fine-tuning techniques, the rise of multi-modal LLMs, applications in robotics, new datasets and benchmarks, and efficiency improvements. The paper also notes a shift towards instruction-tuned models and increased open-source availability."
+              example: "This overview paper on Large Language Models (LLMs) highlights key developments..."
             subpages:
               type: array
               items:
@@ -346,6 +446,7 @@ components:
                     type: string
                   description: Array of links from the search result.
                   example: []
+
   responses:
     SearchResponse:
       description: OK
@@ -356,8 +457,7 @@ components:
             properties:
               results:
                 type: array
-                description:
-                  A list of search results containing title, URL, published date, author, and score.
+                description: A list of search results containing title, URL, published date, author, and score.
                 items:
                   $ref: "#/components/schemas/ResultWithContent"
               searchType:
@@ -365,6 +465,7 @@ components:
                 enum: [neural, keyword]
                 description: For auto searches, indicates which search type was selected.
                 example: "auto"
+
     FindSimilarResponse:
       description: OK
       content:
@@ -374,10 +475,10 @@ components:
             properties:
               results:
                 type: array
-                description:
-                  A list of search results containing title, URL, published date, author, and score.
+                description: A list of search results containing title, URL, published date, author, and score.
                 items:
                   $ref: "#/components/schemas/ResultWithContent"
+
     ContentsResponse:
       description: OK
       content:
@@ -389,5 +490,23 @@ components:
                 type: array
                 items:
                   $ref: "#/components/schemas/ResultWithContent"
+                  
+    AnswerResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AnswerResult"
+        text/event-stream:
+          schema:
+            type: object
+            properties:
+              answer:
+                type: string
+                description: Partial answer chunk when streaming is enabled.
+              sources:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AnswerSource"
 security:
   - apikey: []
