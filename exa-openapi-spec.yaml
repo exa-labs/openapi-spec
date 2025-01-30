@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  version: 1.1.0
+  version: 1.1.1
   title: Exa Search API
   description: A comprehensive API for internet-scale search, allowing users to perform queries and retrieve results from a wide variety of sources using embeddings-based and traditional search.
 servers:
@@ -131,20 +131,20 @@ paths:
                   type: string
                   description: The question or query to answer.
                   example: "What is the latest valuation of SpaceX?"
-                expandedQueriesLimit:
-                  type: integer
-                  minimum: 0
-                  maximum: 4
-                  default: 1
-                  description: Maximum number of query variations to generate for comprehensive search coverage.
+                  minLength: 1
+                mode:
+                  type: string
+                  enum: [fast, accurate]
+                  default: fast
+                  description: "`accurate` generates expanded queries based on the original queries, increasing the result coverage for the response. `fast` only uses your original query."
                 stream:
                   type: boolean
                   default: false
-                  description: Enable streaming responses using Server-Sent Events (SSE).
-                includeText:
+                  description: If true, the response is returned as a server-sent events (SSS) stream. 
+                text:
                   type: boolean
                   default: false
-                  description: Whether to include full text content in the search results, using the get contents endpoint. 
+                  description: If true, the response includes full text content in the search results
       responses:
         "200":
           $ref: "#/components/responses/AnswerResponse"
