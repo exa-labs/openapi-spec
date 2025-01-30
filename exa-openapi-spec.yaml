@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  version: 1.1.1
+  version: 1.1.2
   title: Exa Search API
   description: A comprehensive API for internet-scale search, allowing users to perform queries and retrieve results from a wide variety of sources using embeddings-based and traditional search.
 servers:
@@ -132,11 +132,6 @@ paths:
                   description: The question or query to answer.
                   example: "What is the latest valuation of SpaceX?"
                   minLength: 1
-                mode:
-                  type: string
-                  enum: [fast, accurate]
-                  default: fast
-                  description: "`accurate` generates expanded queries based on the original queries, increasing the result coverage for the response. `fast` only uses your original query."
                 stream:
                   type: boolean
                   default: false
@@ -149,11 +144,16 @@ paths:
         "200":
           $ref: "#/components/responses/AnswerResponse"
 components:
-  securitySchemes:
+    securitySchemes:
     apikey:
       type: apiKey
       name: x-api-key
       in: header
+      description: API key can be provided either via x-api-key header or Authorization header with Bearer scheme
+    bearer:
+      type: http
+      scheme: bearer
+      description: API key can be provided either via x-api-key header or Authorization header with Bearer scheme
   schemas:
     AnswerSource:
       type: object
@@ -195,7 +195,7 @@ components:
         answer:
           type: string
           description: The generated answer based on search results.
-        sources:
+        citations:
           type: array
           description: Search results used to generate the answer.
           items:
@@ -504,9 +504,10 @@ components:
               answer:
                 type: string
                 description: Partial answer chunk when streaming is enabled.
-              sources:
+              citations:
                 type: array
                 items:
                   $ref: "#/components/schemas/AnswerSource"
 security:
   - apikey: []
+  - bearer: []
