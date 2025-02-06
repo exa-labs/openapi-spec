@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  version: 1.1.3
+  version: 1.1.4
   title: Exa Search API
   description: A comprehensive API for internet-scale search, allowing users to perform queries and retrieve results from a wide variety of sources using embeddings-based and traditional search.
 servers:
@@ -140,6 +140,13 @@ paths:
                   type: boolean
                   default: false
                   description: If true, the response includes full text content in the search results
+                model:
+                  type: string
+                  enum:
+                    - exa
+                    - exa-pro          
+                  description: The search model to use for the answer. Exa passes only one query to exa, while exa-pro also passes 2 expanded queries to our search model. 
+                  default: "exa"
       responses:
         "200":
           $ref: "#/components/responses/AnswerResponse"
