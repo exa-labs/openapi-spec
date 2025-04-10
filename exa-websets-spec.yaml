@@ -1,0 +1,2607 @@
+openapi: 3.1.0
+paths:
+  /v0/websets:
+    post:
+      operationId: websets-create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWebsetParameters"
+      responses:
+        "201":
+          description: Webset created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webset"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+        "409":
+          description: Webset with this externalId already exists
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Create a Webset
+      tags: &ref_0
+        - Websets
+      security:
+        - api_key: []
+    get:
+      description: |-
+        Returns a list of Websets.
+
+        You can paginate through the results using the `cursor` parameter.
+      operationId: websets-list
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: The cursor to paginate through the results
+          schema:
+            minLength: 1
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: The number of Websets to return
+          schema:
+            minimum: 1
+            maximum: 100
+            default: 25
+            type: number
+      responses:
+        "200":
+          description: List of Websets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListWebsetsResponse"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: List all Websets
+      tags: *ref_0
+      security:
+        - api_key: []
+  /v0/websets/{id}:
+    get:
+      operationId: websets-get
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id or externalId of the Webset.
+          schema:
+            type: string
+        - name: expand
+          required: false
+          in: query
+          description: Expand the response with the specified resources
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - items
+      responses:
+        "200":
+          description: Webset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetWebsetResponse"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+        "404":
+          description: Webset not found
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Get a Webset
+      tags: *ref_0
+      security:
+        - api_key: []
+    post:
+      operationId: websets-update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id or externalId of the Webset
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWebsetRequest"
+      responses:
+        "200":
+          description: Webset updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webset"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+        "404":
+          description: Webset not found
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Update a Webset
+      tags: *ref_0
+      security:
+        - api_key: []
+    delete:
+      description: |-
+        Deletes a Webset.
+
+        Once deleted, the Webset and all its Items will no longer be available.
+      operationId: websets-delete
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id or externalId of the Webset
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Webset deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webset"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+        "404":
+          description: Webset not found
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Delete a Webset
+      tags: *ref_0
+      security:
+        - api_key: []
+  /v0/websets/{id}/cancel:
+    post:
+      description: >-
+        Cancels all operations being performed on a Webset.
+
+
+        Any enrichment or search will be stopped and the Webset will be marked
+        as `idle`.
+      operationId: websets-cancel
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id or externalId of the Webset
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Webset canceled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webset"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Cancel a running Webset
+      tags: *ref_0
+      security:
+        - api_key: []
+  /v0/websets/{webset}/items/{id}:
+    get:
+      description: Returns a Webset Item.
+      operationId: websets-items-get
+      parameters:
+        - name: webset
+          required: true
+          in: path
+          description: The id or externalId of the Webset
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          description: The id of the Webset item
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Webset Item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebsetItem"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Get an Item
+      tags: &ref_1
+        - Items
+      security:
+        - api_key: []
+    delete:
+      description: |-
+        Deletes an Item from the Webset.
+
+        This will cancel any enrichment process for it.
+      operationId: websets-items-delete
+      parameters:
+        - name: webset
+          required: true
+          in: path
+          description: The id or externalId of the Webset
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          description: The id of the Webset item
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Webset Item deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebsetItem"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Delete an Item
+      tags: *ref_1
+      security:
+        - api_key: []
+  /v0/websets/{webset}/items:
+    get:
+      description: |-
+        Returns a list of Webset Items.
+
+        You can paginate through the Items using the `cursor` parameter.
+      operationId: websets-items-list
+      parameters:
+        - name: webset
+          required: true
+          in: path
+          description: The id or externalId of the Webset
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: The cursor to paginate through the results
+          schema:
+            minLength: 1
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: The number of results to return
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 25
+            type: number
+      responses:
+        "200":
+          description: Webset Items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListWebsetItemResponse"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: List all Items for a Webset
+      tags: *ref_1
+      security:
+        - api_key: []
+  /v0/websets/{webset}/enrichments:
+    post:
+      description: Create an Enrichment for a Webset.
+      operationId: websets-enrichments-create
+      parameters:
+        - name: webset
+          required: true
+          in: path
+          description: The id or externalId of the Webset
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEnrichmentParameters"
+      responses:
+        "200":
+          description: Enrichment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebsetEnrichment"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Create an Enrichment
+      tags: &ref_2
+        - Enrichments
+      security:
+        - api_key: []
+  /v0/websets/{webset}/enrichments/{id}:
+    get:
+      operationId: websets-enrichments-get
+      parameters:
+        - name: webset
+          required: true
+          in: path
+          description: The id or externalId of the Webset
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          description: The id of the Enrichment
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Enrichment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebsetEnrichment"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Get an Enrichment
+      tags: *ref_2
+      security:
+        - api_key: []
+    delete:
+      description: >-
+        When deleting an Enrichment, any running enrichments will be canceled
+        and all existing `enrichment_result` generated by this Enrichment will
+        no longer be available.
+      operationId: websets-enrichments-delete
+      parameters:
+        - name: webset
+          required: true
+          in: path
+          description: The id or externalId of the Webset
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          description: The id of the Enrichment
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Enrichment deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebsetEnrichment"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Delete an Enrichment
+      tags: *ref_2
+      security:
+        - api_key: []
+  /v0/websets/{webset}/enrichments/{id}/cancel:
+    post:
+      description: >-
+        All running enrichments will be canceled. You can not resume an
+        Enrichment after it has been canceled.
+      operationId: websets-enrichments-cancel
+      parameters:
+        - name: webset
+          required: true
+          in: path
+          description: The id or externalId of the Webset
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          description: The id of the Enrichment
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Enrichment cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebsetEnrichment"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Cancel a running Enrichment
+      tags: *ref_2
+      security:
+        - api_key: []
+  /v0/webhooks:
+    post:
+      operationId: webhooks-create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWebhookParameters"
+      responses:
+        "200":
+          description: Webhook
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webhook"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Create a Webhook
+      tags: &ref_3
+        - Webhooks
+      security:
+        - api_key: []
+    get:
+      operationId: webhooks-list
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: The cursor to paginate through the results
+          schema:
+            minLength: 1
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: The number of results to return
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 25
+            type: number
+      responses:
+        "200":
+          description: List of webhooks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListWebhooksResponse"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: List webhooks
+      tags: *ref_3
+      security:
+        - api_key: []
+  /v0/webhooks/{id}:
+    get:
+      operationId: webhooks-get
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id of the webhook
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Webhook
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webhook"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+        "404":
+          description: Webhook not found
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Get a Webhook
+      tags: *ref_3
+      security:
+        - api_key: []
+    patch:
+      operationId: webhooks-update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id of the webhook
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWebhookParameters"
+      responses:
+        "200":
+          description: Webhook
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webhook"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+        "404":
+          description: Webhook not found
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Update a Webhook
+      tags: *ref_3
+      security:
+        - api_key: []
+    delete:
+      operationId: webhooks-delete
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id of the webhook
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Webhook
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webhook"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+        "404":
+          description: Webhook not found
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Delete a Webhook
+      tags: *ref_3
+      security:
+        - api_key: []
+  /v0/events:
+    get:
+      description: |-
+        List all events that have occurred in the system.
+
+        You can paginate through the results using the `cursor` parameter.
+      operationId: events-list
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: The cursor to paginate through the results
+          schema:
+            minLength: 1
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: The number of results to return
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 25
+            type: number
+        - name: types
+          required: false
+          in: query
+          description: The types of events to filter by
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - webset.created
+                - webset.deleted
+                - webset.paused
+                - webset.idle
+                - webset.search.created
+                - webset.search.canceled
+                - webset.search.completed
+                - webset.search.updated
+                - webset.export.created
+                - webset.export.completed
+                - webset.item.created
+                - webset.item.enriched
+      responses:
+        "200":
+          description: List of events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListEventsResponse"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: List all Events
+      tags: &ref_4
+        - Events
+      security:
+        - api_key: []
+  /v0/events/{id}:
+    get:
+      description: |-
+        Get a single Event by id.
+
+        You can subscribe to Events by creating a Webhook.
+      operationId: events-get
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id of the event
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+        "404":
+          description: Event not found
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Get an Event
+      tags: *ref_4
+      security:
+        - api_key: []
+  /v0/websets/{webset}/searches:
+    post:
+      description: >-
+        Creates a new Search for the Webset.
+
+
+        The default behaviour is to reuse the previous Search results and
+        evaluate them against the new criteria.
+      operationId: websets-searches-create
+      parameters:
+        - name: webset
+          required: true
+          in: path
+          description: The id of the Webset
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWebsetSearchParameters"
+      responses:
+        "200":
+          description: Webset Search created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebsetSearch"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Create a Search
+      tags: &ref_5
+        - Searches
+      security:
+        - api_key: []
+  /v0/websets/{webset}/searches/{id}:
+    get:
+      description: Gets a Search by id
+      operationId: websets-searches-get
+      parameters:
+        - name: webset
+          required: true
+          in: path
+          description: The id of the Webset
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          description: The id of the Search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Get a Search
+      tags: *ref_5
+      security:
+        - api_key: []
+  /v0/websets/{webset}/searches/{id}/cancel:
+    post:
+      description: >-
+        Cancels a currently running Search.
+
+
+        You can cancel all searches at once by using the
+        `websets/:webset/cancel` endpoint.
+      operationId: websets-searches-cancel
+      parameters:
+        - name: webset
+          required: true
+          in: path
+          description: The id of the Webset
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          description: The id of the Search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Search canceled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebsetSearch"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Cancel a running Search
+      tags: *ref_5
+      security:
+        - api_key: []
+info:
+  title: Websets
+  description: ""
+  version: "0"
+  contact: {}
+tags: []
+servers:
+  - url: https://api.exa.ai/websets/
+    description: Production
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Your Exa API key
+  schemas:
+    WebsetCompanyEntity:
+      type:
+        - object
+      properties:
+        type:
+          type: string
+          const: company
+          default: company
+      required:
+        - type
+    WebsetPersonEntity:
+      type:
+        - object
+      properties:
+        type:
+          type: string
+          const: person
+          default: person
+      required:
+        - type
+    WebsetArticleEntity:
+      type:
+        - object
+      properties:
+        type:
+          type: string
+          const: article
+          default: article
+      required:
+        - type
+    WebsetResearchPaperEntity:
+      type:
+        - object
+      properties:
+        type:
+          type: string
+          const: research_paper
+          default: research_paper
+      required:
+        - type
+    WebsetCustomEntity:
+      type:
+        - object
+      properties:
+        type:
+          type: string
+          const: custom
+          default: custom
+        description:
+          type:
+            - string
+          minLength: 2
+          maxLength: 200
+          description: >-
+            When you decide to use a custom entity, this is the description of
+            the entity.
+
+
+            The entity represents what type of results the Webset will return.
+            For example, if you want results to be Job Postings, you might use
+            "Job Postings" as the entity description.
+      required:
+        - type
+        - description
+    WebsetEntity:
+      oneOf:
+        - type:
+            - object
+          $ref: "#/components/schemas/WebsetCompanyEntity"
+        - type:
+            - object
+          $ref: "#/components/schemas/WebsetPersonEntity"
+        - type:
+            - object
+          $ref: "#/components/schemas/WebsetArticleEntity"
+        - type:
+            - object
+          $ref: "#/components/schemas/WebsetResearchPaperEntity"
+        - type:
+            - object
+          $ref: "#/components/schemas/WebsetCustomEntity"
+    CreateCriterionParameters:
+      type:
+        - object
+      properties:
+        description:
+          type:
+            - string
+          minLength: 1
+          maxLength: 300
+          description: The description of the criterion
+      required:
+        - description
+    CreateEnrichmentParameters:
+      type:
+        - object
+      properties:
+        description:
+          type:
+            - string
+          minLength: 1
+          maxLength: 5000
+          description: >-
+            Provide a description of the enrichment task you want to perform to
+            each Webset Item.
+        format:
+          type:
+            - string
+          enum:
+            - text
+            - date
+            - number
+            - options
+            - email
+            - phone
+          description: >-
+            Format of the enrichment response.
+
+
+            We automatically select the best format based on the description. If
+            you want to explicitly specify the format, you can do so here.
+        options:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              label:
+                type:
+                  - string
+                description: The label of the option
+            required:
+              - label
+          minItems: 1
+          maxItems: 20
+          description: >-
+            When the format is options, the different options for the enrichment
+            agent to choose from.
+        metadata:
+          description: Set of key-value pairs you want to associate with this object.
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+      required:
+        - description
+    CreateWebsetParameters:
+      type:
+        - object
+      properties:
+        search:
+          type:
+            - object
+          properties:
+            query:
+              type:
+                - string
+              minLength: 1
+              maxLength: 5000
+              description: >-
+                Your search query.
+
+
+                Use this to describe what you are looking for.
+
+
+                Any URL provided will be crawled and used as context for the
+                search.
+              examples:
+                - >-
+                  Marketing agencies based in the US, that focus on consumer
+                  products.
+            count:
+              default: 10
+              type:
+                - number
+              minimum: 1
+              description: >-
+                Number of Items the Webset will attempt to find.
+
+
+                The actual number of Items found may be less than this number
+                depending on the search complexity.
+            entity:
+              $ref: "#/components/schemas/WebsetEntity"
+              description: >-
+                Entity the Webset will return results for.
+
+
+                It is not required to provide it, we automatically detect the
+                entity from all the information provided in the query. Only use
+                this when you need more fine control.
+            criteria:
+              type:
+                - array
+              items:
+                type:
+                  - object
+                $ref: "#/components/schemas/CreateCriterionParameters"
+                title: CreateCriterionParameters
+              minItems: 1
+              maxItems: 5
+              description: >-
+                Criteria every item is evaluated against.
+
+
+                It's not required to provide your own criteria, we automatically
+                detect the criteria from all the information provided in the
+                query. Only use this when you need more fine control.
+          required:
+            - query
+          description: Create initial search for the Webset.
+        enrichments:
+          type:
+            - array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/CreateEnrichmentParameters"
+            title: CreateEnrichmentParameters
+          maxItems: 10
+          description: Add Enrichments for the Webset.
+        externalId:
+          type:
+            - string
+          description: >-
+            The external identifier for the webset.
+
+
+            You can use this to reference the Webset by your own internal
+            identifiers.
+        metadata:
+          description: Set of key-value pairs you want to associate with this object.
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+      required:
+        - search
+      examples:
+        - search:
+            query: >-
+              Marketing agencies based in the US, that focus on consumer
+              products.
+            count: 10
+    WebsetSearch:
+      type:
+        - object
+      properties:
+        id:
+          type:
+            - string
+          description: The unique identifier for the search
+        object:
+          type: string
+          const: webset_search
+          default: webset_search
+        status:
+          type:
+            - string
+          enum:
+            - created
+            - running
+            - completed
+            - canceled
+          description: The status of the search
+          title: WebsetSearchStatus
+        query:
+          type:
+            - string
+          minLength: 1
+          maxLength: 5000
+          description: The query used to create the search.
+        entity:
+          $ref: "#/components/schemas/WebsetEntity"
+          description: >-
+            The entity the search will return results for.
+
+
+            When no entity is provided during creation, we will automatically
+            select the best entity based on the query.
+          nullable: true
+        criteria:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              description:
+                type:
+                  - string
+                minLength: 1
+                maxLength: 300
+                description: The description of the criterion
+              successRate:
+                type:
+                  - number
+                minimum: 0
+                maximum: 100
+                description: >-
+                  Value between 0 and 100 representing the percentage of results
+                  that meet the criterion.
+            required:
+              - description
+              - successRate
+          description: >-
+            The criteria the search will use to evaluate the results. If not
+            provided, we will automatically generate them for you.
+        count:
+          type:
+            - number
+          minimum: 1
+          description: >-
+            The number of results the search will attempt to find. The actual
+            number of results may be less than this number depending on the
+            search complexity.
+        progress:
+          type:
+            - object
+          properties:
+            found:
+              type:
+                - number
+              description: The number of results found so far
+            completion:
+              type:
+                - number
+              minimum: 0
+              maximum: 100
+              description: The completion percentage of the search
+          required:
+            - found
+            - completion
+          description: The progress of the search
+        metadata:
+          default: {}
+          description: Set of key-value pairs you want to associate with this object.
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+        canceledAt:
+          type: string
+          format: date-time
+          description: The date and time the search was canceled
+          nullable: true
+        canceledReason:
+          type: string
+          enum:
+            - webset_deleted
+            - webset_canceled
+          description: The reason the search was canceled
+          nullable: true
+        createdAt:
+          type:
+            - string
+          format: date-time
+          description: The date and time the search was created
+        updatedAt:
+          type:
+            - string
+          format: date-time
+          description: The date and time the search was updated
+      required:
+        - id
+        - object
+        - status
+        - query
+        - entity
+        - criteria
+        - count
+        - progress
+        - canceledAt
+        - canceledReason
+        - createdAt
+        - updatedAt
+    WebsetEnrichment:
+      type:
+        - object
+      properties:
+        id:
+          type:
+            - string
+          description: The unique identifier for the enrichment
+        object:
+          type: string
+          const: webset_enrichment
+          default: webset_enrichment
+        status:
+          type:
+            - string
+          enum:
+            - pending
+            - canceled
+            - completed
+          description: The status of the enrichment
+          title: WebsetEnrichmentStatus
+        websetId:
+          type:
+            - string
+          description: The unique identifier for the Webset this enrichment belongs to.
+        title:
+          type: string
+          description: >-
+            The title of the enrichment.
+
+
+            This will be automatically generated based on the description and
+            format.
+          nullable: true
+        description:
+          type:
+            - string
+          description: >-
+            The description of the enrichment task provided during the creation
+            of the enrichment.
+        format:
+          type: string
+          $ref: "#/components/schemas/WebsetEnrichmentFormat"
+          description: The format of the enrichment response.
+          nullable: true
+        options:
+          type: array
+          items:
+            type:
+              - object
+            properties:
+              label:
+                type:
+                  - string
+                description: The label of the option
+            required:
+              - label
+          description: >-
+            When the format is options, the different options for the enrichment
+            agent to choose from.
+          title: WebsetEnrichmentOptions
+          nullable: true
+        instructions:
+          type: string
+          description: >-
+            The instructions for the enrichment Agent.
+
+
+            This will be automatically generated based on the description and
+            format.
+          nullable: true
+        metadata:
+          default: {}
+          description: The metadata of the enrichment
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+        createdAt:
+          type:
+            - string
+          format: date-time
+          description: The date and time the enrichment was created
+        updatedAt:
+          type:
+            - string
+          format: date-time
+          description: The date and time the enrichment was updated
+      required:
+        - id
+        - object
+        - status
+        - websetId
+        - title
+        - description
+        - format
+        - options
+        - instructions
+        - createdAt
+        - updatedAt
+    Webset:
+      type:
+        - object
+      properties:
+        id:
+          type:
+            - string
+          description: The unique identifier for the webset
+        object:
+          type: string
+          const: webset
+          default: webset
+        status:
+          type:
+            - string
+          enum:
+            - idle
+            - running
+            - paused
+          description: The status of the webset
+          title: WebsetStatus
+        externalId:
+          type: string
+          description: The external identifier for the webset
+          nullable: true
+        searches:
+          type:
+            - array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/WebsetSearch"
+          description: The searches that have been performed on the webset.
+        enrichments:
+          type:
+            - array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/WebsetEnrichment"
+          description: The Enrichments to apply to the Webset Items.
+        metadata:
+          default: {}
+          description: Set of key-value pairs you want to associate with this object.
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+        createdAt:
+          type:
+            - string
+          format: date-time
+          description: The date and time the webset was created
+        updatedAt:
+          type:
+            - string
+          format: date-time
+          description: The date and time the webset was updated
+      required:
+        - id
+        - object
+        - status
+        - externalId
+        - searches
+        - enrichments
+        - createdAt
+        - updatedAt
+    WebsetItemPersonProperties:
+      type:
+        - object
+      properties:
+        type:
+          type: string
+          const: person
+          default: person
+        url:
+          type:
+            - string
+          format: uri
+          description: The URL of the person profile
+        description:
+          type:
+            - string
+          description: Short description of the relevance of the person
+        person:
+          type:
+            - object
+          properties:
+            name:
+              type:
+                - string
+              description: The name of the person
+            location:
+              type: string
+              description: The location of the person
+              nullable: true
+            position:
+              type: string
+              description: The current work position of the person
+              nullable: true
+            pictureUrl:
+              type: string
+              format: uri
+              description: The image URL of the person
+              nullable: true
+          required:
+            - name
+            - location
+            - position
+            - pictureUrl
+          title: WebsetItemPersonPropertiesFields
+      required:
+        - type
+        - url
+        - description
+        - person
+    WebsetItemCompanyProperties:
+      type:
+        - object
+      properties:
+        type:
+          type: string
+          const: company
+          default: company
+        url:
+          type:
+            - string
+          format: uri
+          description: The URL of the company website
+        description:
+          type:
+            - string
+          description: Short description of the relevance of the company
+        content:
+          type: string
+          description: The text content of the company website
+          nullable: true
+        company:
+          type:
+            - object
+          properties:
+            name:
+              type:
+                - string
+              description: The name of the company
+            location:
+              type: string
+              description: The main location of the company
+              nullable: true
+            employees:
+              type: number
+              description: The number of employees of the company
+              nullable: true
+            industry:
+              type: string
+              description: The industry of the company
+              nullable: true
+            about:
+              type: string
+              description: A short description of the company
+              nullable: true
+            logoUrl:
+              type: string
+              format: uri
+              description: The logo URL of the company
+              nullable: true
+          required:
+            - name
+            - location
+            - employees
+            - industry
+            - about
+            - logoUrl
+          title: WebsetItemCompanyPropertiesFields
+      required:
+        - type
+        - url
+        - description
+        - content
+        - company
+    WebsetItemArticleProperties:
+      type:
+        - object
+      properties:
+        type:
+          type: string
+          const: article
+          default: article
+        url:
+          type:
+            - string
+          format: uri
+          description: The URL of the article
+        description:
+          type:
+            - string
+          description: Short description of the relevance of the article
+        content:
+          type: string
+          description: The text content for the article
+          nullable: true
+        article:
+          type:
+            - object
+          properties:
+            author:
+              type: string
+              description: The author(s) of the article
+              nullable: true
+            publishedAt:
+              type: string
+              description: The date and time the article was published
+              nullable: true
+          required:
+            - author
+            - publishedAt
+          title: WebsetItemArticlePropertiesFields
+      required:
+        - type
+        - url
+        - description
+        - content
+        - article
+    WebsetItemResearchPaperProperties:
+      type:
+        - object
+      properties:
+        type:
+          type: string
+          const: research_paper
+          default: research_paper
+        url:
+          type:
+            - string
+          format: uri
+          description: The URL of the research paper
+        description:
+          type:
+            - string
+          description: Short description of the relevance of the research paper
+        content:
+          type: string
+          description: The text content of the research paper
+          nullable: true
+        researchPaper:
+          type:
+            - object
+          properties:
+            author:
+              type: string
+              description: The author(s) of the research paper
+              nullable: true
+            publishedAt:
+              type: string
+              description: The date and time the research paper was published
+              nullable: true
+          required:
+            - author
+            - publishedAt
+          title: WebsetItemResearchPaperPropertiesFields
+      required:
+        - type
+        - url
+        - description
+        - content
+        - researchPaper
+    WebsetItemCustomProperties:
+      type:
+        - object
+      properties:
+        type:
+          type: string
+          const: custom
+          default: custom
+        url:
+          type:
+            - string
+          format: uri
+          description: The URL of the Item
+        description:
+          type:
+            - string
+          description: Short description of the Item
+        content:
+          type: string
+          description: The text content of the Item
+          nullable: true
+        custom:
+          type:
+            - object
+          properties:
+            author:
+              type: string
+              description: The author(s) of the website
+              nullable: true
+            publishedAt:
+              type: string
+              description: The date and time the website was published
+              nullable: true
+          required:
+            - author
+            - publishedAt
+          title: WebsetItemCustomPropertiesFields
+      required:
+        - type
+        - url
+        - description
+        - content
+        - custom
+    WebsetItemEvaluation:
+      type:
+        - object
+      properties:
+        criterion:
+          type:
+            - string
+          description: The description of the criterion
+        reasoning:
+          type:
+            - string
+          description: The reasoning for the result of the evaluation
+        satisfied:
+          type:
+            - string
+          enum:
+            - "yes"
+            - "no"
+            - unclear
+          description: The satisfaction of the criterion
+        references:
+          type: array
+          items:
+            type:
+              - object
+            properties:
+              title:
+                type: string
+                description: The title of the reference
+                nullable: true
+              snippet:
+                type: string
+                description: The relevant snippet of the reference content
+                nullable: true
+              url:
+                description: The URL of the reference
+                type:
+                  - string
+            required:
+              - title
+              - snippet
+              - url
+          description: >-
+            The references used to generate the result. `null` if the evaluation
+            is not yet completed.
+          nullable: true
+      required:
+        - criterion
+        - reasoning
+        - satisfied
+        - references
+    EnrichmentResult:
+      type:
+        - object
+      properties:
+        object:
+          type: string
+          const: enrichment_result
+          default: enrichment_result
+        format:
+          type:
+            - string
+          $ref: "#/components/schemas/WebsetEnrichmentFormat"
+        result:
+          type: array
+          items:
+            type:
+              - string
+          description: The result of the enrichment.
+          nullable: true
+        reasoning:
+          type: string
+          description: The reasoning for the result when an Agent is used.
+          nullable: true
+        references:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              title:
+                type: string
+                description: The title of the reference
+                nullable: true
+              snippet:
+                type: string
+                description: The relevant snippet of the reference content
+                nullable: true
+              url:
+                description: The URL of the reference
+                type:
+                  - string
+            required:
+              - title
+              - snippet
+              - url
+          description: The references used to generate the result.
+        enrichmentId:
+          type:
+            - string
+          description: The id of the Enrichment that generated the result
+      required:
+        - object
+        - format
+        - result
+        - reasoning
+        - references
+        - enrichmentId
+    WebsetItem:
+      type:
+        - object
+      properties:
+        id:
+          type:
+            - string
+          description: The unique identifier for the Webset Item
+        object:
+          type: string
+          const: webset_item
+          default: webset_item
+        source:
+          type:
+            - string
+          enum:
+            - search
+          description: The source of the Item
+        sourceId:
+          type:
+            - string
+          description: The unique identifier for the source
+        websetId:
+          type:
+            - string
+          description: The unique identifier for the Webset this Item belongs to.
+        properties:
+          oneOf:
+            - type:
+                - object
+              $ref: "#/components/schemas/WebsetItemPersonProperties"
+              title: WebsetItemPropertiesPerson
+            - type:
+                - object
+              $ref: "#/components/schemas/WebsetItemCompanyProperties"
+              title: WebsetItemPropertiesCompany
+            - type:
+                - object
+              $ref: "#/components/schemas/WebsetItemArticleProperties"
+              title: WebsetItemPropertiesArticle
+            - type:
+                - object
+              $ref: "#/components/schemas/WebsetItemResearchPaperProperties"
+              title: WebsetItemPropertiesResearchPaper
+            - type:
+                - object
+              $ref: "#/components/schemas/WebsetItemCustomProperties"
+              title: WebsetItemPropertiesCustom
+          description: The properties of the Item
+        evaluations:
+          type:
+            - array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/WebsetItemEvaluation"
+          description: The criteria evaluations of the item
+        enrichments:
+          type: array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/EnrichmentResult"
+          description: The enrichments results of the Webset item
+          nullable: true
+        createdAt:
+          type:
+            - string
+          format: date-time
+          description: The date and time the item was created
+        updatedAt:
+          type:
+            - string
+          format: date-time
+          description: The date and time the item was last updated
+      required:
+        - id
+        - object
+        - source
+        - sourceId
+        - websetId
+        - properties
+        - evaluations
+        - enrichments
+        - createdAt
+        - updatedAt
+    GetWebsetResponse:
+      allOf:
+        - type:
+            - object
+          $ref: "#/components/schemas/Webset"
+        - type:
+            - object
+          properties:
+            items:
+              type:
+                - array
+              items:
+                type:
+                  - object
+                $ref: "#/components/schemas/WebsetItem"
+              description: >-
+                When expand query parameter contains `items`, this will contain
+                the items in the webset
+    UpdateWebsetRequest:
+      type:
+        - object
+      properties:
+        metadata:
+          description: Set of key-value pairs you want to associate with this object.
+          type: object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+          nullable: true
+    ListWebsetsResponse:
+      type:
+        - object
+      properties:
+        data:
+          type:
+            - array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/Webset"
+          description: The list of websets
+        hasMore:
+          type:
+            - boolean
+          description: Whether there are more results to paginate through
+        nextCursor:
+          type: string
+          description: The cursor to paginate through the next set of results
+          nullable: true
+      required:
+        - data
+        - hasMore
+        - nextCursor
+    ListWebsetItemResponse:
+      type:
+        - object
+      properties:
+        data:
+          type:
+            - array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/WebsetItem"
+          description: The list of webset items
+        hasMore:
+          type:
+            - boolean
+          description: Whether there are more Items to paginate through
+        nextCursor:
+          type: string
+          description: The cursor to paginate through the next set of Items
+          nullable: true
+      required:
+        - data
+        - hasMore
+        - nextCursor
+    CreateWebhookParameters:
+      type:
+        - object
+      properties:
+        events:
+          type:
+            - array
+          items:
+            type:
+              - string
+            enum:
+              - webset.created
+              - webset.deleted
+              - webset.paused
+              - webset.idle
+              - webset.search.created
+              - webset.search.canceled
+              - webset.search.completed
+              - webset.search.updated
+              - webset.export.created
+              - webset.export.completed
+              - webset.item.created
+              - webset.item.enriched
+          minItems: 1
+          maxItems: 12
+          description: The events to trigger the webhook
+        url:
+          type:
+            - string
+          format: uri
+          description: The URL to send the webhook to
+        metadata:
+          description: Set of key-value pairs you want to associate with this object.
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+      required:
+        - events
+        - url
+    Webhook:
+      type:
+        - object
+      properties:
+        id:
+          type:
+            - string
+          description: The unique identifier for the webhook
+        object:
+          type: string
+          const: webhook
+          default: webhook
+        status:
+          type:
+            - string
+          enum:
+            - active
+            - inactive
+          description: The status of the webhook
+          title: WebhookStatus
+        events:
+          type:
+            - array
+          items:
+            type:
+              - string
+            enum:
+              - webset.created
+              - webset.deleted
+              - webset.paused
+              - webset.idle
+              - webset.search.created
+              - webset.search.canceled
+              - webset.search.completed
+              - webset.search.updated
+              - webset.export.created
+              - webset.export.completed
+              - webset.item.created
+              - webset.item.enriched
+          minItems: 1
+          description: The events to trigger the webhook
+        url:
+          type:
+            - string
+          format: uri
+          description: The URL to send the webhook to
+        secret:
+          type: string
+          description: >-
+            The secret to verify the webhook signature. Only returned on Webhook
+            creation.
+          nullable: true
+        metadata:
+          default: {}
+          description: The metadata of the webhook
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+        createdAt:
+          type:
+            - string
+          format: date-time
+          description: The date and time the webhook was created
+        updatedAt:
+          type:
+            - string
+          format: date-time
+          description: The date and time the webhook was last updated
+      required:
+        - id
+        - object
+        - status
+        - events
+        - url
+        - secret
+        - createdAt
+        - updatedAt
+    UpdateWebhookParameters:
+      type:
+        - object
+      properties:
+        events:
+          type:
+            - array
+          items:
+            type:
+              - string
+            enum:
+              - webset.created
+              - webset.deleted
+              - webset.paused
+              - webset.idle
+              - webset.search.created
+              - webset.search.canceled
+              - webset.search.completed
+              - webset.search.updated
+              - webset.export.created
+              - webset.export.completed
+              - webset.item.created
+              - webset.item.enriched
+          minItems: 1
+          maxItems: 12
+          description: The events to trigger the webhook
+        url:
+          type:
+            - string
+          format: uri
+          description: The URL to send the webhook to
+        metadata:
+          description: Set of key-value pairs you want to associate with this object.
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+    ListWebhooksResponse:
+      type:
+        - object
+      properties:
+        data:
+          type:
+            - array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/Webhook"
+          description: The list of webhooks
+        hasMore:
+          type:
+            - boolean
+          description: Whether there are more results to paginate through
+        nextCursor:
+          type: string
+          description: The cursor to paginate through the next set of results
+          nullable: true
+      required:
+        - data
+        - hasMore
+        - nextCursor
+    Event:
+      discriminator:
+        propertyName: type
+      oneOf:
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: webset.created
+              default: webset.created
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/Webset"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: WebsetCreatedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: webset.deleted
+              default: webset.deleted
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/Webset"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: WebsetDeletedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: webset.idle
+              default: webset.idle
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/Webset"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: WebsetIdleEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: webset.paused
+              default: webset.paused
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/Webset"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: WebsetPausedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: webset.item.created
+              default: webset.item.created
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/WebsetItem"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: WebsetItemCreatedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: webset.item.enriched
+              default: webset.item.enriched
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/WebsetItem"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: WebsetItemEnrichedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: webset.search.created
+              default: webset.search.created
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/WebsetSearch"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: WebsetSearchCreatedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: webset.search.updated
+              default: webset.search.updated
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/WebsetSearch"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: WebsetSearchUpdatedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: webset.search.canceled
+              default: webset.search.canceled
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/WebsetSearch"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: WebsetSearchCanceledEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: webset.search.completed
+              default: webset.search.completed
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/WebsetSearch"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: WebsetSearchCompletedEvent
+      title: Event
+    ListEventsResponse:
+      type:
+        - object
+      properties:
+        data:
+          type:
+            - array
+          items:
+            discriminator:
+              propertyName: type
+            $ref: "#/components/schemas/Event"
+          description: The list of events
+        hasMore:
+          type:
+            - boolean
+          description: Whether there are more results to paginate through
+        nextCursor:
+          type: string
+          description: The cursor to paginate through the next set of results
+          nullable: true
+      required:
+        - data
+        - hasMore
+        - nextCursor
+    CreateWebsetSearchParameters:
+      type:
+        - object
+      properties:
+        count:
+          type:
+            - number
+          minimum: 1
+          description: >-
+            Number of Items the Search will attempt to find.
+
+
+            The actual number of Items found may be less than this number
+            depending on the query complexity.
+        query:
+          type:
+            - string
+          minLength: 1
+          maxLength: 5000
+          description: |-
+            Query describing what you are looking for.
+
+            Any URL provided will be crawled and used as context for the search.
+          examples:
+            - >-
+              Marketing agencies based in the US, that focus on consumer
+              products. Get brands worked with and city
+        entity:
+          $ref: "#/components/schemas/WebsetEntity"
+          description: >-
+            Entity the Webset will return results for.
+
+
+            It is not required to provide it, we automatically detect the entity
+            from all the information provided in the query.
+        criteria:
+          type:
+            - array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/CreateCriterionParameters"
+            title: CreateCriterionParameters
+          minItems: 1
+          maxItems: 5
+          description: >-
+            Criteria every item is evaluated against.
+
+
+            It's not required to provide your own criteria, we automatically
+            detect the criteria from all the information provided in the query.
+        behaviour:
+          default: override
+          type:
+            - string
+          enum:
+            - override
+          description: >-
+            The behaviour of the Search when it is added to a Webset.
+
+
+            - `override`: the search will reuse the existing Items found in the
+            Webset and evaluate them against the new criteria. Any Items that
+            don't match the new criteria will be discarded.
+          title: WebsetSearchBehaviour
+        metadata:
+          description: Set of key-value pairs you want to associate with this object.
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+      required:
+        - count
+        - query
+    WebsetEnrichmentFormat:
+      type: string
+      enum:
+        - text
+        - date
+        - number
+        - options
+        - email
+        - phone
+    WebsetExportFormat:
+      type: string
+      enum:
+        - csv
