@@ -1740,7 +1740,9 @@ components:
             - unclear
           description: The satisfaction of the criterion
         references:
-          type: array
+          default: []
+          type:
+            - array
           items:
             type:
               - object
@@ -1761,15 +1763,11 @@ components:
               - title
               - snippet
               - url
-          description: >-
-            The references used to generate the result. `null` if the evaluation
-            is not yet completed.
-          nullable: true
+          description: The references used to generate the result.
       required:
         - criterion
         - reasoning
         - satisfied
-        - references
     EnrichmentResult:
       type:
         - object
