@@ -2002,19 +2002,7 @@ components:
           items:
             type:
               - string
-            enum:
-              - webset.created
-              - webset.deleted
-              - webset.paused
-              - webset.idle
-              - webset.search.created
-              - webset.search.canceled
-              - webset.search.completed
-              - webset.search.updated
-              - webset.export.created
-              - webset.export.completed
-              - webset.item.created
-              - webset.item.enriched
+            $ref: "#/components/schemas/EventType"
           minItems: 1
           maxItems: 12
           description: The events to trigger the webhook
@@ -2060,19 +2048,7 @@ components:
           items:
             type:
               - string
-            enum:
-              - webset.created
-              - webset.deleted
-              - webset.paused
-              - webset.idle
-              - webset.search.created
-              - webset.search.canceled
-              - webset.search.completed
-              - webset.search.updated
-              - webset.export.created
-              - webset.export.completed
-              - webset.item.created
-              - webset.item.enriched
+            $ref: "#/components/schemas/EventType"
           minItems: 1
           description: The events to trigger the webhook
         url:
@@ -2124,19 +2100,7 @@ components:
           items:
             type:
               - string
-            enum:
-              - webset.created
-              - webset.deleted
-              - webset.paused
-              - webset.idle
-              - webset.search.created
-              - webset.search.canceled
-              - webset.search.completed
-              - webset.search.updated
-              - webset.export.created
-              - webset.export.completed
-              - webset.item.created
-              - webset.item.enriched
+            $ref: "#/components/schemas/EventType"
           minItems: 1
           maxItems: 12
           description: The events to trigger the webhook
@@ -2601,7 +2565,18 @@ components:
         - options
         - email
         - phone
-    WebsetExportFormat:
+    EventType:
       type: string
       enum:
-        - csv
+        - webset.created
+        - webset.deleted
+        - webset.paused
+        - webset.idle
+        - webset.search.created
+        - webset.search.canceled
+        - webset.search.completed
+        - webset.search.updated
+        - webset.export.created
+        - webset.export.completed
+        - webset.item.created
+        - webset.item.enriched
