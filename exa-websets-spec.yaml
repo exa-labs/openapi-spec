@@ -688,6 +688,71 @@ paths:
       tags: *ref_3
       security:
         - api_key: []
+  /v0/webhooks/{id}/attempts:
+    get:
+      description: List all attempts made by a Webhook ordered in descending order.
+      operationId: webhooks-attempts-list
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The ID of the webhook
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: The cursor to paginate through the results
+          schema:
+            minLength: 1
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: The number of results to return
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 25
+            type: number
+        - name: eventType
+          required: false
+          in: query
+          description: The type of event to filter by
+          schema:
+            type: string
+            enum:
+              - webset.created
+              - webset.deleted
+              - webset.paused
+              - webset.idle
+              - webset.search.created
+              - webset.search.canceled
+              - webset.search.completed
+              - webset.search.updated
+              - webset.export.created
+              - webset.export.completed
+              - webset.item.created
+              - webset.item.enriched
+      responses:
+        "200":
+          description: List of webhook attempts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListWebhookAttemptsResponse"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: List webhook attempts
+      tags:
+        - Webhooks Attempts
+      security:
+        - api_key: []
   /v0/events:
     get:
       description: |-
@@ -2127,6 +2192,112 @@ components:
               - object
             $ref: "#/components/schemas/Webhook"
           description: The list of webhooks
+        hasMore:
+          type:
+            - boolean
+          description: Whether there are more results to paginate through
+        nextCursor:
+          type: string
+          description: The cursor to paginate through the next set of results
+          nullable: true
+      required:
+        - data
+        - hasMore
+        - nextCursor
+    WebhookAttempt:
+      type:
+        - object
+      properties:
+        id:
+          type:
+            - string
+          description: The unique identifier for the webhook attempt
+        object:
+          type: string
+          const: webhook_attempt
+          default: webhook_attempt
+        eventId:
+          type:
+            - string
+          description: The unique identifier for the event
+        eventType:
+          type:
+            - string
+          enum:
+            - webset.created
+            - webset.deleted
+            - webset.paused
+            - webset.idle
+            - webset.search.created
+            - webset.search.canceled
+            - webset.search.completed
+            - webset.search.updated
+            - webset.export.created
+            - webset.export.completed
+            - webset.item.created
+            - webset.item.enriched
+          description: The type of event
+        webhookId:
+          type:
+            - string
+          description: The unique identifier for the webhook
+        url:
+          type:
+            - string
+          description: The URL that was used during the attempt
+        successful:
+          description: Whether the attempt was successful
+          type:
+            - boolean
+        responseHeaders:
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+          description: The headers of the response
+        responseBody:
+          type: string
+          description: The body of the response
+          nullable: true
+        responseStatusCode:
+          type:
+            - number
+          description: The status code of the response
+        attempt:
+          type:
+            - number
+          description: The attempt number of the webhook
+        attemptedAt:
+          type:
+            - string
+          format: date-time
+          description: The date and time the webhook attempt was made
+      required:
+        - id
+        - object
+        - eventId
+        - eventType
+        - webhookId
+        - url
+        - successful
+        - responseHeaders
+        - responseBody
+        - responseStatusCode
+        - attempt
+        - attemptedAt
+    ListWebhookAttemptsResponse:
+      type:
+        - object
+      properties:
+        data:
+          type:
+            - array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/WebhookAttempt"
+          description: The list of webhook attempts
         hasMore:
           type:
             - boolean
