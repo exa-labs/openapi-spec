@@ -864,7 +864,7 @@ paths:
         Creates a new Search for the Webset.
 
 
-        The default behaviour is to reuse the previous Search results and
+        The default behavior is to reuse the previous Search results and
         evaluate them against the new criteria.
       operationId: websets-searches-create
       parameters:
@@ -970,6 +970,251 @@ paths:
       tags: *ref_5
       security:
         - api_key: []
+  /v0/streams:
+    post:
+      description: >-
+        Creates a new `Stream` to continuously keep your Websets updated with
+        fresh data.
+
+
+        Streams automatically run on your defined schedule to ensure your
+        Websets stay current without manual intervention:
+
+
+        - **Find new content**: Execute `search` operations to discover fresh
+        items matching your criteria
+
+        - **Update existing content**: Run `refresh` operations to update items
+        contents and enrichments
+
+        - **Automated scheduling**: Configure `frequency`, `timezone`, and
+        execution times
+      operationId: streams-create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStreamParameters"
+      responses:
+        "201":
+          description: Stream created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stream"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Create a Stream
+      tags: &ref_6
+        - Streams
+      security:
+        - api_key: []
+    get:
+      description: Lists all streams for the Webset.
+      operationId: streams-list
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: The cursor to paginate through the results
+          schema:
+            minLength: 1
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: The number of results to return
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 25
+            type: number
+        - name: websetId
+          required: false
+          in: query
+          description: The id of the Webset to list streams for
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of streams
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListStreamsResponse"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: List Streams
+      tags: *ref_6
+      security:
+        - api_key: []
+  /v0/streams/{stream}:
+    get:
+      description: Gets a specific stream.
+      operationId: streams-get
+      parameters:
+        - name: stream
+          required: true
+          in: path
+          description: The id of the Stream
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Stream details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stream"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Get Stream
+      tags: *ref_6
+      security:
+        - api_key: []
+    patch:
+      description: Updates a stream configuration.
+      operationId: streams-update
+      parameters:
+        - name: stream
+          required: true
+          in: path
+          description: The id of the Stream
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStream"
+      responses:
+        "200":
+          description: Stream updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stream"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Update Stream
+      tags: *ref_6
+      security:
+        - api_key: []
+    delete:
+      description: Deletes a stream.
+      operationId: streams-delete
+      parameters:
+        - name: stream
+          required: true
+          in: path
+          description: The id of the Stream
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Stream deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stream"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Delete Stream
+      tags: *ref_6
+      security:
+        - api_key: []
+  /v0/streams/{stream}/runs:
+    get:
+      description: Lists all runs for the Stream.
+      operationId: streams-runs-list
+      parameters:
+        - name: stream
+          required: true
+          in: path
+          description: The id of the Stream to list runs for
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of stream runs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListStreamRunsResponse"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: List Stream Runs
+      tags: &ref_7
+        - Streams Runs
+      security:
+        - api_key: []
+  /v0/streams/{stream}/runs/{id}:
+    get:
+      description: Gets a specific stream run.
+      operationId: streams-runs-get
+      parameters:
+        - name: stream
+          required: true
+          in: path
+          description: The id of the Stream to get the run for
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Stream run details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreamRun"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Get Stream Run
+      tags: *ref_7
+      security:
+        - api_key: []
 info:
   title: Websets
   description: ""
@@ -1056,18 +1301,23 @@ components:
         - type:
             - object
           $ref: "#/components/schemas/WebsetCompanyEntity"
+          title: Company
         - type:
             - object
           $ref: "#/components/schemas/WebsetPersonEntity"
+          title: Person
         - type:
             - object
           $ref: "#/components/schemas/WebsetArticleEntity"
+          title: Article
         - type:
             - object
           $ref: "#/components/schemas/WebsetResearchPaperEntity"
+          title: Research Paper
         - type:
             - object
           $ref: "#/components/schemas/WebsetCustomEntity"
+          title: Custom
     CreateCriterionParameters:
       type:
         - object
@@ -1076,7 +1326,7 @@ components:
           type:
             - string
           minLength: 1
-          maxLength: 300
+          maxLength: 1000
           description: The description of the criterion
       required:
         - description
@@ -1210,7 +1460,6 @@ components:
               - object
             $ref: "#/components/schemas/CreateEnrichmentParameters"
             title: CreateEnrichmentParameters
-          maxItems: 10
           description: Add Enrichments for the Webset.
         externalId:
           type:
@@ -1285,7 +1534,7 @@ components:
                 type:
                   - string
                 minLength: 1
-                maxLength: 300
+                maxLength: 1000
                 description: The description of the criterion
               successRate:
                 type:
@@ -1309,6 +1558,22 @@ components:
             The number of results the search will attempt to find. The actual
             number of results may be less than this number depending on the
             search complexity.
+        behavior:
+          default: override
+          type:
+            - string
+          $ref: "#/components/schemas/WebsetSearchBehavior"
+          description: >-
+            The behavior of the search when it is added to a Webset.
+
+
+            - `override`: the search will replace the existing Items found in
+            the Webset and evaluate them against the new criteria. Any Items
+            that don't match the new criteria will be discarded.
+
+            - `append`: the search will add the new Items found to the existing
+            Webset. Any Items that don't match the new criteria will be
+            discarded.
         progress:
           type:
             - object
@@ -1343,9 +1608,7 @@ components:
           nullable: true
         canceledReason:
           type: string
-          enum:
-            - webset_deleted
-            - webset_canceled
+          $ref: "#/components/schemas/WebsetSearchCanceledReason"
           description: The reason the search was canceled
           nullable: true
         createdAt:
@@ -1473,6 +1736,293 @@ components:
         - instructions
         - createdAt
         - updatedAt
+    StreamBehaviorSearch:
+      type:
+        - object
+      properties:
+        type:
+          type: string
+          const: search
+          default: search
+        config:
+          type:
+            - object
+          properties:
+            parameters:
+              type:
+                - object
+              properties:
+                query:
+                  type:
+                    - string
+                  minLength: 2
+                  maxLength: 10000
+                criteria:
+                  type:
+                    - array
+                  items:
+                    type:
+                      - object
+                    properties:
+                      description:
+                        type:
+                          - string
+                        minLength: 2
+                        maxLength: 1000
+                    required:
+                      - description
+                  maxItems: 5
+                entity:
+                  $ref: "#/components/schemas/WebsetEntity"
+                  title: WebsetEntity
+                count:
+                  type:
+                    - number
+                  exclusiveMinimum: 0
+                  description: The maximum number of results to find
+                behavior:
+                  default: append
+                  type:
+                    - string
+                  $ref: "#/components/schemas/WebsetSearchBehavior"
+                  description: The behaviour of the Search when it is added to a Webset.
+              required:
+                - query
+                - criteria
+                - entity
+                - count
+          required:
+            - parameters
+      required:
+        - type
+        - config
+    StreamRefreshBehaviorEnrichmentsConfig:
+      type:
+        - object
+      properties:
+        target:
+          type: string
+          const: enrichments
+          default: enrichments
+        enrichments:
+          type:
+            - object
+          properties:
+            ids:
+              type:
+                - array
+              items:
+                type:
+                  - string
+          description: Only refresh specific enrichments
+      required:
+        - target
+    StreamRefreshBehaviorContentsConfig:
+      type:
+        - object
+      properties:
+        target:
+          type: string
+          const: contents
+          default: contents
+      required:
+        - target
+    StreamBehaviorRefresh:
+      type:
+        - object
+      properties:
+        type:
+          type: string
+          const: refresh
+          default: refresh
+        config:
+          discriminator:
+            propertyName: target
+          oneOf:
+            - allOf:
+                - $ref: "#/components/schemas/StreamRefreshBehaviorEnrichmentsConfig"
+              title: Enrichments
+            - allOf:
+                - $ref: "#/components/schemas/StreamRefreshBehaviorContentsConfig"
+              title: Contents
+          description: Specify the target of the refresh
+      required:
+        - type
+        - config
+    StreamRun:
+      type:
+        - object
+      properties:
+        id:
+          type:
+            - string
+          description: The unique identifier for the Stream Run
+        object:
+          type:
+            - string
+          enum:
+            - stream_run
+          description: The type of object
+        status:
+          type:
+            - string
+          enum:
+            - created
+            - running
+            - completed
+            - canceled
+          description: The status of the Stream Run
+        streamId:
+          type:
+            - string
+          description: The stream that the run is associated with
+        type:
+          type:
+            - string
+          enum:
+            - search
+            - refresh
+          description: The type of the Stream Run
+        completedAt:
+          type: string
+          format: date-time
+          description: When the run completed
+          nullable: true
+        failedAt:
+          type: string
+          format: date-time
+          description: When the run failed
+          nullable: true
+        canceledAt:
+          type: string
+          format: date-time
+          description: When the run was canceled
+          nullable: true
+        createdAt:
+          type:
+            - string
+          format: date-time
+          description: When the run was created
+        updatedAt:
+          type:
+            - string
+          format: date-time
+          description: When the run was last updated
+      required:
+        - id
+        - object
+        - streamId
+        - status
+        - type
+        - completedAt
+        - failedAt
+        - canceledAt
+        - createdAt
+        - updatedAt
+    Stream:
+      type:
+        - object
+      properties:
+        id:
+          type:
+            - string
+          description: The unique identifier for the Stream
+        object:
+          type:
+            - string
+          enum:
+            - stream
+          description: The type of object
+        status:
+          type:
+            - string
+          enum:
+            - open
+            - closed
+          description: The status of the Stream
+        websetId:
+          type:
+            - string
+          description: The id of the Webset the Stream belongs to
+        cadence:
+          type:
+            - object
+          properties:
+            frequency:
+              type:
+                - string
+              enum:
+                - daily
+                - weekly
+                - monthly
+              description: How often the stream will run
+            timezone:
+              description: IANA timezone (e.g., "America/New_York")
+              default: Etc/UTC
+              type:
+                - string
+            time:
+              type:
+                - string
+              pattern: ^([01]?[0-9]|2[0-3]):[0-5][0-9]$
+              description: >-
+                Customized time of day in HH:MM format (e.g., "14:30"). By
+                default is the hour and minute of creation of the Stream.
+          required:
+            - frequency
+          description: How often the stream will run
+        behavior:
+          discriminator:
+            propertyName: type
+          oneOf:
+            - allOf: &ref_8
+                - $ref: "#/components/schemas/StreamBehaviorSearch"
+              title: Search
+            - allOf: &ref_9
+                - $ref: "#/components/schemas/StreamBehaviorRefresh"
+              title: Refresh
+          description: Behavior to perform when stream runs
+        lastRun:
+          type: object
+          $ref: "#/components/schemas/StreamRun"
+          title: StreamRun
+          description: The last run of the stream
+          nullable: true
+        nextRunAt:
+          type: string
+          format: date-time
+          description: When the next run will occur
+          nullable: true
+        metadata:
+          description: Set of key-value pairs you want to associate with this object.
+          type: object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+          nullable: true
+        createdAt:
+          type:
+            - string
+          format: date-time
+          description: When the stream was created
+        updatedAt:
+          type:
+            - string
+          format: date-time
+          description: When the stream was last updated
+      required:
+        - id
+        - object
+        - status
+        - websetId
+        - cadence
+        - behavior
+        - lastRun
+        - nextRunAt
+        - metadata
+        - createdAt
+        - updatedAt
     Webset:
       type:
         - object
@@ -1514,6 +2064,14 @@ components:
               - object
             $ref: "#/components/schemas/WebsetEnrichment"
           description: The Enrichments to apply to the Webset Items.
+        streams:
+          type:
+            - array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/Stream"
+          description: The Streams for the Webset.
         metadata:
           default: {}
           description: Set of key-value pairs you want to associate with this object.
@@ -1540,6 +2098,7 @@ components:
         - externalId
         - searches
         - enrichments
+        - streams
         - createdAt
         - updatedAt
     WebsetItemPersonProperties:
@@ -1908,6 +2467,7 @@ components:
             - string
           enum:
             - search
+            - import
           description: The source of the Item
         sourceId:
           type:
@@ -1922,23 +2482,23 @@ components:
             - type:
                 - object
               $ref: "#/components/schemas/WebsetItemPersonProperties"
-              title: WebsetItemPropertiesPerson
+              title: Person
             - type:
                 - object
               $ref: "#/components/schemas/WebsetItemCompanyProperties"
-              title: WebsetItemPropertiesCompany
+              title: Company
             - type:
                 - object
               $ref: "#/components/schemas/WebsetItemArticleProperties"
-              title: WebsetItemPropertiesArticle
+              title: Article
             - type:
                 - object
               $ref: "#/components/schemas/WebsetItemResearchPaperProperties"
-              title: WebsetItemPropertiesResearchPaper
+              title: Research Paper
             - type:
                 - object
               $ref: "#/components/schemas/WebsetItemCustomProperties"
-              title: WebsetItemPropertiesCustom
+              title: Custom
           description: The properties of the Item
         evaluations:
           type:
@@ -2700,20 +3260,22 @@ components:
 
             It's not required to provide your own criteria, we automatically
             detect the criteria from all the information provided in the query.
-        behaviour:
+        behavior:
           default: override
           type:
             - string
-          enum:
-            - override
+          $ref: "#/components/schemas/WebsetSearchBehavior"
           description: >-
-            The behaviour of the Search when it is added to a Webset.
+            The behavior of the Search when it is added to a Webset.
 
 
-            - `override`: the search will reuse the existing Items found in the
-            Webset and evaluate them against the new criteria. Any Items that
-            don't match the new criteria will be discarded.
-          title: WebsetSearchBehaviour
+            - `override`: the search will replace the existing Items found in
+            the Webset and evaluate them against the new criteria. Any Items
+            that don't match the new criteria will be discarded.
+
+            - `append`: the search will add the new Items found to the existing
+            Webset. Any Items that don't match the new criteria will be
+            discarded.
         metadata:
           description: Set of key-value pairs you want to associate with this object.
           type:
@@ -2725,6 +3287,151 @@ components:
       required:
         - count
         - query
+    CreateStreamParameters:
+      type:
+        - object
+      properties:
+        websetId:
+          type:
+            - string
+          description: The id of the Webset
+        cadence:
+          type:
+            - object
+          properties:
+            frequency:
+              type:
+                - string
+              enum:
+                - daily
+                - weekly
+                - monthly
+              description: How often the stream will run
+            timezone:
+              description: IANA timezone (e.g., "America/New_York")
+              default: Etc/UTC
+              type:
+                - string
+            time:
+              type:
+                - string
+              pattern: ^([01]?[0-9]|2[0-3]):[0-5][0-9]$
+              description: >-
+                Customized time of day in HH:MM format (e.g., "14:30"). By
+                default is the hour and minute of creation of the Stream.
+          required:
+            - frequency
+          description: How often the stream will run
+        behavior:
+          discriminator:
+            propertyName: type
+          oneOf:
+            - allOf: *ref_8
+              title: Search
+            - allOf: *ref_9
+              title: Refresh
+          description: Behavior to perform when stream runs
+        metadata:
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+      required:
+        - websetId
+        - cadence
+        - behavior
+    ListStreamsResponse:
+      type:
+        - object
+      properties:
+        data:
+          type:
+            - array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/Stream"
+          description: The list of streams
+        hasMore:
+          type:
+            - boolean
+          description: Whether there are more results to paginate through
+        nextCursor:
+          type: string
+          description: The cursor to paginate through the next set of results
+          nullable: true
+      required:
+        - data
+        - hasMore
+        - nextCursor
+    UpdateStream:
+      type:
+        - object
+      properties:
+        status:
+          type:
+            - string
+          enum:
+            - open
+            - closed
+          description: The status of the stream.
+        metadata:
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+    ListStreamRunsResponse:
+      type:
+        - object
+      properties:
+        data:
+          type:
+            - array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/StreamRun"
+          description: The list of stream runs
+        hasMore:
+          type:
+            - boolean
+          description: Whether there are more results to paginate through
+        nextCursor:
+          type: string
+          description: The cursor to paginate through the next set of results
+          nullable: true
+      required:
+        - data
+        - hasMore
+        - nextCursor
+    StreamCadence:
+      type:
+        - object
+      properties:
+        frequency:
+          type:
+            - string
+          enum:
+            - daily
+            - weekly
+            - monthly
+          description: How often the stream will run
+        timezone:
+          description: IANA timezone (e.g., "America/New_York")
+          default: Etc/UTC
+          type:
+            - string
+        time:
+          type:
+            - string
+          pattern: ^([01]?[0-9]|2[0-3]):[0-5][0-9]$
+          description: >-
+            Customized time of day in HH:MM format (e.g., "14:30"). By default
+            is the hour and minute of creation of the Stream.
+      required:
+        - frequency
     WebsetEnrichmentFormat:
       type: string
       enum:
@@ -2749,3 +3456,13 @@ components:
         - webset.export.completed
         - webset.item.created
         - webset.item.enriched
+    WebsetSearchBehavior:
+      type: string
+      enum:
+        - override
+        - append
+    WebsetSearchCanceledReason:
+      type: string
+      enum:
+        - webset_deleted
+        - webset_canceled
