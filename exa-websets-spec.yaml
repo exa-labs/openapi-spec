@@ -1995,12 +1995,12 @@ components:
           nullable: true
         metadata:
           description: Set of key-value pairs you want to associate with this object.
-          type: object
+          type:
+            - object
           additionalProperties:
             type:
               - string
             maxLength: 1000
-          nullable: true
         createdAt:
           type:
             - string
