@@ -1948,28 +1948,17 @@ components:
           type:
             - object
           properties:
-            frequency:
+            cron:
+              description: Cron expression for daily execution only (at most once per day)
               type:
                 - string
-              enum:
-                - daily
-                - weekly
-                - monthly
-              description: How often the stream will run
             timezone:
               description: IANA timezone (e.g., "America/New_York")
               default: Etc/UTC
               type:
                 - string
-            time:
-              type:
-                - string
-              pattern: ^([01]?[0-9]|2[0-3]):[0-5][0-9]$
-              description: >-
-                Customized time of day in HH:MM format (e.g., "14:30"). By
-                default is the hour and minute of creation of the Stream.
           required:
-            - frequency
+            - cron
           description: How often the stream will run
         behavior:
           discriminator:
@@ -3299,28 +3288,17 @@ components:
           type:
             - object
           properties:
-            frequency:
+            cron:
+              description: Cron expression for daily execution only (at most once per day)
               type:
                 - string
-              enum:
-                - daily
-                - weekly
-                - monthly
-              description: How often the stream will run
             timezone:
               description: IANA timezone (e.g., "America/New_York")
               default: Etc/UTC
               type:
                 - string
-            time:
-              type:
-                - string
-              pattern: ^([01]?[0-9]|2[0-3]):[0-5][0-9]$
-              description: >-
-                Customized time of day in HH:MM format (e.g., "14:30"). By
-                default is the hour and minute of creation of the Stream.
           required:
-            - frequency
+            - cron
           description: How often the stream will run
         behavior:
           discriminator:
@@ -3410,28 +3388,17 @@ components:
       type:
         - object
       properties:
-        frequency:
+        cron:
+          description: Cron expression for daily execution only (at most once per day)
           type:
             - string
-          enum:
-            - daily
-            - weekly
-            - monthly
-          description: How often the stream will run
         timezone:
           description: IANA timezone (e.g., "America/New_York")
           default: Etc/UTC
           type:
             - string
-        time:
-          type:
-            - string
-          pattern: ^([01]?[0-9]|2[0-3]):[0-5][0-9]$
-          description: >-
-            Customized time of day in HH:MM format (e.g., "14:30"). By default
-            is the hour and minute of creation of the Stream.
       required:
-        - frequency
+        - cron
     WebsetEnrichmentFormat:
       type: string
       enum:
