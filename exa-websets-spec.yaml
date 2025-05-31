@@ -1748,51 +1748,45 @@ components:
           type:
             - object
           properties:
-            parameters:
+            query:
               type:
-                - object
-              properties:
-                query:
-                  type:
-                    - string
-                  minLength: 2
-                  maxLength: 10000
-                criteria:
-                  type:
-                    - array
-                  items:
+                - string
+              minLength: 2
+              maxLength: 10000
+            criteria:
+              type:
+                - array
+              items:
+                type:
+                  - object
+                properties:
+                  description:
                     type:
-                      - object
-                    properties:
-                      description:
-                        type:
-                          - string
-                        minLength: 2
-                        maxLength: 1000
-                    required:
-                      - description
-                  maxItems: 5
-                entity:
-                  $ref: "#/components/schemas/WebsetEntity"
-                  title: WebsetEntity
-                count:
-                  type:
-                    - number
-                  exclusiveMinimum: 0
-                  description: The maximum number of results to find
-                behavior:
-                  default: append
-                  type:
-                    - string
-                  $ref: "#/components/schemas/WebsetSearchBehavior"
-                  description: The behaviour of the Search when it is added to a Webset.
-              required:
-                - query
-                - criteria
-                - entity
-                - count
+                      - string
+                    minLength: 2
+                    maxLength: 1000
+                required:
+                  - description
+              maxItems: 5
+            entity:
+              $ref: "#/components/schemas/WebsetEntity"
+              title: WebsetEntity
+            count:
+              type:
+                - number
+              exclusiveMinimum: 0
+              description: The maximum number of results to find
+            behavior:
+              default: append
+              type:
+                - string
+              $ref: "#/components/schemas/WebsetSearchBehavior"
+              description: The behaviour of the Search when it is added to a Webset.
           required:
-            - parameters
+            - query
+            - criteria
+            - entity
+            - count
       required:
         - type
         - config
@@ -1949,7 +1943,9 @@ components:
             - object
           properties:
             cron:
-              description: Cron expression for daily execution only (at most once per day)
+              description: >-
+                Cron expression for stream cadence (must be a valid Unix cron
+                with 5 fields). The schedule must trigger at most once per day.
               type:
                 - string
             timezone:
@@ -3289,7 +3285,9 @@ components:
             - object
           properties:
             cron:
-              description: Cron expression for daily execution only (at most once per day)
+              description: >-
+                Cron expression for stream cadence (must be a valid Unix cron
+                with 5 fields). The schedule must trigger at most once per day.
               type:
                 - string
             timezone:
@@ -3389,7 +3387,9 @@ components:
         - object
       properties:
         cron:
-          description: Cron expression for daily execution only (at most once per day)
+          description: >-
+            Cron expression for stream cadence (must be a valid Unix cron with 5
+            fields). The schedule must trigger at most once per day.
           type:
             - string
         timezone:
