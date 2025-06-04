@@ -1039,7 +1039,7 @@ paths:
         - name: websetId
           required: false
           in: query
-          description: The id of the Webset to list streams for
+          description: The id of the Webset to list monitors for
           schema:
             type: string
       responses:
@@ -1151,12 +1151,12 @@ paths:
       tags: *ref_6
       security:
         - api_key: []
-  /v0/streams/{stream}/runs:
+  /v0/monitors/{monitor}/runs:
     get:
       description: Lists all runs for the Monitor.
-      operationId: streams-runs-list
+      operationId: monitors-runs-list
       parameters:
-        - name: stream
+        - name: monitor
           required: true
           in: path
           description: The id of the Monitor to list runs for
@@ -1164,7 +1164,7 @@ paths:
             type: string
       responses:
         "200":
-          description: List of stream runs
+          description: List of monitor runs
           content:
             application/json:
               schema:
@@ -1181,12 +1181,12 @@ paths:
         - Monitors Runs
       security:
         - api_key: []
-  /v0/streams/{stream}/runs/{id}:
+  /v0/monitors/{monitor}/runs/{id}:
     get:
-      description: Gets a specific stream run.
-      operationId: streams-runs-get
+      description: Gets a specific monitor run.
+      operationId: monitors-runs-get
       parameters:
-        - name: stream
+        - name: monitor
           required: true
           in: path
           description: The id of the Monitor to get the run for
@@ -1855,7 +1855,7 @@ components:
           type:
             - string
           enum:
-            - stream_run
+            - monitor_run
           description: The type of object
         status:
           type:
@@ -1869,7 +1869,7 @@ components:
         monitorId:
           type:
             - string
-          description: The stream that the run is associated with
+          description: The monitor that the run is associated with
         type:
           type:
             - string
@@ -1925,7 +1925,7 @@ components:
           type:
             - string
           enum:
-            - stream
+            - monitor
           description: The type of object
         status:
           type:
@@ -1944,7 +1944,7 @@ components:
           properties:
             cron:
               description: >-
-                Cron expression for stream cadence (must be a valid Unix cron
+                Cron expression for monitor cadence (must be a valid Unix cron
                 with 5 fields). The schedule must trigger at most once per day.
               type:
                 - string
@@ -1955,7 +1955,7 @@ components:
                 - string
           required:
             - cron
-          description: How often the stream will run
+          description: How often the monitor will run
         behavior:
           discriminator:
             propertyName: type
@@ -1966,12 +1966,12 @@ components:
             - allOf: &ref_9
                 - $ref: "#/components/schemas/MonitorBehaviorRefresh"
               title: Refresh
-          description: Behavior to perform when stream runs
+          description: Behavior to perform when monitor runs
         lastRun:
           type: object
           $ref: "#/components/schemas/MonitorRun"
           title: MonitorRun
-          description: The last run of the stream
+          description: The last run of the monitor
           nullable: true
         nextRunAt:
           type: string
@@ -1990,12 +1990,12 @@ components:
           type:
             - string
           format: date-time
-          description: When the stream was created
+          description: When the monitor was created
         updatedAt:
           type:
             - string
           format: date-time
-          description: When the stream was last updated
+          description: When the monitor was last updated
       required:
         - id
         - object
@@ -2049,7 +2049,7 @@ components:
               - object
             $ref: "#/components/schemas/WebsetEnrichment"
           description: The Enrichments to apply to the Webset Items.
-        streams:
+        monitors:
           type:
             - array
           items:
@@ -2083,7 +2083,7 @@ components:
         - externalId
         - searches
         - enrichments
-        - streams
+        - monitors
         - createdAt
         - updatedAt
     WebsetItemPersonProperties:
@@ -3286,7 +3286,7 @@ components:
           properties:
             cron:
               description: >-
-                Cron expression for stream cadence (must be a valid Unix cron
+                Cron expression for monitor cadence (must be a valid Unix cron
                 with 5 fields). The schedule must trigger at most once per day.
               type:
                 - string
@@ -3297,7 +3297,7 @@ components:
                 - string
           required:
             - cron
-          description: How often the stream will run
+          description: How often the monitor will run
         behavior:
           discriminator:
             propertyName: type
@@ -3306,7 +3306,7 @@ components:
               title: Search
             - allOf: *ref_9
               title: Refresh
-          description: Behavior to perform when stream runs
+          description: Behavior to perform when monitor runs
         metadata:
           type:
             - object
@@ -3328,7 +3328,7 @@ components:
             type:
               - object
             $ref: "#/components/schemas/Monitor"
-          description: The list of streams
+          description: The list of monitors
         hasMore:
           type:
             - boolean
@@ -3351,7 +3351,7 @@ components:
           enum:
             - enabled
             - disabled
-          description: The status of the stream.
+          description: The status of the monitor.
         metadata:
           type:
             - object
@@ -3369,7 +3369,7 @@ components:
             type:
               - object
             $ref: "#/components/schemas/MonitorRun"
-          description: The list of stream runs
+          description: The list of monitor runs
         hasMore:
           type:
             - boolean
@@ -3388,8 +3388,8 @@ components:
       properties:
         cron:
           description: >-
-            Cron expression for stream cadence (must be a valid Unix cron with 5
-            fields). The schedule must trigger at most once per day.
+            Cron expression for monitor cadence (must be a valid Unix cron with
+            5 fields). The schedule must trigger at most once per day.
           type:
             - string
         timezone:
