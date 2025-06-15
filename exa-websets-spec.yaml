@@ -2,6 +2,14 @@ openapi: 3.1.0
 paths:
   /v0/websets:
     post:
+      description: >-
+        Creates a new Webset with optional search, import, and enrichment
+        configurations. The Webset will automatically begin processing once
+        created.
+
+
+        You can specify an `externalId` to reference the Webset with your own
+        identifiers for easier integration.
       operationId: websets-create
       parameters: []
       requestBody:
@@ -730,10 +738,13 @@ paths:
               - webset.search.canceled
               - webset.search.completed
               - webset.search.updated
-              - webset.export.created
-              - webset.export.completed
+              - import.created
+              - import.completed
+              - import.processing
               - webset.item.created
               - webset.item.enriched
+              - webset.export.created
+              - webset.export.completed
       responses:
         "200":
           description: List of webhook attempts
@@ -794,10 +805,13 @@ paths:
                 - webset.search.canceled
                 - webset.search.completed
                 - webset.search.updated
-                - webset.export.created
-                - webset.export.completed
+                - import.created
+                - import.completed
+                - import.processing
                 - webset.item.created
                 - webset.item.enriched
+                - webset.export.created
+                - webset.export.completed
       responses:
         "200":
           description: List of events
@@ -987,8 +1001,8 @@ paths:
         - **Update existing content**: Run `refresh` operations to update items
         contents and enrichments
 
-        - **Automated scheduling**: Configure `frequency`, `timezone`, and
-        execution times
+        - **Automated scheduling**: Configure `cron` expressions and `timezone`
+        for precise scheduling control
       operationId: monitors-create
       parameters: []
       requestBody:
@@ -1060,12 +1074,12 @@ paths:
       tags: *ref_6
       security:
         - api_key: []
-  /v0/monitors/{monitor}:
+  /v0/monitors/{id}:
     get:
       description: Gets a specific monitor.
       operationId: monitors-get
       parameters:
-        - name: monitor
+        - name: id
           required: true
           in: path
           description: The id of the Monitor
@@ -1093,7 +1107,7 @@ paths:
       description: Updates a monitor configuration.
       operationId: monitors-update
       parameters:
-        - name: monitor
+        - name: id
           required: true
           in: path
           description: The id of the Monitor
@@ -1127,7 +1141,7 @@ paths:
       description: Deletes a monitor.
       operationId: monitors-delete
       parameters:
-        - name: monitor
+        - name: id
           required: true
           in: path
           description: The id of the Monitor
@@ -1215,6 +1229,181 @@ paths:
       tags: *ref_7
       security:
         - api_key: []
+  /v0/imports:
+    post:
+      description: >-
+        Creates a new import to upload your data into Websets. Imports can be
+        used to:
+
+
+        - **Enrich**: Enhance your data with additional information using our
+        AI-powered enrichment engine
+
+        - **Search**: Query your data using Websets' agentic search with natural
+        language filters
+
+        - **Exclude**: Prevent duplicate or already known results from appearing
+        in your searches
+
+
+        Once the import is created, you can upload your data to the returned
+        `uploadUrl` until `uploadValidUntil` (by default 1 hour).
+      operationId: imports-create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateImportParameters"
+      responses:
+        "201":
+          description: Import created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateImportResponse"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Create an Import
+      tags: &ref_8
+        - Imports
+      security:
+        - api_key: []
+    get:
+      description: Lists all imports for the Webset.
+      operationId: imports-list
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: The cursor to paginate through the results
+          schema:
+            minLength: 1
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: The number of results to return
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 25
+            type: number
+      responses:
+        "200":
+          description: List of imports
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListImportsResponse"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: List Imports
+      tags: *ref_8
+      security:
+        - api_key: []
+  /v0/imports/{id}:
+    get:
+      description: Gets a specific import.
+      operationId: imports-get
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id of the Import
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Import details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Import"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Get Import
+      tags: *ref_8
+      security:
+        - api_key: []
+    patch:
+      description: Updates a import configuration.
+      operationId: imports-update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id of the Import
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateImport"
+      responses:
+        "200":
+          description: Import updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Import"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Update Import
+      tags: *ref_8
+      security:
+        - api_key: []
+    delete:
+      description: Deletes a import.
+      operationId: imports-delete
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id of the Import
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Import deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Import"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Delete Import
+      tags: *ref_8
+      security:
+        - api_key: []
 info:
   title: Websets
   description: ""
@@ -1232,7 +1421,7 @@ components:
       name: x-api-key
       description: Your Exa API key
   schemas:
-    WebsetCompanyEntity:
+    CompanyEntity:
       type:
         - object
       properties:
@@ -1242,7 +1431,8 @@ components:
           default: company
       required:
         - type
-    WebsetPersonEntity:
+      title: Company
+    PersonEntity:
       type:
         - object
       properties:
@@ -1252,7 +1442,8 @@ components:
           default: person
       required:
         - type
-    WebsetArticleEntity:
+      title: Person
+    ArticleEntity:
       type:
         - object
       properties:
@@ -1262,7 +1453,8 @@ components:
           default: article
       required:
         - type
-    WebsetResearchPaperEntity:
+      title: Article
+    ResearchPaperEntity:
       type:
         - object
       properties:
@@ -1272,7 +1464,8 @@ components:
           default: research_paper
       required:
         - type
-    WebsetCustomEntity:
+      title: Research Paper
+    CustomEntity:
       type:
         - object
       properties:
@@ -1290,34 +1483,32 @@ components:
             the entity.
 
 
-            The entity represents what type of results the Webset will return.
-            For example, if you want results to be Job Postings, you might use
-            "Job Postings" as the entity description.
+            The entity represents what type of results the  will return. For
+            example, if you want results to be Job Postings, you might use "Job
+            Postings" as the entity description.
       required:
         - type
         - description
-    WebsetEntity:
+      title: Custom
+    Entity:
+      discriminator:
+        propertyName: type
       oneOf:
         - type:
             - object
-          $ref: "#/components/schemas/WebsetCompanyEntity"
-          title: Company
+          $ref: "#/components/schemas/CompanyEntity"
         - type:
             - object
-          $ref: "#/components/schemas/WebsetPersonEntity"
-          title: Person
+          $ref: "#/components/schemas/PersonEntity"
         - type:
             - object
-          $ref: "#/components/schemas/WebsetArticleEntity"
-          title: Article
+          $ref: "#/components/schemas/ArticleEntity"
         - type:
             - object
-          $ref: "#/components/schemas/WebsetResearchPaperEntity"
-          title: Research Paper
+          $ref: "#/components/schemas/ResearchPaperEntity"
         - type:
             - object
-          $ref: "#/components/schemas/WebsetCustomEntity"
-          title: Custom
+          $ref: "#/components/schemas/CustomEntity"
     CreateCriterionParameters:
       type:
         - object
@@ -1372,7 +1563,7 @@ components:
             required:
               - label
           minItems: 1
-          maxItems: 20
+          maxItems: 150
           description: >-
             When the format is options, the different options for the enrichment
             agent to choose from.
@@ -1400,18 +1591,23 @@ components:
               minLength: 1
               maxLength: 5000
               description: >-
-                Your search query.
+                Natural language search query describing what you are looking
+                for.
 
 
-                Use this to describe what you are looking for.
+                Be specific and descriptive about your requirements,
+                characteristics, and any constraints that help narrow down the
+                results.
 
 
-                Any URL provided will be crawled and used as context for the
-                search.
+                Any URLs provided will be crawled and used as additional context
+                for the search.
               examples:
                 - >-
                   Marketing agencies based in the US, that focus on consumer
                   products.
+                - AI startups in Europe that raised Series A funding in 2024
+                - SaaS companies with 50-200 employees in the fintech space
             count:
               default: 10
               type:
@@ -1424,7 +1620,9 @@ components:
                 The actual number of Items found may be less than this number
                 depending on the search complexity.
             entity:
-              $ref: "#/components/schemas/WebsetEntity"
+              discriminator:
+                propertyName: type
+              $ref: "#/components/schemas/Entity"
               description: >-
                 Entity the Webset will return results for.
 
@@ -1449,9 +1647,56 @@ components:
                 It's not required to provide your own criteria, we automatically
                 detect the criteria from all the information provided in the
                 query. Only use this when you need more fine control.
+            exclude:
+              type:
+                - array
+              items:
+                type:
+                  - object
+                properties:
+                  source:
+                    type:
+                      - string
+                    enum:
+                      - import
+                      - webset
+                  id:
+                    type:
+                      - string
+                    minLength: 1
+                    description: The ID of the source to exclude.
+                required:
+                  - source
+                  - id
+              description: >-
+                Sources (existing imports or websets) to exclude from search
+                results. Any results found within these sources will be omitted
+                to prevent finding them during search.
           required:
             - query
           description: Create initial search for the Webset.
+        import:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              source:
+                type:
+                  - string
+                enum:
+                  - import
+                  - webset
+              id:
+                type:
+                  - string
+                minLength: 1
+                description: The ID of the source to search.
+            required:
+              - source
+              - id
+          description: Import data from existing Websets and Imports into this Webset.
         enrichments:
           type:
             - array
@@ -1460,10 +1705,17 @@ components:
               - object
             $ref: "#/components/schemas/CreateEnrichmentParameters"
             title: CreateEnrichmentParameters
-          description: Add Enrichments for the Webset.
+          description: >-
+            Add enrichments to extract additional data from found items.
+
+
+            Enrichments automatically search for and extract specific
+            information (like contact details, funding data, employee counts,
+            etc.) from each item added to your Webset.
         externalId:
           type:
             - string
+          maxLength: 300
           description: >-
             The external identifier for the webset.
 
@@ -1478,8 +1730,6 @@ components:
             type:
               - string
             maxLength: 1000
-      required:
-        - search
       examples:
         - search:
             query: >-
@@ -1515,7 +1765,9 @@ components:
           maxLength: 5000
           description: The query used to create the search.
         entity:
-          $ref: "#/components/schemas/WebsetEntity"
+          discriminator:
+            propertyName: type
+          $ref: "#/components/schemas/Entity"
           description: >-
             The entity the search will return results for.
 
@@ -1574,6 +1826,28 @@ components:
             - `append`: the search will add the new Items found to the existing
             Webset. Any Items that don't match the new criteria will be
             discarded.
+        exclude:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              source:
+                type:
+                  - string
+                enum:
+                  - import
+                  - webset
+              id:
+                type:
+                  - string
+            required:
+              - source
+              - id
+          description: >-
+            Sources (existing imports or websets) used to omit certain results
+            to be found during the search.
         progress:
           type:
             - object
@@ -1629,6 +1903,7 @@ components:
         - entity
         - criteria
         - count
+        - exclude
         - progress
         - canceledAt
         - canceledReason
@@ -1736,113 +2011,6 @@ components:
         - instructions
         - createdAt
         - updatedAt
-    MonitorBehaviorSearch:
-      type:
-        - object
-      properties:
-        type:
-          type: string
-          const: search
-          default: search
-        config:
-          type:
-            - object
-          properties:
-            query:
-              type:
-                - string
-              minLength: 2
-              maxLength: 10000
-            criteria:
-              type:
-                - array
-              items:
-                type:
-                  - object
-                properties:
-                  description:
-                    type:
-                      - string
-                    minLength: 2
-                    maxLength: 1000
-                required:
-                  - description
-              maxItems: 5
-            entity:
-              $ref: "#/components/schemas/WebsetEntity"
-              title: WebsetEntity
-            count:
-              type:
-                - number
-              exclusiveMinimum: 0
-              description: The maximum number of results to find
-            behavior:
-              default: append
-              type:
-                - string
-              $ref: "#/components/schemas/WebsetSearchBehavior"
-              description: The behaviour of the Search when it is added to a Webset.
-          required:
-            - query
-            - criteria
-            - entity
-            - count
-      required:
-        - type
-        - config
-    MonitorRefreshBehaviorEnrichmentsConfig:
-      type:
-        - object
-      properties:
-        target:
-          type: string
-          const: enrichments
-          default: enrichments
-        enrichments:
-          type:
-            - object
-          properties:
-            ids:
-              type:
-                - array
-              items:
-                type:
-                  - string
-          description: Only refresh specific enrichments
-      required:
-        - target
-    MonitorRefreshBehaviorContentsConfig:
-      type:
-        - object
-      properties:
-        target:
-          type: string
-          const: contents
-          default: contents
-      required:
-        - target
-    MonitorBehaviorRefresh:
-      type:
-        - object
-      properties:
-        type:
-          type: string
-          const: refresh
-          default: refresh
-        config:
-          discriminator:
-            propertyName: target
-          oneOf:
-            - allOf:
-                - $ref: "#/components/schemas/MonitorRefreshBehaviorEnrichmentsConfig"
-              title: Enrichments
-            - allOf:
-                - $ref: "#/components/schemas/MonitorRefreshBehaviorContentsConfig"
-              title: Contents
-          description: Specify the target of the refresh
-      required:
-        - type
-        - config
     MonitorRun:
       type:
         - object
@@ -1957,15 +2125,75 @@ components:
             - cron
           description: How often the monitor will run
         behavior:
-          discriminator:
-            propertyName: type
-          oneOf:
-            - allOf: &ref_8
-                - $ref: "#/components/schemas/MonitorBehaviorSearch"
-              title: Search
-            - allOf: &ref_9
-                - $ref: "#/components/schemas/MonitorBehaviorRefresh"
-              title: Refresh
+          type:
+            - object
+          properties:
+            type:
+              type: string
+              const: search
+              default: search
+            config:
+              type:
+                - object
+              properties:
+                query:
+                  type:
+                    - string
+                  minLength: 2
+                  maxLength: 10000
+                  description: >-
+                    The query to search for. By default, the query from the last
+                    search is used.
+                criteria:
+                  type:
+                    - array
+                  items:
+                    type:
+                      - object
+                    properties:
+                      description:
+                        type:
+                          - string
+                        minLength: 2
+                        maxLength: 1000
+                    required:
+                      - description
+                  maxItems: 5
+                  description: >-
+                    The criteria to search for. By default, the criteria from
+                    the last search is used.
+                entity:
+                  discriminator:
+                    propertyName: type
+                  $ref: "#/components/schemas/Entity"
+                  title: Entity
+                  description: >-
+                    The entity to search for. By default, the entity from the
+                    last search/import is used.
+                count:
+                  type:
+                    - number
+                  exclusiveMinimum: 0
+                  description: The maximum number of results to find
+                behavior:
+                  default: append
+                  type:
+                    - string
+                  enum:
+                    - override
+                    - append
+                  description: The behaviour of the Search when it is added to a Webset.
+              required:
+                - count
+              description: >-
+                Specify the search parameters for the Monitor.
+
+
+                By default, the search parameters (query, entity and criteria)
+                from the last search are used when no parameters are provided.
+          required:
+            - type
+            - config
           description: Behavior to perform when monitor runs
         lastRun:
           type: object
@@ -1976,7 +2204,7 @@ components:
         nextRunAt:
           type: string
           format: date-time
-          description: When the next run will occur
+          description: Date and time when the next run will occur in
           nullable: true
         metadata:
           description: Set of key-value pairs you want to associate with this object.
@@ -2041,6 +2269,809 @@ components:
               - object
             $ref: "#/components/schemas/WebsetSearch"
           description: The searches that have been performed on the webset.
+        imports:
+          type:
+            - array
+          items:
+            oneOf:
+              - type:
+                  - object
+                properties:
+                  id:
+                    type:
+                      - string
+                  teamId:
+                    type:
+                      - string
+                  title:
+                    type:
+                      - string
+                  status:
+                    type:
+                      - string
+                    enum:
+                      - created
+                  uri:
+                    type:
+                      - string
+                    description: The URI of the import when format is CSV
+                  format:
+                    type:
+                      - string
+                    enum:
+                      - csv
+                      - webset
+                  metadata:
+                    type:
+                      - object
+                    additionalProperties:
+                      type:
+                        - string
+                  websetId:
+                    type:
+                      - string
+                    description: The ID of the webset when format is WEBSET
+                  createdAt:
+                    type:
+                      - string
+                    format: date-time
+                  updatedAt:
+                    type:
+                      - string
+                    format: date-time
+                  count:
+                    type:
+                      - number
+                  entity:
+                    discriminator:
+                      propertyName: type
+                    oneOf:
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: company
+                            default: company
+                          description:
+                            default: A homepage of a company
+                            type: string
+                            const: A homepage of a company
+                        required:
+                          - type
+                        title: CompanyEntity
+                        description: A company
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: person
+                            default: person
+                          description:
+                            default: A LinkedIn profile
+                            type: string
+                            const: A LinkedIn profile
+                        required:
+                          - type
+                        title: PersonEntity
+                        description: A person
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: article
+                            default: article
+                          description:
+                            default: A blog post or article
+                            type: string
+                            const: A blog post or article
+                        required:
+                          - type
+                        title: ArticleEntity
+                        description: An article
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: research_paper
+                            default: research_paper
+                          description:
+                            default: A research paper
+                            type: string
+                            const: A research paper
+                        required:
+                          - type
+                        title: ResearchPaperEntity
+                        description: A research paper
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: custom
+                            default: custom
+                          description:
+                            type:
+                              - string
+                            minLength: 2
+                            maxLength: 200
+                            description: >-
+                              When you decide to use a custom entity, this is
+                              the description of the entity.
+
+
+                              The entity represents what type of results the 
+                              will return. For example, if you want results to
+                              be Job Postings, you might use "Job Postings" as
+                              the entity description.
+                        required:
+                          - type
+                          - description
+                        title: CustomEntity
+                        description: >-
+                          When you decide to use a custom entity, this is the
+                          description of the entity.
+
+
+                          The entity represents what type of results the  will
+                          return. For example, if you want results to be Job
+                          Postings, you might use "Job Postings" as the entity
+                          description.
+                required:
+                  - id
+                  - teamId
+                  - title
+                  - status
+                  - format
+                  - createdAt
+                  - updatedAt
+                  - count
+              - type:
+                  - object
+                properties:
+                  id:
+                    type:
+                      - string
+                  teamId:
+                    type:
+                      - string
+                  title:
+                    type:
+                      - string
+                  status:
+                    type:
+                      - string
+                    enum:
+                      - scheduled
+                  uri:
+                    type:
+                      - string
+                    description: The URI of the import when format is CSV
+                  format:
+                    type:
+                      - string
+                    enum:
+                      - csv
+                      - webset
+                  metadata:
+                    type:
+                      - object
+                    additionalProperties:
+                      type:
+                        - string
+                  websetId:
+                    type:
+                      - string
+                    description: The ID of the webset when format is WEBSET
+                  createdAt:
+                    type:
+                      - string
+                    format: date-time
+                  updatedAt:
+                    type:
+                      - string
+                    format: date-time
+                  count:
+                    type:
+                      - number
+                  entity:
+                    discriminator:
+                      propertyName: type
+                    oneOf:
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: company
+                            default: company
+                          description:
+                            default: A homepage of a company
+                            type: string
+                            const: A homepage of a company
+                        required:
+                          - type
+                        title: CompanyEntity
+                        description: A company
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: person
+                            default: person
+                          description:
+                            default: A LinkedIn profile
+                            type: string
+                            const: A LinkedIn profile
+                        required:
+                          - type
+                        title: PersonEntity
+                        description: A person
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: article
+                            default: article
+                          description:
+                            default: A blog post or article
+                            type: string
+                            const: A blog post or article
+                        required:
+                          - type
+                        title: ArticleEntity
+                        description: An article
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: research_paper
+                            default: research_paper
+                          description:
+                            default: A research paper
+                            type: string
+                            const: A research paper
+                        required:
+                          - type
+                        title: ResearchPaperEntity
+                        description: A research paper
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: custom
+                            default: custom
+                          description:
+                            type:
+                              - string
+                            minLength: 2
+                            maxLength: 200
+                            description: >-
+                              When you decide to use a custom entity, this is
+                              the description of the entity.
+
+
+                              The entity represents what type of results the 
+                              will return. For example, if you want results to
+                              be Job Postings, you might use "Job Postings" as
+                              the entity description.
+                        required:
+                          - type
+                          - description
+                        title: CustomEntity
+                        description: >-
+                          When you decide to use a custom entity, this is the
+                          description of the entity.
+
+
+                          The entity represents what type of results the  will
+                          return. For example, if you want results to be Job
+                          Postings, you might use "Job Postings" as the entity
+                          description.
+                required:
+                  - id
+                  - teamId
+                  - title
+                  - status
+                  - format
+                  - createdAt
+                  - updatedAt
+                  - count
+                  - entity
+              - type:
+                  - object
+                properties:
+                  id:
+                    type:
+                      - string
+                  teamId:
+                    type:
+                      - string
+                  title:
+                    type:
+                      - string
+                  status:
+                    type:
+                      - string
+                    enum:
+                      - completed
+                  uri:
+                    type:
+                      - string
+                    description: The URI of the import when format is CSV
+                  format:
+                    type:
+                      - string
+                    enum:
+                      - csv
+                      - webset
+                  metadata:
+                    type:
+                      - object
+                    additionalProperties:
+                      type:
+                        - string
+                  websetId:
+                    type:
+                      - string
+                    description: The ID of the webset when format is WEBSET
+                  createdAt:
+                    type:
+                      - string
+                    format: date-time
+                  updatedAt:
+                    type:
+                      - string
+                    format: date-time
+                  count:
+                    type:
+                      - number
+                  entity:
+                    discriminator:
+                      propertyName: type
+                    oneOf:
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: company
+                            default: company
+                          description:
+                            default: A homepage of a company
+                            type: string
+                            const: A homepage of a company
+                        required:
+                          - type
+                        title: CompanyEntity
+                        description: A company
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: person
+                            default: person
+                          description:
+                            default: A LinkedIn profile
+                            type: string
+                            const: A LinkedIn profile
+                        required:
+                          - type
+                        title: PersonEntity
+                        description: A person
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: article
+                            default: article
+                          description:
+                            default: A blog post or article
+                            type: string
+                            const: A blog post or article
+                        required:
+                          - type
+                        title: ArticleEntity
+                        description: An article
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: research_paper
+                            default: research_paper
+                          description:
+                            default: A research paper
+                            type: string
+                            const: A research paper
+                        required:
+                          - type
+                        title: ResearchPaperEntity
+                        description: A research paper
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: custom
+                            default: custom
+                          description:
+                            type:
+                              - string
+                            minLength: 2
+                            maxLength: 200
+                            description: >-
+                              When you decide to use a custom entity, this is
+                              the description of the entity.
+
+
+                              The entity represents what type of results the 
+                              will return. For example, if you want results to
+                              be Job Postings, you might use "Job Postings" as
+                              the entity description.
+                        required:
+                          - type
+                          - description
+                        title: CustomEntity
+                        description: >-
+                          When you decide to use a custom entity, this is the
+                          description of the entity.
+
+
+                          The entity represents what type of results the  will
+                          return. For example, if you want results to be Job
+                          Postings, you might use "Job Postings" as the entity
+                          description.
+                required:
+                  - id
+                  - teamId
+                  - title
+                  - status
+                  - format
+                  - createdAt
+                  - updatedAt
+                  - count
+                  - entity
+              - type:
+                  - object
+                properties:
+                  id:
+                    type:
+                      - string
+                  teamId:
+                    type:
+                      - string
+                  title:
+                    type:
+                      - string
+                  status:
+                    type:
+                      - string
+                    enum:
+                      - failed
+                  uri:
+                    type:
+                      - string
+                    description: The URI of the import when format is CSV
+                  format:
+                    type:
+                      - string
+                    enum:
+                      - csv
+                      - webset
+                  metadata:
+                    type:
+                      - object
+                    additionalProperties:
+                      type:
+                        - string
+                  websetId:
+                    type:
+                      - string
+                    description: The ID of the webset when format is WEBSET
+                  createdAt:
+                    type:
+                      - string
+                    format: date-time
+                  updatedAt:
+                    type:
+                      - string
+                    format: date-time
+                  count:
+                    type:
+                      - number
+                  entity:
+                    discriminator:
+                      propertyName: type
+                    oneOf:
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: company
+                            default: company
+                          description:
+                            default: A homepage of a company
+                            type: string
+                            const: A homepage of a company
+                        required:
+                          - type
+                        title: CompanyEntity
+                        description: A company
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: person
+                            default: person
+                          description:
+                            default: A LinkedIn profile
+                            type: string
+                            const: A LinkedIn profile
+                        required:
+                          - type
+                        title: PersonEntity
+                        description: A person
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: article
+                            default: article
+                          description:
+                            default: A blog post or article
+                            type: string
+                            const: A blog post or article
+                        required:
+                          - type
+                        title: ArticleEntity
+                        description: An article
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: research_paper
+                            default: research_paper
+                          description:
+                            default: A research paper
+                            type: string
+                            const: A research paper
+                        required:
+                          - type
+                        title: ResearchPaperEntity
+                        description: A research paper
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: custom
+                            default: custom
+                          description:
+                            type:
+                              - string
+                            minLength: 2
+                            maxLength: 200
+                            description: >-
+                              When you decide to use a custom entity, this is
+                              the description of the entity.
+
+
+                              The entity represents what type of results the 
+                              will return. For example, if you want results to
+                              be Job Postings, you might use "Job Postings" as
+                              the entity description.
+                        required:
+                          - type
+                          - description
+                        title: CustomEntity
+                        description: >-
+                          When you decide to use a custom entity, this is the
+                          description of the entity.
+
+
+                          The entity represents what type of results the  will
+                          return. For example, if you want results to be Job
+                          Postings, you might use "Job Postings" as the entity
+                          description.
+                  failedReason:
+                    type:
+                      - string
+                    enum:
+                      - file_not_uploaded
+                      - invalid_format
+                      - invalid_file_content
+                      - missing_identifier
+                  failedAt:
+                    type:
+                      - string
+                    format: date-time
+                  failedMessage:
+                    type:
+                      - string
+                required:
+                  - id
+                  - teamId
+                  - title
+                  - status
+                  - format
+                  - createdAt
+                  - updatedAt
+                  - count
+                  - entity
+                  - failedReason
+                  - failedAt
+                  - failedMessage
+              - type:
+                  - object
+                properties:
+                  id:
+                    type:
+                      - string
+                  teamId:
+                    type:
+                      - string
+                  title:
+                    type:
+                      - string
+                  status:
+                    type:
+                      - string
+                    enum:
+                      - processing
+                  uri:
+                    type:
+                      - string
+                    description: The URI of the import when format is CSV
+                  format:
+                    type:
+                      - string
+                    enum:
+                      - csv
+                      - webset
+                  metadata:
+                    type:
+                      - object
+                    additionalProperties:
+                      type:
+                        - string
+                  websetId:
+                    type:
+                      - string
+                    description: The ID of the webset when format is WEBSET
+                  createdAt:
+                    type:
+                      - string
+                    format: date-time
+                  updatedAt:
+                    type:
+                      - string
+                    format: date-time
+                  count:
+                    type:
+                      - number
+                  entity:
+                    discriminator:
+                      propertyName: type
+                    oneOf:
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: company
+                            default: company
+                          description:
+                            default: A homepage of a company
+                            type: string
+                            const: A homepage of a company
+                        required:
+                          - type
+                        title: CompanyEntity
+                        description: A company
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: person
+                            default: person
+                          description:
+                            default: A LinkedIn profile
+                            type: string
+                            const: A LinkedIn profile
+                        required:
+                          - type
+                        title: PersonEntity
+                        description: A person
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: article
+                            default: article
+                          description:
+                            default: A blog post or article
+                            type: string
+                            const: A blog post or article
+                        required:
+                          - type
+                        title: ArticleEntity
+                        description: An article
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: research_paper
+                            default: research_paper
+                          description:
+                            default: A research paper
+                            type: string
+                            const: A research paper
+                        required:
+                          - type
+                        title: ResearchPaperEntity
+                        description: A research paper
+                      - type:
+                          - object
+                        properties:
+                          type:
+                            type: string
+                            const: custom
+                            default: custom
+                          description:
+                            type:
+                              - string
+                            minLength: 2
+                            maxLength: 200
+                            description: >-
+                              When you decide to use a custom entity, this is
+                              the description of the entity.
+
+
+                              The entity represents what type of results the 
+                              will return. For example, if you want results to
+                              be Job Postings, you might use "Job Postings" as
+                              the entity description.
+                        required:
+                          - type
+                          - description
+                        title: CustomEntity
+                        description: >-
+                          When you decide to use a custom entity, this is the
+                          description of the entity.
+
+
+                          The entity represents what type of results the  will
+                          return. For example, if you want results to be Job
+                          Postings, you might use "Job Postings" as the entity
+                          description.
+                required:
+                  - id
+                  - teamId
+                  - title
+                  - status
+                  - format
+                  - createdAt
+                  - updatedAt
+                  - count
+                  - entity
+          description: Imports that have been performed on the webset.
         enrichments:
           type:
             - array
@@ -2057,6 +3088,11 @@ components:
               - object
             $ref: "#/components/schemas/Monitor"
           description: The Monitors for the Webset.
+        streams:
+          type:
+            - array
+          items: {}
+          description: The Streams for the Webset.
         metadata:
           default: {}
           description: Set of key-value pairs you want to associate with this object.
@@ -2084,6 +3120,7 @@ components:
         - searches
         - enrichments
         - monitors
+        - streams
         - createdAt
         - updatedAt
     WebsetItemPersonProperties:
@@ -2224,6 +3261,10 @@ components:
           type:
             - object
           properties:
+            title:
+              type: string
+              description: The title of the article
+              nullable: true
             author:
               type: string
               description: The author(s) of the article
@@ -2233,6 +3274,7 @@ components:
               description: The date and time the article was published
               nullable: true
           required:
+            - title
             - author
             - publishedAt
           title: WebsetItemArticlePropertiesFields
@@ -2267,6 +3309,10 @@ components:
           type:
             - object
           properties:
+            title:
+              type: string
+              description: The title of the research paper
+              nullable: true
             author:
               type: string
               description: The author(s) of the research paper
@@ -2276,6 +3322,7 @@ components:
               description: The date and time the research paper was published
               nullable: true
           required:
+            - title
             - author
             - publishedAt
           title: WebsetItemResearchPaperPropertiesFields
@@ -2310,6 +3357,10 @@ components:
           type:
             - object
           properties:
+            title:
+              type: string
+              description: The title of the website
+              nullable: true
             author:
               type: string
               description: The author(s) of the website
@@ -2319,6 +3370,7 @@ components:
               description: The date and time the website was published
               nullable: true
           required:
+            - title
             - author
             - publishedAt
           title: WebsetItemCustomPropertiesFields
@@ -2612,7 +3664,7 @@ components:
               - string
             $ref: "#/components/schemas/EventType"
           minItems: 1
-          maxItems: 12
+          maxItems: 15
           description: The events to trigger the webhook
         url:
           type:
@@ -2710,7 +3762,7 @@ components:
               - string
             $ref: "#/components/schemas/EventType"
           minItems: 1
-          maxItems: 12
+          maxItems: 15
           description: The events to trigger the webhook
         url:
           type:
@@ -2777,10 +3829,13 @@ components:
             - webset.search.canceled
             - webset.search.completed
             - webset.search.updated
-            - webset.export.created
-            - webset.export.completed
+            - import.created
+            - import.completed
+            - import.processing
             - webset.item.created
             - webset.item.enriched
+            - webset.export.created
+            - webset.export.completed
           description: The type of event
         webhookId:
           type:
@@ -3213,22 +4268,34 @@ components:
             - string
           minLength: 1
           maxLength: 5000
-          description: |-
-            Query describing what you are looking for.
+          description: >-
+            Natural language search query describing what you are looking for.
 
-            Any URL provided will be crawled and used as context for the search.
+
+            Be specific and descriptive about your requirements,
+            characteristics, and any constraints that help narrow down the
+            results.
+
+
+            Any URLs provided will be crawled and used as additional context for
+            the search.
           examples:
             - >-
               Marketing agencies based in the US, that focus on consumer
               products. Get brands worked with and city
+            - AI startups in Europe that raised Series A funding in 2024
+            - SaaS companies with 50-200 employees in the fintech space
         entity:
-          $ref: "#/components/schemas/WebsetEntity"
+          discriminator:
+            propertyName: type
+          $ref: "#/components/schemas/Entity"
           description: >-
-            Entity the Webset will return results for.
+            Entity the search will return results for.
 
 
             It is not required to provide it, we automatically detect the entity
-            from all the information provided in the query.
+            from all the information provided in the query. Only use this when
+            you need more fine control.
         criteria:
           type:
             - array
@@ -3245,22 +4312,46 @@ components:
 
             It's not required to provide your own criteria, we automatically
             detect the criteria from all the information provided in the query.
+            Only use this when you need more fine control.
+        exclude:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              source:
+                type:
+                  - string
+                enum:
+                  - import
+                  - webset
+              id:
+                type:
+                  - string
+                minLength: 1
+                description: The ID of the source to exclude.
+            required:
+              - source
+              - id
+          description: >-
+            Sources (existing imports or websets) to exclude from search
+            results. Any results found within these sources will be omitted to
+            prevent finding them during search.
         behavior:
           default: override
           type:
             - string
           $ref: "#/components/schemas/WebsetSearchBehavior"
           description: >-
-            The behavior of the Search when it is added to a Webset.
+            How this search interacts with existing items in the Webset:
 
 
-            - `override`: the search will replace the existing Items found in
-            the Webset and evaluate them against the new criteria. Any Items
-            that don't match the new criteria will be discarded.
+            - **override**: Replace existing items and evaluate all items
+            against new criteria
 
-            - `append`: the search will add the new Items found to the existing
-            Webset. Any Items that don't match the new criteria will be
-            discarded.
+            - **append**: Add new items to existing ones, keeping items that
+            match the new criteria
         metadata:
           description: Set of key-value pairs you want to associate with this object.
           type:
@@ -3299,13 +4390,75 @@ components:
             - cron
           description: How often the monitor will run
         behavior:
-          discriminator:
-            propertyName: type
-          oneOf:
-            - allOf: *ref_8
-              title: Search
-            - allOf: *ref_9
-              title: Refresh
+          type:
+            - object
+          properties:
+            type:
+              type: string
+              const: search
+              default: search
+            config:
+              type:
+                - object
+              properties:
+                query:
+                  type:
+                    - string
+                  minLength: 2
+                  maxLength: 10000
+                  description: >-
+                    The query to search for. By default, the query from the last
+                    search is used.
+                criteria:
+                  type:
+                    - array
+                  items:
+                    type:
+                      - object
+                    properties:
+                      description:
+                        type:
+                          - string
+                        minLength: 2
+                        maxLength: 1000
+                    required:
+                      - description
+                  maxItems: 5
+                  description: >-
+                    The criteria to search for. By default, the criteria from
+                    the last search is used.
+                entity:
+                  discriminator:
+                    propertyName: type
+                  $ref: "#/components/schemas/Entity"
+                  title: Entity
+                  description: >-
+                    The entity to search for. By default, the entity from the
+                    last search/import is used.
+                count:
+                  type:
+                    - number
+                  exclusiveMinimum: 0
+                  description: The maximum number of results to find
+                behavior:
+                  default: append
+                  type:
+                    - string
+                  enum:
+                    - override
+                    - append
+                  description: The behaviour of the Search when it is added to a Webset.
+              required:
+                - count
+              description: >-
+                Specify the search parameters for the Monitor.
+
+
+                By default, the search parameters (query, entity and criteria)
+                from the last search are used when no parameters are provided.
+          required:
+            - type
+            - config
           description: Behavior to perform when monitor runs
         metadata:
           type:
@@ -3341,6 +4494,93 @@ components:
         - data
         - hasMore
         - nextCursor
+    MonitorCadence:
+      type:
+        - object
+      properties:
+        cron:
+          description: >-
+            Cron expression for monitor cadence (must be a valid Unix cron with
+            5 fields). The schedule must trigger at most once per day.
+          type:
+            - string
+        timezone:
+          description: IANA timezone (e.g., "America/New_York")
+          default: Etc/UTC
+          type:
+            - string
+      required:
+        - cron
+    MonitorBehavior:
+      type:
+        - object
+      properties:
+        type:
+          type: string
+          const: search
+          default: search
+        config:
+          type:
+            - object
+          properties:
+            query:
+              type:
+                - string
+              minLength: 2
+              maxLength: 10000
+              description: >-
+                The query to search for. By default, the query from the last
+                search is used.
+            criteria:
+              type:
+                - array
+              items:
+                type:
+                  - object
+                properties:
+                  description:
+                    type:
+                      - string
+                    minLength: 2
+                    maxLength: 1000
+                required:
+                  - description
+              maxItems: 5
+              description: >-
+                The criteria to search for. By default, the criteria from the
+                last search is used.
+            entity:
+              discriminator:
+                propertyName: type
+              $ref: "#/components/schemas/Entity"
+              title: Entity
+              description: >-
+                The entity to search for. By default, the entity from the last
+                search/import is used.
+            count:
+              type:
+                - number
+              exclusiveMinimum: 0
+              description: The maximum number of results to find
+            behavior:
+              default: append
+              type:
+                - string
+              enum:
+                - override
+                - append
+              description: The behaviour of the Search when it is added to a Webset.
+          required:
+            - count
+          description: >-
+            Specify the search parameters for the Monitor.
+
+
+            By default, the search parameters (query, entity and criteria) from
+            the last search are used when no parameters are provided.
+      required:
+        - type
+        - config
     UpdateMonitor:
       type:
         - object
@@ -3358,6 +4598,14 @@ components:
           additionalProperties:
             type:
               - string
+        cadence:
+          type:
+            - object
+          $ref: "#/components/schemas/MonitorCadence"
+        behavior:
+          type:
+            - object
+          $ref: "#/components/schemas/MonitorBehavior"
     ListMonitorRunsResponse:
       type:
         - object
@@ -3382,23 +4630,321 @@ components:
         - data
         - hasMore
         - nextCursor
-    MonitorCadence:
+    CreateImportParameters:
+      discriminator:
+        propertyName: format
+      oneOf:
+        - type:
+            - object
+          properties:
+            size:
+              type:
+                - number
+              maximum: 50000000
+              description: The size of the file in megabytes. Maximum size is 50 MB.
+            count:
+              type:
+                - number
+              description: The number of records to import
+            title:
+              type:
+                - string
+              description: The title of the import
+            format:
+              type:
+                - string
+              enum:
+                - csv
+              description: >-
+                When the import is in CSV format, we expect a column containing
+                the key identifier for the entity - for now URL. If not
+                provided, import will fail to be processed.
+            metadata:
+              description: Set of key-value pairs you want to associate with this object.
+              type:
+                - object
+              additionalProperties:
+                type:
+                  - string
+                maxLength: 1000
+            entity:
+              discriminator:
+                propertyName: type
+              oneOf:
+                - type:
+                    - object
+                  $ref: "#/components/schemas/CompanyEntity"
+                - type:
+                    - object
+                  $ref: "#/components/schemas/PersonEntity"
+                - type:
+                    - object
+                  $ref: "#/components/schemas/ArticleEntity"
+                - type:
+                    - object
+                  $ref: "#/components/schemas/ResearchPaperEntity"
+                - type:
+                    - object
+                  $ref: "#/components/schemas/CustomEntity"
+              description: >-
+                What type of entity the import contains (e.g. People, Companies,
+                etc.), and thus should be attempted to be resolved as.
+            csv:
+              type:
+                - object
+              properties:
+                identifier:
+                  type:
+                    - integer
+                  minimum: 0
+                  description: >-
+                    Column containing the key identifier for the entity (e.g.
+                    URL, Name, etc.). If not provided, we will try to infer it
+                    from the file.
+              description: When format is `csv`, these are the specific import parameters.
+          required:
+            - size
+            - count
+            - format
+            - entity
+    CreateImportResponse:
       type:
         - object
       properties:
-        cron:
+        id:
+          type:
+            - string
+          description: The unique identifier for the Import
+        object:
+          type:
+            - string
+          enum:
+            - import
+          description: The type of object
+        status:
+          type:
+            - string
+          enum:
+            - pending
+            - processing
+            - completed
+            - failed
+          description: The status of the Import
+        format:
+          type:
+            - string
+          enum:
+            - csv
+            - webset
+          description: The format of the import.
+        entity:
+          discriminator:
+            propertyName: type
+          $ref: "#/components/schemas/Entity"
+          description: The type of entity the import contains.
+          nullable: true
+        title:
+          type:
+            - string
+          description: The title of the import
+        count:
+          type:
+            - number
+          description: The number of entities in the import
+        metadata:
+          description: Set of key-value pairs you want to associate with this object.
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+        failedReason:
+          type: string
+          enum:
+            - invalid_format
+            - invalid_file_content
+            - missing_identifier
+          description: The reason the import failed
+          nullable: true
+        failedAt:
+          type: string
+          format: date-time
+          description: When the import failed
+          nullable: true
+        failedMessage:
+          type: string
+          description: A human readable message of the import failure
+          nullable: true
+        createdAt:
+          type:
+            - string
+          format: date-time
+          description: When the import was created
+        updatedAt:
+          type:
+            - string
+          format: date-time
+          description: When the import was last updated
+        uploadUrl:
+          type:
+            - string
+          description: The URL to upload the file to
+        uploadValidUntil:
+          type:
+            - string
           description: >-
-            Cron expression for monitor cadence (must be a valid Unix cron with
-            5 fields). The schedule must trigger at most once per day.
-          type:
-            - string
-        timezone:
-          description: IANA timezone (e.g., "America/New_York")
-          default: Etc/UTC
-          type:
-            - string
+            The date and time until the upload URL is valid. The upload URL will
+            be valid for 1 hour.
       required:
-        - cron
+        - id
+        - object
+        - status
+        - format
+        - entity
+        - title
+        - count
+        - metadata
+        - failedReason
+        - failedAt
+        - failedMessage
+        - createdAt
+        - updatedAt
+        - uploadUrl
+        - uploadValidUntil
+      description: >-
+        The response to a successful import. Includes the upload URL and the
+        upload valid until date.
+    Import:
+      type:
+        - object
+      properties:
+        id:
+          type:
+            - string
+          description: The unique identifier for the Import
+        object:
+          type:
+            - string
+          enum:
+            - import
+          description: The type of object
+        status:
+          type:
+            - string
+          enum:
+            - pending
+            - processing
+            - completed
+            - failed
+          description: The status of the Import
+        format:
+          type:
+            - string
+          enum:
+            - csv
+            - webset
+          description: The format of the import.
+        entity:
+          discriminator:
+            propertyName: type
+          $ref: "#/components/schemas/Entity"
+          description: The type of entity the import contains.
+          nullable: true
+        title:
+          type:
+            - string
+          description: The title of the import
+        count:
+          type:
+            - number
+          description: The number of entities in the import
+        metadata:
+          description: Set of key-value pairs you want to associate with this object.
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+        failedReason:
+          type: string
+          enum:
+            - invalid_format
+            - invalid_file_content
+            - missing_identifier
+          description: The reason the import failed
+          nullable: true
+        failedAt:
+          type: string
+          format: date-time
+          description: When the import failed
+          nullable: true
+        failedMessage:
+          type: string
+          description: A human readable message of the import failure
+          nullable: true
+        createdAt:
+          type:
+            - string
+          format: date-time
+          description: When the import was created
+        updatedAt:
+          type:
+            - string
+          format: date-time
+          description: When the import was last updated
+      required:
+        - id
+        - object
+        - status
+        - format
+        - entity
+        - title
+        - count
+        - metadata
+        - failedReason
+        - failedAt
+        - failedMessage
+        - createdAt
+        - updatedAt
+    ListImportsResponse:
+      type:
+        - object
+      properties:
+        data:
+          type:
+            - array
+          items:
+            type:
+              - object
+            $ref: "#/components/schemas/Import"
+          description: The list of imports
+        hasMore:
+          type:
+            - boolean
+          description: Whether there are more results to paginate through
+        nextCursor:
+          type: string
+          description: The cursor to paginate through the next set of results
+          nullable: true
+      required:
+        - data
+        - hasMore
+        - nextCursor
+    UpdateImport:
+      type:
+        - object
+      properties:
+        metadata:
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+        title:
+          type:
+            - string
     WebsetEnrichmentFormat:
       type: string
       enum:
@@ -3419,10 +4965,13 @@ components:
         - webset.search.canceled
         - webset.search.completed
         - webset.search.updated
-        - webset.export.created
-        - webset.export.completed
+        - import.created
+        - import.completed
+        - import.processing
         - webset.item.created
         - webset.item.enriched
+        - webset.export.created
+        - webset.export.completed
     WebsetSearchBehavior:
       type: string
       enum:
