@@ -1478,21 +1478,11 @@ components:
             - string
           minLength: 2
           maxLength: 200
-          description: >-
-            When you decide to use a custom entity, this is the description of
-            the entity.
-
-
-            The entity represents what type of results the  will return. For
-            example, if you want results to be Job Postings, you might use "Job
-            Postings" as the entity description.
       required:
         - type
         - description
       title: Custom
     Entity:
-      discriminator:
-        propertyName: type
       oneOf:
         - type:
             - object
@@ -1620,8 +1610,6 @@ components:
                 The actual number of Items found may be less than this number
                 depending on the search complexity.
             entity:
-              discriminator:
-                propertyName: type
               $ref: "#/components/schemas/Entity"
               description: >-
                 Entity the Webset will return results for.
@@ -1765,8 +1753,6 @@ components:
           maxLength: 5000
           description: The query used to create the search.
         entity:
-          discriminator:
-            propertyName: type
           $ref: "#/components/schemas/Entity"
           description: >-
             The entity the search will return results for.
@@ -2163,8 +2149,6 @@ components:
                     The criteria to search for. By default, the criteria from
                     the last search is used.
                 entity:
-                  discriminator:
-                    propertyName: type
                   $ref: "#/components/schemas/Entity"
                   title: Entity
                   description: >-
@@ -2340,7 +2324,6 @@ components:
                         required:
                           - type
                         title: CompanyEntity
-                        description: A company
                       - type:
                           - object
                         properties:
@@ -2355,7 +2338,6 @@ components:
                         required:
                           - type
                         title: PersonEntity
-                        description: A person
                       - type:
                           - object
                         properties:
@@ -2370,7 +2352,6 @@ components:
                         required:
                           - type
                         title: ArticleEntity
-                        description: An article
                       - type:
                           - object
                         properties:
@@ -2385,7 +2366,6 @@ components:
                         required:
                           - type
                         title: ResearchPaperEntity
-                        description: A research paper
                       - type:
                           - object
                         properties:
@@ -2411,15 +2391,6 @@ components:
                           - type
                           - description
                         title: CustomEntity
-                        description: >-
-                          When you decide to use a custom entity, this is the
-                          description of the entity.
-
-
-                          The entity represents what type of results the  will
-                          return. For example, if you want results to be Job
-                          Postings, you might use "Job Postings" as the entity
-                          description.
                 required:
                   - id
                   - teamId
@@ -2495,7 +2466,6 @@ components:
                         required:
                           - type
                         title: CompanyEntity
-                        description: A company
                       - type:
                           - object
                         properties:
@@ -2510,7 +2480,6 @@ components:
                         required:
                           - type
                         title: PersonEntity
-                        description: A person
                       - type:
                           - object
                         properties:
@@ -2525,7 +2494,6 @@ components:
                         required:
                           - type
                         title: ArticleEntity
-                        description: An article
                       - type:
                           - object
                         properties:
@@ -2540,7 +2508,6 @@ components:
                         required:
                           - type
                         title: ResearchPaperEntity
-                        description: A research paper
                       - type:
                           - object
                         properties:
@@ -2566,15 +2533,6 @@ components:
                           - type
                           - description
                         title: CustomEntity
-                        description: >-
-                          When you decide to use a custom entity, this is the
-                          description of the entity.
-
-
-                          The entity represents what type of results the  will
-                          return. For example, if you want results to be Job
-                          Postings, you might use "Job Postings" as the entity
-                          description.
                 required:
                   - id
                   - teamId
@@ -2651,7 +2609,6 @@ components:
                         required:
                           - type
                         title: CompanyEntity
-                        description: A company
                       - type:
                           - object
                         properties:
@@ -2666,7 +2623,6 @@ components:
                         required:
                           - type
                         title: PersonEntity
-                        description: A person
                       - type:
                           - object
                         properties:
@@ -2681,7 +2637,6 @@ components:
                         required:
                           - type
                         title: ArticleEntity
-                        description: An article
                       - type:
                           - object
                         properties:
@@ -2696,7 +2651,6 @@ components:
                         required:
                           - type
                         title: ResearchPaperEntity
-                        description: A research paper
                       - type:
                           - object
                         properties:
@@ -2722,15 +2676,6 @@ components:
                           - type
                           - description
                         title: CustomEntity
-                        description: >-
-                          When you decide to use a custom entity, this is the
-                          description of the entity.
-
-
-                          The entity represents what type of results the  will
-                          return. For example, if you want results to be Job
-                          Postings, you might use "Job Postings" as the entity
-                          description.
                 required:
                   - id
                   - teamId
@@ -2807,7 +2752,6 @@ components:
                         required:
                           - type
                         title: CompanyEntity
-                        description: A company
                       - type:
                           - object
                         properties:
@@ -2822,7 +2766,6 @@ components:
                         required:
                           - type
                         title: PersonEntity
-                        description: A person
                       - type:
                           - object
                         properties:
@@ -2837,7 +2780,6 @@ components:
                         required:
                           - type
                         title: ArticleEntity
-                        description: An article
                       - type:
                           - object
                         properties:
@@ -2852,7 +2794,6 @@ components:
                         required:
                           - type
                         title: ResearchPaperEntity
-                        description: A research paper
                       - type:
                           - object
                         properties:
@@ -2878,15 +2819,6 @@ components:
                           - type
                           - description
                         title: CustomEntity
-                        description: >-
-                          When you decide to use a custom entity, this is the
-                          description of the entity.
-
-
-                          The entity represents what type of results the  will
-                          return. For example, if you want results to be Job
-                          Postings, you might use "Job Postings" as the entity
-                          description.
                   failedReason:
                     type:
                       - string
@@ -2981,7 +2913,6 @@ components:
                         required:
                           - type
                         title: CompanyEntity
-                        description: A company
                       - type:
                           - object
                         properties:
@@ -2996,7 +2927,6 @@ components:
                         required:
                           - type
                         title: PersonEntity
-                        description: A person
                       - type:
                           - object
                         properties:
@@ -3011,7 +2941,6 @@ components:
                         required:
                           - type
                         title: ArticleEntity
-                        description: An article
                       - type:
                           - object
                         properties:
@@ -3026,7 +2955,6 @@ components:
                         required:
                           - type
                         title: ResearchPaperEntity
-                        description: A research paper
                       - type:
                           - object
                         properties:
@@ -3052,15 +2980,6 @@ components:
                           - type
                           - description
                         title: CustomEntity
-                        description: >-
-                          When you decide to use a custom entity, this is the
-                          description of the entity.
-
-
-                          The entity represents what type of results the  will
-                          return. For example, if you want results to be Job
-                          Postings, you might use "Job Postings" as the entity
-                          description.
                 required:
                   - id
                   - teamId
@@ -4286,8 +4205,6 @@ components:
             - AI startups in Europe that raised Series A funding in 2024
             - SaaS companies with 50-200 employees in the fintech space
         entity:
-          discriminator:
-            propertyName: type
           $ref: "#/components/schemas/Entity"
           description: >-
             Entity the search will return results for.
@@ -4428,8 +4345,6 @@ components:
                     The criteria to search for. By default, the criteria from
                     the last search is used.
                 entity:
-                  discriminator:
-                    propertyName: type
                   $ref: "#/components/schemas/Entity"
                   title: Entity
                   description: >-
@@ -4550,8 +4465,6 @@ components:
                 The criteria to search for. By default, the criteria from the
                 last search is used.
             entity:
-              discriminator:
-                propertyName: type
               $ref: "#/components/schemas/Entity"
               title: Entity
               description: >-
@@ -4668,8 +4581,6 @@ components:
                   - string
                 maxLength: 1000
             entity:
-              discriminator:
-                propertyName: type
               oneOf:
                 - type:
                     - object
@@ -4738,8 +4649,6 @@ components:
             - webset
           description: The format of the import.
         entity:
-          discriminator:
-            propertyName: type
           $ref: "#/components/schemas/Entity"
           description: The type of entity the import contains.
           nullable: true
@@ -4846,8 +4755,6 @@ components:
             - webset
           description: The format of the import.
         entity:
-          discriminator:
-            propertyName: type
           $ref: "#/components/schemas/Entity"
           description: The type of entity the import contains.
           nullable: true
