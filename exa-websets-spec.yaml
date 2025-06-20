@@ -3075,6 +3075,22 @@ components:
               type: string
               description: The current work position of the person
               nullable: true
+            company:
+              type: object
+              properties:
+                name:
+                  type:
+                    - string
+                  description: The name of the company
+                location:
+                  type: string
+                  description: The location the person is working at the company
+                  nullable: true
+              required:
+                - name
+                - location
+              title: WebsetItemPersonCompanyPropertiesFields
+              nullable: true
             pictureUrl:
               type: string
               format: uri
@@ -3084,6 +3100,7 @@ components:
             - name
             - location
             - position
+            - company
             - pictureUrl
           title: WebsetItemPersonPropertiesFields
       required:
