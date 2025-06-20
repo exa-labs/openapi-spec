@@ -2398,6 +2398,7 @@ components:
         - status
         - externalId
         - searches
+        - imports
         - enrichments
         - monitors
         - streams
