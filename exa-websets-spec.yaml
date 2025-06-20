@@ -1895,6 +1895,97 @@ components:
         - canceledReason
         - createdAt
         - updatedAt
+    Import:
+      type:
+        - object
+      properties:
+        id:
+          type:
+            - string
+          description: The unique identifier for the Import
+        object:
+          type:
+            - string
+          enum:
+            - import
+          description: The type of object
+        status:
+          type:
+            - string
+          enum:
+            - pending
+            - processing
+            - completed
+            - failed
+          description: The status of the Import
+        format:
+          type:
+            - string
+          enum:
+            - csv
+            - webset
+          description: The format of the import.
+        entity:
+          $ref: "#/components/schemas/Entity"
+          description: The type of entity the import contains.
+          nullable: true
+        title:
+          type:
+            - string
+          description: The title of the import
+        count:
+          type:
+            - number
+          description: The number of entities in the import
+        metadata:
+          description: Set of key-value pairs you want to associate with this object.
+          type:
+            - object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+        failedReason:
+          type: string
+          enum:
+            - invalid_format
+            - invalid_file_content
+            - missing_identifier
+          description: The reason the import failed
+          nullable: true
+        failedAt:
+          type: string
+          format: date-time
+          description: When the import failed
+          nullable: true
+        failedMessage:
+          type: string
+          description: A human readable message of the import failure
+          nullable: true
+        createdAt:
+          type:
+            - string
+          format: date-time
+          description: When the import was created
+        updatedAt:
+          type:
+            - string
+          format: date-time
+          description: When the import was last updated
+      required:
+        - id
+        - object
+        - status
+        - format
+        - entity
+        - title
+        - count
+        - metadata
+        - failedReason
+        - failedAt
+        - failedMessage
+        - createdAt
+        - updatedAt
     WebsetEnrichment:
       type:
         - object
@@ -2257,739 +2348,9 @@ components:
           type:
             - array
           items:
-            oneOf:
-              - type:
-                  - object
-                properties:
-                  id:
-                    type:
-                      - string
-                  teamId:
-                    type:
-                      - string
-                  title:
-                    type:
-                      - string
-                  status:
-                    type:
-                      - string
-                    enum:
-                      - created
-                  uri:
-                    type:
-                      - string
-                    description: The URI of the import when format is CSV
-                  format:
-                    type:
-                      - string
-                    enum:
-                      - csv
-                      - webset
-                  metadata:
-                    type:
-                      - object
-                    additionalProperties:
-                      type:
-                        - string
-                  websetId:
-                    type:
-                      - string
-                    description: The ID of the webset when format is WEBSET
-                  createdAt:
-                    type:
-                      - string
-                    format: date-time
-                  updatedAt:
-                    type:
-                      - string
-                    format: date-time
-                  count:
-                    type:
-                      - number
-                  entity:
-                    discriminator:
-                      propertyName: type
-                    oneOf:
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: company
-                            default: company
-                          description:
-                            default: A homepage of a company
-                            type: string
-                            const: A homepage of a company
-                        required:
-                          - type
-                        title: CompanyEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: person
-                            default: person
-                          description:
-                            default: A LinkedIn profile
-                            type: string
-                            const: A LinkedIn profile
-                        required:
-                          - type
-                        title: PersonEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: article
-                            default: article
-                          description:
-                            default: A blog post or article
-                            type: string
-                            const: A blog post or article
-                        required:
-                          - type
-                        title: ArticleEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: research_paper
-                            default: research_paper
-                          description:
-                            default: A research paper
-                            type: string
-                            const: A research paper
-                        required:
-                          - type
-                        title: ResearchPaperEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: custom
-                            default: custom
-                          description:
-                            type:
-                              - string
-                            minLength: 2
-                            maxLength: 200
-                            description: >-
-                              When you decide to use a custom entity, this is
-                              the description of the entity.
-
-
-                              The entity represents what type of results the 
-                              will return. For example, if you want results to
-                              be Job Postings, you might use "Job Postings" as
-                              the entity description.
-                        required:
-                          - type
-                          - description
-                        title: CustomEntity
-                required:
-                  - id
-                  - teamId
-                  - title
-                  - status
-                  - format
-                  - createdAt
-                  - updatedAt
-                  - count
-              - type:
-                  - object
-                properties:
-                  id:
-                    type:
-                      - string
-                  teamId:
-                    type:
-                      - string
-                  title:
-                    type:
-                      - string
-                  status:
-                    type:
-                      - string
-                    enum:
-                      - scheduled
-                  uri:
-                    type:
-                      - string
-                    description: The URI of the import when format is CSV
-                  format:
-                    type:
-                      - string
-                    enum:
-                      - csv
-                      - webset
-                  metadata:
-                    type:
-                      - object
-                    additionalProperties:
-                      type:
-                        - string
-                  websetId:
-                    type:
-                      - string
-                    description: The ID of the webset when format is WEBSET
-                  createdAt:
-                    type:
-                      - string
-                    format: date-time
-                  updatedAt:
-                    type:
-                      - string
-                    format: date-time
-                  count:
-                    type:
-                      - number
-                  entity:
-                    discriminator:
-                      propertyName: type
-                    oneOf:
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: company
-                            default: company
-                          description:
-                            default: A homepage of a company
-                            type: string
-                            const: A homepage of a company
-                        required:
-                          - type
-                        title: CompanyEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: person
-                            default: person
-                          description:
-                            default: A LinkedIn profile
-                            type: string
-                            const: A LinkedIn profile
-                        required:
-                          - type
-                        title: PersonEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: article
-                            default: article
-                          description:
-                            default: A blog post or article
-                            type: string
-                            const: A blog post or article
-                        required:
-                          - type
-                        title: ArticleEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: research_paper
-                            default: research_paper
-                          description:
-                            default: A research paper
-                            type: string
-                            const: A research paper
-                        required:
-                          - type
-                        title: ResearchPaperEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: custom
-                            default: custom
-                          description:
-                            type:
-                              - string
-                            minLength: 2
-                            maxLength: 200
-                            description: >-
-                              When you decide to use a custom entity, this is
-                              the description of the entity.
-
-
-                              The entity represents what type of results the 
-                              will return. For example, if you want results to
-                              be Job Postings, you might use "Job Postings" as
-                              the entity description.
-                        required:
-                          - type
-                          - description
-                        title: CustomEntity
-                required:
-                  - id
-                  - teamId
-                  - title
-                  - status
-                  - format
-                  - createdAt
-                  - updatedAt
-                  - count
-                  - entity
-              - type:
-                  - object
-                properties:
-                  id:
-                    type:
-                      - string
-                  teamId:
-                    type:
-                      - string
-                  title:
-                    type:
-                      - string
-                  status:
-                    type:
-                      - string
-                    enum:
-                      - completed
-                  uri:
-                    type:
-                      - string
-                    description: The URI of the import when format is CSV
-                  format:
-                    type:
-                      - string
-                    enum:
-                      - csv
-                      - webset
-                  metadata:
-                    type:
-                      - object
-                    additionalProperties:
-                      type:
-                        - string
-                  websetId:
-                    type:
-                      - string
-                    description: The ID of the webset when format is WEBSET
-                  createdAt:
-                    type:
-                      - string
-                    format: date-time
-                  updatedAt:
-                    type:
-                      - string
-                    format: date-time
-                  count:
-                    type:
-                      - number
-                  entity:
-                    discriminator:
-                      propertyName: type
-                    oneOf:
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: company
-                            default: company
-                          description:
-                            default: A homepage of a company
-                            type: string
-                            const: A homepage of a company
-                        required:
-                          - type
-                        title: CompanyEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: person
-                            default: person
-                          description:
-                            default: A LinkedIn profile
-                            type: string
-                            const: A LinkedIn profile
-                        required:
-                          - type
-                        title: PersonEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: article
-                            default: article
-                          description:
-                            default: A blog post or article
-                            type: string
-                            const: A blog post or article
-                        required:
-                          - type
-                        title: ArticleEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: research_paper
-                            default: research_paper
-                          description:
-                            default: A research paper
-                            type: string
-                            const: A research paper
-                        required:
-                          - type
-                        title: ResearchPaperEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: custom
-                            default: custom
-                          description:
-                            type:
-                              - string
-                            minLength: 2
-                            maxLength: 200
-                            description: >-
-                              When you decide to use a custom entity, this is
-                              the description of the entity.
-
-
-                              The entity represents what type of results the 
-                              will return. For example, if you want results to
-                              be Job Postings, you might use "Job Postings" as
-                              the entity description.
-                        required:
-                          - type
-                          - description
-                        title: CustomEntity
-                required:
-                  - id
-                  - teamId
-                  - title
-                  - status
-                  - format
-                  - createdAt
-                  - updatedAt
-                  - count
-                  - entity
-              - type:
-                  - object
-                properties:
-                  id:
-                    type:
-                      - string
-                  teamId:
-                    type:
-                      - string
-                  title:
-                    type:
-                      - string
-                  status:
-                    type:
-                      - string
-                    enum:
-                      - failed
-                  uri:
-                    type:
-                      - string
-                    description: The URI of the import when format is CSV
-                  format:
-                    type:
-                      - string
-                    enum:
-                      - csv
-                      - webset
-                  metadata:
-                    type:
-                      - object
-                    additionalProperties:
-                      type:
-                        - string
-                  websetId:
-                    type:
-                      - string
-                    description: The ID of the webset when format is WEBSET
-                  createdAt:
-                    type:
-                      - string
-                    format: date-time
-                  updatedAt:
-                    type:
-                      - string
-                    format: date-time
-                  count:
-                    type:
-                      - number
-                  entity:
-                    discriminator:
-                      propertyName: type
-                    oneOf:
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: company
-                            default: company
-                          description:
-                            default: A homepage of a company
-                            type: string
-                            const: A homepage of a company
-                        required:
-                          - type
-                        title: CompanyEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: person
-                            default: person
-                          description:
-                            default: A LinkedIn profile
-                            type: string
-                            const: A LinkedIn profile
-                        required:
-                          - type
-                        title: PersonEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: article
-                            default: article
-                          description:
-                            default: A blog post or article
-                            type: string
-                            const: A blog post or article
-                        required:
-                          - type
-                        title: ArticleEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: research_paper
-                            default: research_paper
-                          description:
-                            default: A research paper
-                            type: string
-                            const: A research paper
-                        required:
-                          - type
-                        title: ResearchPaperEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: custom
-                            default: custom
-                          description:
-                            type:
-                              - string
-                            minLength: 2
-                            maxLength: 200
-                            description: >-
-                              When you decide to use a custom entity, this is
-                              the description of the entity.
-
-
-                              The entity represents what type of results the 
-                              will return. For example, if you want results to
-                              be Job Postings, you might use "Job Postings" as
-                              the entity description.
-                        required:
-                          - type
-                          - description
-                        title: CustomEntity
-                  failedReason:
-                    type:
-                      - string
-                    enum:
-                      - file_not_uploaded
-                      - invalid_format
-                      - invalid_file_content
-                      - missing_identifier
-                  failedAt:
-                    type:
-                      - string
-                    format: date-time
-                  failedMessage:
-                    type:
-                      - string
-                required:
-                  - id
-                  - teamId
-                  - title
-                  - status
-                  - format
-                  - createdAt
-                  - updatedAt
-                  - count
-                  - entity
-                  - failedReason
-                  - failedAt
-                  - failedMessage
-              - type:
-                  - object
-                properties:
-                  id:
-                    type:
-                      - string
-                  teamId:
-                    type:
-                      - string
-                  title:
-                    type:
-                      - string
-                  status:
-                    type:
-                      - string
-                    enum:
-                      - processing
-                  uri:
-                    type:
-                      - string
-                    description: The URI of the import when format is CSV
-                  format:
-                    type:
-                      - string
-                    enum:
-                      - csv
-                      - webset
-                  metadata:
-                    type:
-                      - object
-                    additionalProperties:
-                      type:
-                        - string
-                  websetId:
-                    type:
-                      - string
-                    description: The ID of the webset when format is WEBSET
-                  createdAt:
-                    type:
-                      - string
-                    format: date-time
-                  updatedAt:
-                    type:
-                      - string
-                    format: date-time
-                  count:
-                    type:
-                      - number
-                  entity:
-                    discriminator:
-                      propertyName: type
-                    oneOf:
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: company
-                            default: company
-                          description:
-                            default: A homepage of a company
-                            type: string
-                            const: A homepage of a company
-                        required:
-                          - type
-                        title: CompanyEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: person
-                            default: person
-                          description:
-                            default: A LinkedIn profile
-                            type: string
-                            const: A LinkedIn profile
-                        required:
-                          - type
-                        title: PersonEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: article
-                            default: article
-                          description:
-                            default: A blog post or article
-                            type: string
-                            const: A blog post or article
-                        required:
-                          - type
-                        title: ArticleEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: research_paper
-                            default: research_paper
-                          description:
-                            default: A research paper
-                            type: string
-                            const: A research paper
-                        required:
-                          - type
-                        title: ResearchPaperEntity
-                      - type:
-                          - object
-                        properties:
-                          type:
-                            type: string
-                            const: custom
-                            default: custom
-                          description:
-                            type:
-                              - string
-                            minLength: 2
-                            maxLength: 200
-                            description: >-
-                              When you decide to use a custom entity, this is
-                              the description of the entity.
-
-
-                              The entity represents what type of results the 
-                              will return. For example, if you want results to
-                              be Job Postings, you might use "Job Postings" as
-                              the entity description.
-                        required:
-                          - type
-                          - description
-                        title: CustomEntity
-                required:
-                  - id
-                  - teamId
-                  - title
-                  - status
-                  - format
-                  - createdAt
-                  - updatedAt
-                  - count
-                  - entity
+            type:
+              - object
+            $ref: "#/components/schemas/Import"
           description: Imports that have been performed on the webset.
         enrichments:
           type:
@@ -4741,97 +4102,6 @@ components:
       description: >-
         The response to a successful import. Includes the upload URL and the
         upload valid until date.
-    Import:
-      type:
-        - object
-      properties:
-        id:
-          type:
-            - string
-          description: The unique identifier for the Import
-        object:
-          type:
-            - string
-          enum:
-            - import
-          description: The type of object
-        status:
-          type:
-            - string
-          enum:
-            - pending
-            - processing
-            - completed
-            - failed
-          description: The status of the Import
-        format:
-          type:
-            - string
-          enum:
-            - csv
-            - webset
-          description: The format of the import.
-        entity:
-          $ref: "#/components/schemas/Entity"
-          description: The type of entity the import contains.
-          nullable: true
-        title:
-          type:
-            - string
-          description: The title of the import
-        count:
-          type:
-            - number
-          description: The number of entities in the import
-        metadata:
-          description: Set of key-value pairs you want to associate with this object.
-          type:
-            - object
-          additionalProperties:
-            type:
-              - string
-            maxLength: 1000
-        failedReason:
-          type: string
-          enum:
-            - invalid_format
-            - invalid_file_content
-            - missing_identifier
-          description: The reason the import failed
-          nullable: true
-        failedAt:
-          type: string
-          format: date-time
-          description: When the import failed
-          nullable: true
-        failedMessage:
-          type: string
-          description: A human readable message of the import failure
-          nullable: true
-        createdAt:
-          type:
-            - string
-          format: date-time
-          description: When the import was created
-        updatedAt:
-          type:
-            - string
-          format: date-time
-          description: When the import was last updated
-      required:
-        - id
-        - object
-        - status
-        - format
-        - entity
-        - title
-        - count
-        - metadata
-        - failedReason
-        - failedAt
-        - failedMessage
-        - createdAt
-        - updatedAt
     ListImportsResponse:
       type:
         - object
