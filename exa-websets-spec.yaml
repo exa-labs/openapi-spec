@@ -46,6 +46,37 @@ paths:
         - Websets
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const webset = await exa.websets.create({
+              search: {
+                query: "Tech companies in San Francisco",
+                count: 10
+              }
+            });
+
+            console.log(`Created webset: ${webset.id}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            webset = exa.websets.create(params={
+                'search': {
+                    'query': 'Tech companies in San Francisco',
+                    'count': 10
+                }
+            })
+
+            print(f'Created webset: {webset.id}')
     get:
       description: |-
         Returns a list of Websets.
@@ -87,6 +118,38 @@ paths:
       tags: *ref_0
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            // List websets with optional pagination
+            const websets = await exa.websets.list({
+              limit: 20  // Optional: max results per page
+            });
+
+            console.log(`Found ${websets.data.length} websets`);
+            websets.data.forEach(webset => {
+              console.log(`- ${webset.id}: ${webset.status}`);
+            });
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            # List websets with optional pagination
+            websets_response = exa.websets.list(
+                limit=20  # Optional: max results per page
+            )
+
+            print(f"Found {len(websets_response.data)} websets")
+            for webset in websets_response.data:
+                print(f"- {webset.id}: {webset.status}")
   /v0/websets/{id}:
     get:
       operationId: websets-get
@@ -134,6 +197,27 @@ paths:
       tags: *ref_0
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const webset = await exa.websets.get('webset_id');
+
+            console.log(`Webset: ${webset.id} - ${webset.status}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            webset = exa.websets.get('webset_id')
+
+            print(f'Webset: {webset.id} - {webset.status}')
     post:
       operationId: websets-update
       parameters:
@@ -176,6 +260,33 @@ paths:
       tags: *ref_0
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const webset = await exa.websets.update('webset_id', {
+              name: 'Updated Webset Name',
+              description: 'Updated description'
+            });
+
+            console.log(`Updated webset: ${webset.id}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            webset = exa.websets.update('webset_id', params={
+                'name': 'Updated Webset Name',
+                'description': 'Updated description'
+            })
+
+            print(f'Updated webset: {webset.id}')
     delete:
       description: |-
         Deletes a Webset.
@@ -216,6 +327,27 @@ paths:
       tags: *ref_0
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            await exa.websets.delete('webset_id');
+
+            console.log('Webset deleted successfully');
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            exa.websets.delete('webset_id')
+
+            print('Webset deleted successfully')
   /v0/websets/{id}/cancel:
     post:
       description: >-
@@ -250,6 +382,27 @@ paths:
       tags: *ref_0
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const webset = await exa.websets.cancel('webset_id');
+
+            console.log(`Cancelled webset: ${webset.id}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            webset = exa.websets.cancel('webset_id')
+
+            print(f'Cancelled webset: {webset.id}')
   /v0/websets/{webset}/items/{id}:
     get:
       description: Returns a Webset Item.
@@ -286,6 +439,27 @@ paths:
         - Items
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const item = await exa.websets.items.get('webset_id', 'item_id');
+
+            console.log(`Item: ${item.id} - ${item.properties.name}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            item = exa.websets.items.get('webset_id', 'item_id')
+
+            print(f'Item: {item.id} - {item.properties.name}')
     delete:
       description: |-
         Deletes an Item from the Webset.
@@ -323,6 +497,27 @@ paths:
       tags: *ref_1
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            await exa.websets.items.delete('webset_id', 'item_id');
+
+            console.log('Item deleted successfully');
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            exa.websets.items.delete('webset_id', 'item_id')
+
+            print('Item deleted successfully')
   /v0/websets/{webset}/items:
     get:
       description: |-
@@ -371,6 +566,34 @@ paths:
       tags: *ref_1
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const items = await exa.websets.items.list('webset_id', {
+              limit: 20
+            });
+
+            console.log(`Found ${items.data.length} items`);
+            items.data.forEach(item => {
+              console.log(`- ${item.id}: ${item.properties.name}`);
+            });
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            items = exa.websets.items.list('webset_id', limit=20)
+
+            print(f'Found {len(items.data)} items')
+            for item in items.data:
+                print(f'- {item.id}: {item.properties.name}')
   /v0/websets/{webset}/enrichments:
     post:
       description: Create an Enrichment for a Webset.
@@ -407,6 +630,38 @@ paths:
         - Enrichments
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: >-
+            // npm install exa-js
+
+            import Exa from 'exa-js';
+
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+
+            const enrichment = await exa.websets.enrichments.create('webset_id',
+            {
+              description: 'Company revenue information',
+              format: 'text'
+            });
+
+
+            console.log(`Created enrichment: ${enrichment.id}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            enrichment = exa.websets.enrichments.create('webset_id', params={
+                'description': 'Company revenue information',
+                'format': 'text'
+            })
+
+            print(f'Created enrichment: {enrichment.id}')
   /v0/websets/{webset}/enrichments/{id}:
     get:
       operationId: websets-enrichments-get
@@ -441,6 +696,37 @@ paths:
       tags: *ref_2
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: >-
+            // npm install exa-js
+
+            import Exa from 'exa-js';
+
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+
+            const enrichment = await exa.websets.enrichments.get('webset_id',
+            'enrichment_id');
+
+
+            console.log(`Enrichment: ${enrichment.id} - ${enrichment.status}`);
+        - lang: python
+          label: Python
+          source: >-
+            # pip install exa-py
+
+            from exa_py import Exa
+
+            exa = Exa('YOUR_EXA_API_KEY')
+
+
+            enrichment = exa.websets.enrichments.get('webset_id',
+            'enrichment_id')
+
+
+            print(f'Enrichment: {enrichment.id} - {enrichment.status}')
     delete:
       description: >-
         When deleting an Enrichment, any running enrichments will be canceled
@@ -478,6 +764,27 @@ paths:
       tags: *ref_2
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            await exa.websets.enrichments.delete('webset_id', 'enrichment_id');
+
+            console.log('Enrichment deleted successfully');
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            exa.websets.enrichments.delete('webset_id', 'enrichment_id')
+
+            print('Enrichment deleted successfully')
   /v0/websets/{webset}/enrichments/{id}/cancel:
     post:
       description: >-
@@ -515,6 +822,37 @@ paths:
       tags: *ref_2
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: >-
+            // npm install exa-js
+
+            import Exa from 'exa-js';
+
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+
+            const enrichment = await exa.websets.enrichments.cancel('webset_id',
+            'enrichment_id');
+
+
+            console.log(`Cancelled enrichment: ${enrichment.id}`);
+        - lang: python
+          label: Python
+          source: >-
+            # pip install exa-py
+
+            from exa_py import Exa
+
+            exa = Exa('YOUR_EXA_API_KEY')
+
+
+            enrichment = exa.websets.enrichments.cancel('webset_id',
+            'enrichment_id')
+
+
+            print(f'Cancelled enrichment: {enrichment.id}')
   /v0/webhooks:
     post:
       operationId: webhooks-create
@@ -544,6 +882,33 @@ paths:
         - Webhooks
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const webhook = await exa.websets.webhooks.create({
+              url: 'https://api.yourapp.com/webhooks/exa',
+              events: ['webset.completed', 'enrichment.completed']
+            });
+
+            console.log(`Created webhook: ${webhook.id}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            webhook = exa.websets.webhooks.create(params={
+                'url': 'https://api.yourapp.com/webhooks/exa',
+                'events': ['webset.completed', 'enrichment.completed']
+            })
+
+            print(f'Created webhook: {webhook.id}')
     get:
       operationId: webhooks-list
       parameters:
@@ -581,6 +946,32 @@ paths:
       tags: *ref_3
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const webhooks = await exa.websets.webhooks.list();
+
+            console.log(`Found ${webhooks.data.length} webhooks`);
+            webhooks.data.forEach(webhook => {
+              console.log(`- ${webhook.id}: ${webhook.url}`);
+            });
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            webhooks = exa.websets.webhooks.list()
+
+            print(f'Found {len(webhooks.data)} webhooks')
+            for webhook in webhooks.data:
+                print(f'- {webhook.id}: {webhook.url}')
   /v0/webhooks/{id}:
     get:
       operationId: webhooks-get
@@ -618,6 +1009,27 @@ paths:
       tags: *ref_3
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const webhook = await exa.websets.webhooks.get('webhook_id');
+
+            console.log(`Webhook: ${webhook.id} - ${webhook.url}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            webhook = exa.websets.webhooks.get('webhook_id')
+
+            print(f'Webhook: {webhook.id} - {webhook.url}')
     patch:
       operationId: webhooks-update
       parameters:
@@ -660,6 +1072,33 @@ paths:
       tags: *ref_3
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const webhook = await exa.websets.webhooks.update('webhook_id', {
+              url: 'https://api.yourapp.com/webhooks/exa-updated',
+              events: ['webset.completed']
+            });
+
+            console.log(`Updated webhook: ${webhook.id}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            webhook = exa.websets.webhooks.update('webhook_id', params={
+                'url': 'https://api.yourapp.com/webhooks/exa-updated',
+                'events': ['webset.completed']
+            })
+
+            print(f'Updated webhook: {webhook.id}')
     delete:
       operationId: webhooks-delete
       parameters:
@@ -696,6 +1135,27 @@ paths:
       tags: *ref_3
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            await exa.websets.webhooks.delete('webhook_id');
+
+            console.log('Webhook deleted successfully');
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            exa.websets.webhooks.delete('webhook_id')
+
+            print('Webhook deleted successfully')
   /v0/webhooks/{id}/attempts:
     get:
       description: List all attempts made by a Webhook ordered in descending order.
@@ -764,6 +1224,40 @@ paths:
         - Webhooks Attempts
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: >-
+            // npm install exa-js
+
+            import Exa from 'exa-js';
+
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+
+            const attempts = await
+            exa.websets.webhooks.listAttempts('webhook_id', {
+              limit: 20
+            });
+
+
+            console.log(`Found ${attempts.data.length} webhook attempts`);
+
+            attempts.data.forEach(attempt => {
+              console.log(`- ${attempt.id}: ${attempt.status}`);
+            });
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            attempts = exa.websets.webhooks.attempts.list('webhook_id')
+
+            print(f'Found {len(attempts.data)} webhook attempts')
+            for attempt in attempts.data:
+                print(f'- {attempt.id}: {attempt.status}')
   /v0/events:
     get:
       description: |-
@@ -831,6 +1325,34 @@ paths:
         - Events
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const events = await exa.websets.events.list({
+              limit: 20
+            });
+
+            console.log(`Found ${events.data.length} events`);
+            events.data.forEach(event => {
+              console.log(`- ${event.id}: ${event.type} at ${event.createdAt}`);
+            });
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            events = exa.websets.events.list(limit=20)
+
+            print(f'Found {len(events.data)} events')
+            for event in events.data:
+                print(f'- {event.id}: {event.type}')
   /v0/events/{id}:
     get:
       description: |-
@@ -872,6 +1394,27 @@ paths:
       tags: *ref_4
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const event = await exa.websets.events.get('event_id');
+
+            console.log(`Event: ${event.id} - ${event.type}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            event = exa.websets.events.get('event_id')
+
+            print(f'Event: {event.id} - {event.type}')
   /v0/websets/{webset}/searches:
     post:
       description: >-
@@ -913,6 +1456,33 @@ paths:
         - Searches
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const search = await exa.websets.searches.create('webset_id', {
+              query: 'additional companies to add',
+              count: 5
+            });
+
+            console.log(`Created search: ${search.id}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            search = exa.websets.searches.create('webset_id', params={
+                'query': 'additional companies to add',
+                'count': 5
+            })
+
+            print(f'Created search: {search.id}')
   /v0/websets/{webset}/searches/{id}:
     get:
       description: Gets a Search by id
@@ -932,7 +1502,11 @@ paths:
             type: string
       responses:
         "200":
-          description: ""
+          description: Search retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebsetSearch"
           headers:
             X-Request-Id:
               schema:
@@ -944,6 +1518,32 @@ paths:
       tags: *ref_5
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: >-
+            // npm install exa-js
+
+            import Exa from 'exa-js';
+
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+
+            const search = await exa.websets.searches.get('webset_id',
+            'search_id');
+
+
+            console.log(`Search: ${search.id} - ${search.status}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            search = exa.websets.searches.get('webset_id', 'search_id')
+
+            print(f'Search: {search.id} - {search.status}')
   /v0/websets/{webset}/searches/{id}/cancel:
     post:
       description: >-
@@ -984,6 +1584,32 @@ paths:
       tags: *ref_5
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: >-
+            // npm install exa-js
+
+            import Exa from 'exa-js';
+
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+
+            const search = await exa.websets.searches.cancel('webset_id',
+            'search_id');
+
+
+            console.log(`Cancelled search: ${search.id}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            search = exa.websets.searches.cancel('webset_id', 'search_id')
+
+            print(f'Cancelled search: {search.id}')
   /v0/monitors:
     post:
       description: >-
@@ -1030,6 +1656,55 @@ paths:
         - Monitors
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const monitor = await exa.websets.monitors.create({
+              websetId: 'webset_id',
+              cadence: {
+                cron: '0 9 * * 1', // Every Monday at 9 AM
+                timezone: 'America/New_York'
+              },
+              behavior: {
+                type: 'search',
+                config: {
+                  behavior: 'append',
+                  query: 'new companies to monitor',
+                  count: 10
+                }
+              }
+            });
+
+            console.log(`Created monitor: ${monitor.id}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            monitor = exa.websets.monitors.create(params={
+                'websetId': 'webset_id',
+                'cadence': {
+                    'cron': '0 9 * * 1',  # Every Monday at 9 AM
+                    'timezone': 'America/New_York'
+                },
+                'behavior': {
+                    'type': 'search',
+                    'config': {
+                        'behavior': 'append',
+                        'query': 'new companies to monitor',
+                        'count': 10
+                    }
+                }
+            })
+
+            print(f'Created monitor: {monitor.id}')
     get:
       description: Lists all monitors for the Webset.
       operationId: monitors-list
@@ -1074,6 +1749,34 @@ paths:
       tags: *ref_6
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const monitors = await exa.websets.monitors.list({
+              webset_id: 'webset_id'
+            });
+
+            console.log(`Found ${monitors.data.length} monitors`);
+            monitors.data.forEach(monitor => {
+              console.log(`- ${monitor.id}: ${monitor.status}`);
+            });
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            monitors = exa.websets.monitors.list(webset_id='webset_id')
+
+            print(f'Found {len(monitors.data)} monitors')
+            for monitor in monitors.data:
+                print(f'- {monitor.id}: {monitor.status}')
   /v0/monitors/{id}:
     get:
       description: Gets a specific monitor.
@@ -1103,6 +1806,27 @@ paths:
       tags: *ref_6
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const monitor = await exa.websets.monitors.get('monitor_id');
+
+            console.log(`Monitor: ${monitor.id} - ${monitor.status}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            monitor = exa.websets.monitors.get('monitor_id')
+
+            print(f'Monitor: {monitor.id} - {monitor.status}')
     patch:
       description: Updates a monitor configuration.
       operationId: monitors-update
@@ -1137,6 +1861,37 @@ paths:
       tags: *ref_6
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const monitor = await exa.websets.monitors.update('monitor_id', {
+              cadence: {
+                cron: '0 14 * * *', // Every day at 2 PM
+                timezone: 'America/New_York'
+              }
+            });
+
+            console.log(`Updated monitor: ${monitor.id}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            monitor = exa.websets.monitors.update('monitor_id', params={
+                'cadence': {
+                    'cron': '0 14 * * *',  # Every day at 2 PM
+                    'timezone': 'America/New_York'
+                }
+            })
+
+            print(f'Updated monitor: {monitor.id}')
     delete:
       description: Deletes a monitor.
       operationId: monitors-delete
@@ -1165,6 +1920,27 @@ paths:
       tags: *ref_6
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            await exa.websets.monitors.delete('monitor_id');
+
+            console.log('Monitor deleted successfully');
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            exa.websets.monitors.delete('monitor_id')
+
+            print('Monitor deleted successfully')
   /v0/monitors/{monitor}/runs:
     get:
       description: Lists all runs for the Monitor.
@@ -1195,6 +1971,32 @@ paths:
         - Monitors Runs
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const runs = await exa.websets.monitors.runs.list('monitor_id');
+
+            console.log(`Found ${runs.data.length} monitor runs`);
+            runs.data.forEach(run => {
+              console.log(`- ${run.id}: ${run.status}`);
+            });
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            runs = exa.websets.monitors.runs.list('monitor_id')
+
+            print(f'Found {len(runs.data)} monitor runs')
+            for run in runs.data:
+                print(f'- {run.id}: {run.status}')
   /v0/monitors/{monitor}/runs/{id}:
     get:
       description: Gets a specific monitor run.
@@ -1229,6 +2031,32 @@ paths:
       tags: *ref_7
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: >-
+            // npm install exa-js
+
+            import Exa from 'exa-js';
+
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+
+            const run = await exa.websets.monitors.runs.get('monitor_id',
+            'run_id');
+
+
+            console.log(`Monitor run: ${run.id} - ${run.status}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            run = exa.websets.monitors.runs.get('monitor_id', 'run_id')
+
+            print(f'Monitor run: {run.id} - {run.status}')
   /v0/imports:
     post:
       description: >-
@@ -1275,6 +2103,37 @@ paths:
         - Imports
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const importJob = await exa.websets.imports.create('webset_id', {
+              source: {
+                type: 'csv',
+                url: 'https://example.com/companies.csv'
+              }
+            });
+
+            console.log(`Created import: ${importJob.id}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            import_job = exa.websets.imports.create('webset_id', params={
+                'source': {
+                    'type': 'csv',
+                    'url': 'https://example.com/companies.csv'
+                }
+            })
+
+            print(f'Created import: {import_job.id}')
     get:
       description: Lists all imports for the Webset.
       operationId: imports-list
@@ -1313,6 +2172,34 @@ paths:
       tags: *ref_8
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const imports = await exa.websets.imports.list({
+              webset_id: 'webset_id'
+            });
+
+            console.log(`Found ${imports.data.length} imports`);
+            imports.data.forEach(importJob => {
+              console.log(`- ${importJob.id}: ${importJob.status}`);
+            });
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            imports = exa.websets.imports.list(webset_id='webset_id')
+
+            print(f'Found {len(imports.data)} imports')
+            for import_job in imports.data:
+                print(f'- {import_job.id}: {import_job.status}')
   /v0/imports/{id}:
     get:
       description: Gets a specific import.
@@ -1342,6 +2229,32 @@ paths:
       tags: *ref_8
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: >-
+            // npm install exa-js
+
+            import Exa from 'exa-js';
+
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+
+            const importJob = await exa.websets.imports.get('webset_id',
+            'import_id');
+
+
+            console.log(`Import: ${importJob.id} - ${importJob.status}`);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            import_job = exa.websets.imports.get('webset_id', 'import_id')
+
+            print(f'Import: {import_job.id} - {import_job.status}')
     patch:
       description: Updates a import configuration.
       operationId: imports-update
@@ -1376,6 +2289,41 @@ paths:
       tags: *ref_8
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: >-
+            // npm install exa-js
+
+            import Exa from 'exa-js';
+
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+
+            const importJob = await exa.websets.imports.update('webset_id',
+            'import_id', {
+              name: 'Updated Import Name'
+            });
+
+
+            console.log(`Updated import: ${importJob.id}`);
+        - lang: python
+          label: Python
+          source: >-
+            # pip install exa-py
+
+            from exa_py import Exa
+
+            exa = Exa('YOUR_EXA_API_KEY')
+
+
+            import_job = exa.websets.imports.update('webset_id', 'import_id',
+            params={
+                'name': 'Updated Import Name'
+            })
+
+
+            print(f'Updated import: {import_job.id}')
     delete:
       description: Deletes a import.
       operationId: imports-delete
@@ -1404,6 +2352,27 @@ paths:
       tags: *ref_8
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            await exa.websets.imports.delete('webset_id', 'import_id');
+
+            console.log('Import deleted successfully');
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            exa.websets.imports.delete('webset_id', 'import_id')
+
+            print('Import deleted successfully')
 info:
   title: Websets
   description: ""
