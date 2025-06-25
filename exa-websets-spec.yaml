@@ -1306,6 +1306,29 @@ paths:
                 - webset.item.enriched
                 - webset.export.created
                 - webset.export.completed
+        - name: createdBefore
+          required: false
+          in: query
+          description: >-
+            Filter events created before or at this timestamp (inclusive). Can
+            be either a datetime (ISO 8601) or date string. All times are in
+            UTC.
+          schema:
+            oneOf:
+              - type: string
+                format: date-time
+              - type: string
+        - name: createdAfter
+          required: false
+          in: query
+          description: >-
+            Filter events created after or at this timestamp (inclusive). Can be
+            either a datetime (ISO 8601) or date string. All times are in UTC.
+          schema:
+            oneOf:
+              - type: string
+                format: date-time
+              - type: string
       responses:
         "200":
           description: List of events
