@@ -1310,25 +1310,20 @@ paths:
           required: false
           in: query
           description: >-
-            Filter events created before or at this timestamp (inclusive). Can
-            be either a datetime (ISO 8601) or date string. All times are in
-            UTC.
+            Filter events created before or at this timestamp (inclusive). Must
+            be a valid ISO 8601 datetime string. All times are in UTC.
           schema:
-            oneOf:
-              - type: string
-                format: date-time
-              - type: string
+            format: date-time
+            type: string
         - name: createdAfter
           required: false
           in: query
           description: >-
-            Filter events created after or at this timestamp (inclusive). Can be
-            either a datetime (ISO 8601) or date string. All times are in UTC.
+            Filter events created after or at this timestamp (inclusive). Must
+            be a valid ISO 8601 datetime string. All times are in UTC.
           schema:
-            oneOf:
-              - type: string
-                format: date-time
-              - type: string
+            format: date-time
+            type: string
       responses:
         "200":
           description: List of events
@@ -2627,6 +2622,10 @@ components:
                 It's not required to provide your own criteria, we automatically
                 detect the criteria from all the information provided in the
                 query. Only use this when you need more fine control.
+            recall:
+              type:
+                - boolean
+              description: Whether to compute recall metrics for the search
             exclude:
               type:
                 - array
@@ -2834,16 +2833,75 @@ components:
               type:
                 - number
               description: The number of results found so far
+            analyzed:
+              type:
+                - number
+              description: The number of results analyzed so far
             completion:
               type:
                 - number
               minimum: 0
               maximum: 100
               description: The completion percentage of the search
+            timeLeft:
+              type: number
+              description: The estimated time remaining in seconds, null if unknown
+              nullable: true
           required:
             - found
+            - analyzed
             - completion
+            - timeLeft
           description: The progress of the search
+        recall:
+          type: object
+          properties:
+            expected:
+              type:
+                - object
+              properties:
+                total:
+                  type:
+                    - number
+                  description: The estimated total number of potential matches
+                confidence:
+                  type:
+                    - string
+                  enum:
+                    - high
+                    - medium
+                    - low
+                  description: The confidence in the estimate
+                bounds:
+                  type:
+                    - object
+                  properties:
+                    min:
+                      type:
+                        - number
+                      description: The minimum estimated total number of potential matches
+                    max:
+                      type:
+                        - number
+                      description: The maximum estimated total number of potential matches
+                  required:
+                    - min
+                    - max
+              required:
+                - total
+                - confidence
+                - bounds
+            reasoning:
+              type:
+                - string
+              description: The reasoning for the estimate
+          required:
+            - expected
+            - reasoning
+          description: >-
+            Recall metrics for the search, null if not yet computed or
+            requested.
+          nullable: true
         metadata:
           default: {}
           description: Set of key-value pairs you want to associate with this object.
@@ -2883,6 +2941,7 @@ components:
         - count
         - exclude
         - progress
+        - recall
         - canceledAt
         - canceledReason
         - createdAt
@@ -4635,6 +4694,10 @@ components:
             Sources (existing imports or websets) to exclude from search
             results. Any results found within these sources will be omitted to
             prevent finding them during search.
+        recall:
+          type:
+            - boolean
+          description: Whether to compute recall metrics for the search
         behavior:
           default: override
           type:
