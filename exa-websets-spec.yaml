@@ -2625,7 +2625,13 @@ components:
             recall:
               type:
                 - boolean
-              description: Whether to compute recall metrics for the search
+              description: >-
+                Whether to provide an estimate of how many total relevant
+                results exist for this search, including those not found in our
+                search results.
+
+                Result of the analysis will be available in the `recall` field
+                within the search request.
             exclude:
               type:
                 - array
@@ -4697,7 +4703,13 @@ components:
         recall:
           type:
             - boolean
-          description: Whether to compute recall metrics for the search
+          description: >-
+            Whether to provide an estimate of how many total relevant results
+            exist for this search, including those not found in our search
+            results.
+
+            Result of the analysis will be available in the `recall` field
+            within the search request.
         behavior:
           default: override
           type:
