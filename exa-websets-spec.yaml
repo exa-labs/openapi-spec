@@ -548,6 +548,12 @@ paths:
             maximum: 200
             default: 25
             type: number
+        - name: sourceId
+          required: false
+          in: query
+          description: The id of the source
+          schema:
+            type: string
       responses:
         "200":
           description: Webset Items
@@ -1205,6 +1211,17 @@ paths:
               - webset.item.enriched
               - webset.export.created
               - webset.export.completed
+        - name: status
+          required: false
+          in: query
+          description: Filter attempts by their success status
+          schema:
+            default: all
+            type: string
+            enum:
+              - all
+              - succeeded
+              - failed
       responses:
         "200":
           description: List of webhook attempts
@@ -2627,8 +2644,7 @@ components:
                 - boolean
               description: >-
                 Whether to provide an estimate of how many total relevant
-                results exist for this search, including those not found in our
-                search results.
+                results could exist for this search.
 
                 Result of the analysis will be available in the `recall` field
                 within the search request.
@@ -3167,6 +3183,7 @@ components:
             - running
             - completed
             - canceled
+            - failed
           description: The status of the Monitor Run
         monitorId:
           type:
@@ -3188,6 +3205,10 @@ components:
           type: string
           format: date-time
           description: When the run failed
+          nullable: true
+        failedReason:
+          type: string
+          description: The reason the run failed
           nullable: true
         canceledAt:
           type: string
@@ -3212,6 +3233,7 @@ components:
         - type
         - completedAt
         - failedAt
+        - failedReason
         - canceledAt
         - createdAt
         - updatedAt
@@ -3393,6 +3415,10 @@ components:
           type: string
           description: The external identifier for the webset
           nullable: true
+        title:
+          type: string
+          description: The title of the webset
+          nullable: true
         searches:
           type:
             - array
@@ -3454,6 +3480,7 @@ components:
         - object
         - status
         - externalId
+        - title
         - searches
         - imports
         - enrichments
@@ -3772,14 +3799,23 @@ components:
                 description: The relevant snippet of the reference content
                 nullable: true
               url:
-                description: The URL of the reference
                 type:
                   - string
+                format: uri
+                description: The URL of the reference
             required:
               - title
               - snippet
               - url
           description: The references used to generate the result.
+        source:
+          type:
+            - string
+          description: The source of the criterion
+        sourceType:
+          type:
+            - string
+          description: The source type of the criterion
       required:
         - criterion
         - reasoning
@@ -3831,9 +3867,10 @@ components:
                 description: The relevant snippet of the reference content
                 nullable: true
               url:
-                description: The URL of the reference
                 type:
                   - string
+                format: uri
+                description: The URL of the reference
             required:
               - title
               - snippet
@@ -4705,8 +4742,7 @@ components:
             - boolean
           description: >-
             Whether to provide an estimate of how many total relevant results
-            exist for this search, including those not found in our search
-            results.
+            could exist for this search.
 
             Result of the analysis will be available in the `recall` field
             within the search request.
