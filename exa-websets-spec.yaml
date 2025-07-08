@@ -1211,17 +1211,12 @@ paths:
               - webset.item.enriched
               - webset.export.created
               - webset.export.completed
-        - name: status
+        - name: successful
           required: false
           in: query
           description: Filter attempts by their success status
           schema:
-            default: all
-            type: string
-            enum:
-              - all
-              - succeeded
-              - failed
+            type: boolean
       responses:
         "200":
           description: List of webhook attempts
