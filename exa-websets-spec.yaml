@@ -3803,14 +3803,6 @@ components:
               - snippet
               - url
           description: The references used to generate the result.
-        source:
-          type:
-            - string
-          description: The source of the criterion
-        sourceType:
-          type:
-            - string
-          description: The source type of the criterion
       required:
         - criterion
         - reasoning
