@@ -403,6 +403,63 @@ paths:
             webset = exa.websets.cancel('webset_id')
 
             print(f'Cancelled webset: {webset.id}')
+  /v0/websets/preview:
+    post:
+      description: Preview a webset with the given parameters
+      operationId: websets-preview
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PreviewWebsetParameters"
+      responses:
+        "200":
+          description: Preview of the webset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreviewWebsetResponse"
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      summary: Preview a webset
+      tags:
+        - Websets Preview
+      security:
+        - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: |-
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const preview = await exa.websets.preview({
+              query: "Marketing agencies based in the US, that focus on consumer products. Get brands worked with and city"
+            });
+
+            console.log('Search criteria:', preview.search.criteria);
+            console.log('Available enrichments:', preview.enrichments.length);
+        - lang: python
+          label: Python
+          source: |-
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            preview = exa.websets.preview(params={
+                'query': 'Marketing agencies based in the US, that focus on consumer products. Get brands worked with and city'
+            })
+
+            print('Search criteria:', preview.search.criteria)
+            print('Available enrichments:', len(preview.enrichments))
   /v0/websets/{webset}/items/{id}:
     get:
       description: Returns a Webset Item.
@@ -545,8 +602,8 @@ paths:
           description: The number of results to return
           schema:
             minimum: 1
-            maximum: 200
-            default: 25
+            maximum: 100
+            default: 20
             type: number
         - name: sourceId
           required: false
@@ -2749,6 +2806,7 @@ components:
             - string
           enum:
             - created
+            - pending
             - running
             - completed
             - canceled
@@ -3402,6 +3460,7 @@ components:
             - string
           enum:
             - idle
+            - pending
             - running
             - paused
           description: The status of the webset
@@ -4016,6 +4075,117 @@ components:
         - data
         - hasMore
         - nextCursor
+    PreviewWebsetParameters:
+      type:
+        - object
+      properties:
+        query:
+          type:
+            - string
+          minLength: 1
+          maxLength: 5000
+          description: >-
+            Natural language search query describing what you are looking for.
+
+
+            Be specific and descriptive about your requirements,
+            characteristics, and any constraints that help narrow down the
+            results.
+          examples:
+            - >-
+              Marketing agencies based in the US, that focus on consumer
+              products. Get brands worked with and city
+            - AI startups in Europe that raised Series A funding in 2024
+            - SaaS companies with 50-200 employees in the fintech space
+        entity:
+          $ref: "#/components/schemas/Entity"
+          description: >-
+            Entity used to inform the decomposition.
+
+
+            It is not required to provide it, we automatically detect the entity
+            from all the information provided in the query. Only use this when
+            you need more fine control.
+      required:
+        - query
+    PreviewWebsetResponse:
+      type:
+        - object
+      properties:
+        search:
+          type:
+            - object
+          properties:
+            entity:
+              oneOf:
+                - type:
+                    - object
+                  $ref: "#/components/schemas/CompanyEntity"
+                - type:
+                    - object
+                  $ref: "#/components/schemas/PersonEntity"
+                - type:
+                    - object
+                  $ref: "#/components/schemas/ArticleEntity"
+                - type:
+                    - object
+                  $ref: "#/components/schemas/ResearchPaperEntity"
+                - type:
+                    - object
+                  $ref: "#/components/schemas/CustomEntity"
+            criteria:
+              type:
+                - array
+              items:
+                type:
+                  - object
+                properties:
+                  description:
+                    type:
+                      - string
+                required:
+                  - description
+          required:
+            - entity
+            - criteria
+        enrichments:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              description:
+                type:
+                  - string
+              format:
+                type:
+                  - string
+                enum:
+                  - text
+                  - date
+                  - number
+                  - options
+                  - email
+                  - phone
+              options:
+                type:
+                  - array
+                items:
+                  type:
+                    - object
+                  properties:
+                    label:
+                      type:
+                        - string
+                  required:
+                    - label
+            required:
+              - description
+              - format
+      required:
+        - search
+        - enrichments
     ListWebsetItemResponse:
       type:
         - object
