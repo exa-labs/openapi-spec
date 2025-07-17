@@ -405,7 +405,15 @@ paths:
             print(f'Cancelled webset: {webset.id}')
   /v0/websets/preview:
     post:
-      description: Preview a webset with the given parameters
+      description: >-
+        Preview how a search query will be decomposed before creating a webset.
+        This endpoint performs the same query analysis that happens during
+        webset creation, allowing you to see the detected entity type, generated
+        search criteria, and available enrichment columns in advance.
+
+
+        Use this to help users understand how their search will be interpreted
+        before committing to a full webset creation.
       operationId: websets-preview
       parameters: []
       requestBody:
@@ -2725,6 +2733,30 @@ components:
                 Sources (existing imports or websets) to exclude from search
                 results. Any results found within these sources will be omitted
                 to prevent finding them during search.
+            scope:
+              type:
+                - array
+              items:
+                type:
+                  - object
+                properties:
+                  source:
+                    type:
+                      - string
+                    enum:
+                      - import
+                  id:
+                    type:
+                      - string
+                    minLength: 1
+                    description: The ID of the source to search.
+                required:
+                  - source
+                  - id
+              description: >-
+                Limit the search to specific sources (existing imports or
+                websets). Any results found within these sources matching the
+                search criteria will be included in the Webset.
           required:
             - query
           description: Create initial search for the Webset.
@@ -2900,6 +2932,31 @@ components:
           description: >-
             Sources (existing imports or websets) used to omit certain results
             to be found during the search.
+        scope:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              source:
+                default: import
+                type:
+                  - string
+                enum:
+                  - import
+              id:
+                type:
+                  - string
+            required:
+              - id
+          description: >-
+            The scope of the search. By default, there is no scope - thus
+            searching the web.
+
+
+            If provided during creation, the search will only be performed on
+            the sources provided.
         progress:
           type:
             - object
@@ -3015,6 +3072,7 @@ components:
         - criteria
         - count
         - exclude
+        - scope
         - progress
         - recall
         - canceledAt
@@ -4133,6 +4191,7 @@ components:
                 - type:
                     - object
                   $ref: "#/components/schemas/CustomEntity"
+              description: Detected entity from the query.
             criteria:
               type:
                 - array
@@ -4145,6 +4204,7 @@ components:
                       - string
                 required:
                   - description
+              description: Detected criteria from the query.
           required:
             - entity
             - criteria
@@ -4158,6 +4218,7 @@ components:
               description:
                 type:
                   - string
+                description: Description of the enrichment.
               format:
                 type:
                   - string
@@ -4168,6 +4229,7 @@ components:
                   - options
                   - email
                   - phone
+                description: Format of the enrichment.
               options:
                 type:
                   - array
@@ -4178,11 +4240,14 @@ components:
                     label:
                       type:
                         - string
+                      description: Label of the option.
                   required:
                     - label
+                description: When format is options, the options detected from the query.
             required:
               - description
               - format
+          description: Detected enrichments from the query.
       required:
         - search
         - enrichments
@@ -4883,10 +4948,10 @@ components:
                   - import
                   - webset
               id:
+                description: The ID of the source to exclude.
                 type:
                   - string
                 minLength: 1
-                description: The ID of the source to exclude.
             required:
               - source
               - id
@@ -4894,6 +4959,30 @@ components:
             Sources (existing imports or websets) to exclude from search
             results. Any results found within these sources will be omitted to
             prevent finding them during search.
+        scope:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              source:
+                type:
+                  - string
+                enum:
+                  - import
+              id:
+                description: The ID of the source to search.
+                type:
+                  - string
+                minLength: 1
+            required:
+              - source
+              - id
+          description: >-
+            Limit the search to specific sources (existing imports). Any results
+            found within these sources matching the search criteria will be
+            included in the Webset.
         recall:
           type:
             - boolean
