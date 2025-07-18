@@ -2745,11 +2745,31 @@ components:
                       - string
                     enum:
                       - import
+                      - webset
                   id:
+                    description: The ID of the source to search.
                     type:
                       - string
                     minLength: 1
-                    description: The ID of the source to search.
+                  relationship:
+                    type:
+                      - object
+                    properties:
+                      definition:
+                        type:
+                          - string
+                        description: >-
+                          What the relationship of the entities you hope to find
+                          is relative to the entities contained in the provided
+                          source.
+                      limit:
+                        type:
+                          - number
+                        minimum: 1
+                        maximum: 10
+                    required:
+                      - definition
+                      - limit
                 required:
                   - source
                   - id
@@ -4971,11 +4991,30 @@ components:
                   - string
                 enum:
                   - import
+                  - webset
               id:
                 description: The ID of the source to search.
                 type:
                   - string
                 minLength: 1
+              relationship:
+                type:
+                  - object
+                properties:
+                  definition:
+                    type:
+                      - string
+                    description: >-
+                      What the relationship of the entities you hope to find is
+                      relative to the entities contained in the provided source.
+                  limit:
+                    type:
+                      - number
+                    minimum: 1
+                    maximum: 10
+                required:
+                  - definition
+                  - limit
             required:
               - source
               - id
