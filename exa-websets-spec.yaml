@@ -2864,6 +2864,10 @@ components:
             - canceled
           description: The status of the search
           title: WebsetSearchStatus
+        websetId:
+          type:
+            - string
+          description: The unique identifier for the Webset this search belongs to
         query:
           type:
             - string
@@ -3086,6 +3090,7 @@ components:
       required:
         - id
         - object
+        - websetId
         - status
         - query
         - entity
