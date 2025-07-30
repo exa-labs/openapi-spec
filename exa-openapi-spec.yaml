@@ -1,16 +1,149 @@
 openapi: 3.1.0
 info:
-  version: 1.1.4
+  version: 1.2.0
   title: Exa Search API
   description: A comprehensive API for internet-scale search, allowing users to perform queries and retrieve results from a wide variety of sources using embeddings-based and traditional search.
 servers:
   - url: https://api.exa.ai
+security:
+  - apikey: []
 paths:
   /search:
     post:
       operationId: search
       summary: Search
       description: Perform a search with a Exa prompt-engineered query and retrieve a list of relevant results. Optionally get contents.
+      x-codeSamples:
+        - lang: bash
+          label: Simple search and contents
+          source: |
+            curl -X POST 'https://api.exa.ai/search' \
+              -H 'x-api-key: YOUR-EXA-API-KEY' \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "query": "Latest research in LLMs",
+                "text": true
+              }'
+        - lang: python
+          label: Simple search and contents
+          source: |
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            results = exa.search_and_contents(
+                "Latest research in LLMs", 
+                text=True
+            )
+
+            print(results)
+        - lang: javascript
+          label: Simple search and contents
+          source: |
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const results = await exa.searchAndContents(
+                'Latest research in LLMs', 
+                { text: true }
+            );
+
+            console.log(results);
+        - lang: php
+          label: Simple search and contents
+          source: ""
+        - lang: go
+          label: Simple search and contents
+          source: ""
+        - lang: java
+          label: Simple search and contents
+          source: ""
+        - lang: bash
+          label: Advanced search with filters
+          source: |
+            curl --request POST \
+              --url https://api.exa.ai/search \
+              --header 'x-api-key: <token>' \
+              --header 'Content-Type: application/json' \
+              --data '{
+              "query": "Latest research in LLMs",
+              "type": "auto",
+              "category": "research paper",
+              "numResults": 10,
+              "contents": {
+                "text": true,
+                "summary": {
+                  "query": "Main developments"
+                },
+                "subpages": 1,
+                "subpageTarget": "sources",
+                "extras": {
+                  "links": 1,
+                  "imageLinks": 1
+                }
+              }
+            }'
+        - lang: python
+          label: Advanced search with filters
+          source: |
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            results = exa.search_and_contents(
+                "Latest research in LLMs",
+                type="auto",
+                category="research paper",
+                num_results=10,
+                text=True,
+                summary={
+                    "query": "Main developments"
+                },
+                subpages=1,
+                subpage_target="sources",
+                extras={
+                    "links": 1,
+                    "image_links": 1
+                }
+            )
+
+            print(results)
+        - lang: javascript
+          label: Advanced search with filters
+          source: |
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const results = await exa.searchAndContents('Latest research in LLMs', {
+                type: 'auto',
+                category: 'research paper',
+                numResults: 10,
+                contents: {
+                    text: true,
+                    summary: {
+                        query: 'Main developments'
+                    },
+                    subpages: 1,
+                    subpageTarget: 'sources',
+                    extras: {
+                        links: 1,
+                        imageLinks: 1
+                    }
+                }
+            });
+
+            console.log(results);
+        - lang: php
+          label: Advanced search with filters
+          source: ""
+        - lang: go
+          label: Advanced search with filters
+          source: ""
+        - lang: java
+          label: Advanced search with filters
+          source: ""
       requestBody:
         required: true
         content:
@@ -23,18 +156,14 @@ paths:
                       type: string
                       example: "Latest developments in LLM capabilities"
                       description: The query string for the search.
-                    useAutoprompt:
-                      type: boolean
-                      description: Autoprompt converts your query to an Exa-style query. Enabled by default for auto search, optional for neural search, and not available for keyword search.
-                      example: true
-                      default: true
                     type:
                       type: string
                       enum:
                         - keyword
                         - neural
+                        - fast
                         - auto
-                      description: The type of search. Neural uses an embeddings-based model, keyword is google-like SERP. Default is auto, which automatically decides between keyword and neural.
+                      description: The type of search. Neural uses an embeddings-based model, keyword is google-like SERP, and auto (default) intelligently combines the two. Fast uses streamlined versions of the neural and keyword models.
                       example: "auto"
                       default: "auto"
                     category:
@@ -51,6 +180,10 @@ paths:
                         - financial report
                       description: A data category to focus on.
                       example: "research paper"
+                    userLocation:
+                      type: string
+                      description: The two-letter ISO country code of the user, e.g. US.
+                      example: "US"
                   required:
                     - query
                 - $ref: "#/components/schemas/CommonRequest"
@@ -62,6 +195,52 @@ paths:
       operationId: findSimilar
       summary: Find similar links
       description: Find similar links to the link provided. Optionally get contents.
+      x-codeSamples:
+        - lang: bash
+          label: Find similar links
+          source: |
+            curl -X POST 'https://api.exa.ai/findSimilar' \
+              -H 'x-api-key: YOUR-EXA-API-KEY' \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "url": "https://arxiv.org/abs/2307.06435",
+                "text": true
+              }'
+        - lang: python
+          label: Find similar links
+          source: |
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            results = exa.find_similar_and_contents(
+                url="https://arxiv.org/abs/2307.06435",
+                text=True
+            )
+
+            print(results)
+        - lang: javascript
+          label: Find similar links
+          source: |
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const results = await exa.findSimilarAndContents(
+                'https://arxiv.org/abs/2307.06435',
+                { text: true }
+            );
+
+            console.log(results);
+        - lang: php
+          label: Find similar links
+          source: ""
+        - lang: go
+          label: Find similar links
+          source: ""
+        - lang: java
+          label: Find similar links
+          source: ""
       requestBody:
         required: true
         content:
@@ -84,6 +263,142 @@ paths:
     post:
       summary: Get Contents
       operationId: "getContents"
+      x-codeSamples:
+        - lang: bash
+          label: Simple contents retrieval
+          source: |
+            curl -X POST 'https://api.exa.ai/contents' \
+              -H 'x-api-key: YOUR-EXA-API-KEY' \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "urls": ["https://arxiv.org/abs/2307.06435"],
+                "text": true
+              }'
+        - lang: python
+          label: Simple contents retrieval
+          source: |
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            results = exa.get_contents(
+                urls=["https://arxiv.org/abs/2307.06435"],
+                text=True
+            )
+
+            print(results)
+        - lang: javascript
+          label: Simple contents retrieval
+          source: |
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const results = await exa.getContents(
+                ["https://arxiv.org/abs/2307.06435"],
+                { text: true }
+            );
+
+            console.log(results);
+        - lang: php
+          label: Simple contents retrieval
+          source: ""
+        - lang: go
+          label: Simple contents retrieval
+          source: ""
+        - lang: java
+          label: Simple contents retrieval
+          source: ""
+        - lang: bash
+          label: Advanced contents retrieval
+          source: |
+            curl --request POST \
+              --url https://api.exa.ai/contents \
+              --header 'x-api-key: YOUR-EXA-API-KEY' \
+              --header 'Content-Type: application/json' \
+              --data '{
+                "urls": ["https://arxiv.org/abs/2307.06435"],
+                "text": {
+                  "maxCharacters": 1000,
+                  "includeHtmlTags": false
+                },
+                "highlights": {
+                  "numSentences": 3,
+                  "highlightsPerUrl": 2,
+                  "query": "Key findings"
+                },
+                "summary": {
+                  "query": "Main research contributions"
+                },
+                "subpages": 1,
+                "subpageTarget": "references",
+                "extras": {
+                  "links": 2,
+                  "imageLinks": 1
+                }
+              }'
+        - lang: python
+          label: Advanced contents retrieval
+          source: |
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            results = exa.get_contents(
+                urls=["https://arxiv.org/abs/2307.06435"],
+                text={
+                    "maxCharacters": 1000,
+                    "includeHtmlTags": False
+                },
+                highlights={
+                    "numSentences": 3,
+                    "highlightsPerUrl": 2,
+                    "query": "Key findings"
+                },
+                summary={
+                    "query": "Main research contributions"
+                },
+                subpages=1,
+                subpage_target="references",
+                extras={
+                    "links": 2,
+                    "image_links": 1
+                }
+            )
+
+            print(results)
+        - lang: javascript
+          label: Advanced contents retrieval
+          source: |
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const results = await exa.getContents(
+                ["https://arxiv.org/abs/2307.06435"],
+                {
+                    text: {
+                        maxCharacters: 1000,
+                        includeHtmlTags: false
+                    },
+                    highlights: {
+                        numSentences: 3,
+                        highlightsPerUrl: 2,
+                        query: "Key findings"
+                    },
+                    summary: {
+                        query: "Main research contributions"
+                    },
+                    subpages: 1,
+                    subpageTarget: "references",
+                    extras: {
+                        links: 2,
+                        imageLinks: 1
+                    }
+                }
+            );
+
+            console.log(results);
       requestBody:
         required: true
         content:
@@ -117,7 +432,53 @@ paths:
       operationId: answer
       summary: Generate an answer from search results
       description: |
-        Performs a search based on the query and generates either a direct answer or a detailed summary with citations, depending on the query type. 
+        Performs a search based on the query and generates either a direct answer or a detailed summary with citations, depending on the query type.
+      x-codeSamples:
+        - lang: bash
+          label: Simple answer
+          source: |
+            curl -X POST 'https://api.exa.ai/answer' \
+              -H 'x-api-key: YOUR-EXA-API-KEY' \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "query": "What is the latest valuation of SpaceX?",
+                "text": true
+              }'
+        - lang: python
+          label: Simple answer
+          source: |
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            result = exa.answer(
+                "What is the latest valuation of SpaceX?",
+                text=True
+            )
+
+            print(result)
+        - lang: javascript
+          label: Simple answer
+          source: |
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const result = await exa.answer(
+                'What is the latest valuation of SpaceX?',
+                { text: true }
+            );
+
+            console.log(result);
+        - lang: php
+          label: Simple answer
+          source: ""
+        - lang: go
+          label: Simple answer
+          source: ""
+        - lang: java
+          label: Simple answer
+          source: ""
       requestBody:
         required: true
         content:
@@ -135,21 +496,230 @@ paths:
                 stream:
                   type: boolean
                   default: false
-                  description: If true, the response is returned as a server-sent events (SSS) stream. 
+                  description: If true, the response is returned as a server-sent events (SSS) stream.
                 text:
                   type: boolean
                   default: false
                   description: If true, the response includes full text content in the search results
-                model:
-                  type: string
-                  enum:
-                    - exa
-                    - exa-pro          
-                  description: The search model to use for the answer. Exa passes only one query to exa, while exa-pro also passes 2 expanded queries to our search model. 
-                  default: "exa"
       responses:
         "200":
           $ref: "#/components/responses/AnswerResponse"
+  /research/v0/tasks:
+    post:
+      operationId: research-tasks-create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                instructions:
+                  type: string
+                  maxLength: 4096
+                  description: Instructions for what the research task should accomplish
+                model:
+                  type: string
+                  enum:
+                    - exa-research
+                    - exa-research-pro
+                  default: exa-research
+                output:
+                  type: object
+                  properties:
+                    schema:
+                      description: >-
+                        A JsonSchema specification of the desired output. See
+                        https://json-schema.org/draft-07.
+                    inferSchema:
+                      type: boolean
+                      description: When set to true and no output schema is provided, an LLM will generate an output schema.
+              required:
+                - instructions
+              example:
+                instructions: "What species of ant are similar to honeypot ants?"
+                model: "exa-research"
+                output:
+                  schema:
+                    type: "object"
+                    properties:
+                      answer:
+                        type: "string"
+      responses:
+        "201":
+          $ref: "#/components/responses/ResearchCreateTaskResponse"
+      summary: Create a research task with instructions and an output schema
+      x-codeSamples:
+        - lang: python
+          label: Advanced search with filters
+          source: |
+            # pip install exa-py
+            import os
+            from exa_py import Exa
+
+            exa = Exa(os.environ["EXA_API_KEY"])
+
+            # Create a research task
+            instructions = "Summarize the history of San Francisco highlighting one or two major events for each decade from 1850 to 1950"
+            schema = {
+                "type": "object",
+                "required": ["timeline"],
+                "properties": {
+                    "timeline": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": ["decade", "notableEvents"],
+                            "properties": {
+                                "decade": {"type": "string"},
+                                "notableEvents": {"type": "string"},
+                            },
+                        },
+                    },
+                },
+                "additionalProperties": False,
+            }
+
+            task = exa.research.create_task(
+                model="exa_research",
+                instructions=instructions,
+                output_schema=schema,
+            )
+            # Poll until completion
+            result = exa.research.poll_task(task.id)
+            print(result)
+        - lang: javascript
+          label: Advanced search with filters
+          source: |
+            // npm install exa-js
+            import Exa, { ResearchModel } from "exa-js";
+
+            const exa = new Exa(process.env.EXA_API_KEY);
+
+            async function simpleResearchExample() {
+              // Create a research task
+              const task = await exa.research.createTask({
+                model: ResearchModel.exa_research,
+                instructions: "Summarize the history of San Francisco in 3 sentences.",
+                output: {
+                  schema: {
+                    type: "object",
+                    required: ["summary"],
+                    properties: {
+                      summary: { type: "string" },
+                    },
+                    additionalProperties: false,
+                  },
+                },
+              });
+
+              // Poll until completion
+              const result = await exa.research.pollTask(task.id);
+              console.log("Research result:", result);
+            }
+
+            simpleResearchExample().catch(console.error);
+    get:
+      operationId: research-tasks-list
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: The cursor to paginate through the results
+          schema:
+            minLength: 1
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: The number of results to return
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 25
+            type: number
+      responses:
+        "200":
+          $ref: "#/components/responses/ListResearchTasksResponse"
+      summary: List research tasks
+      x-codeSamples:
+        - lang: python
+          label: Advanced search with filters
+          source: |
+            # pip install exa
+            import os
+            from exa import Exa
+
+            exa = Exa(os.environ["EXA_API_KEY"])
+
+            response = exa.research.list_tasks()
+            print("All research tasks:", response["data"])
+        - lang: javascript
+          label: Advanced search with filters
+          source: |
+            // npm install exa-js
+            import Exa from "exa-js";
+            const exa = new Exa(process.env.EXA_API_KEY);
+
+            async function listAllResearchTasks() {
+              const response = await exa.research.listTasks();
+              console.log("All research tasks:", response.data);
+            }
+
+            listAllResearchTasks().catch(console.error);
+  /research/v0/tasks/{id}:
+    get:
+      operationId: ResearchControllerV0_getResearchTask
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/ResearchTaskResponse"
+      summary: Get a research task by id
+      x-codeSamples:
+        - lang: python
+          label: Get research task
+          source: |
+            # pip install exa-py
+            import os
+            from exa_py import Exa
+
+            exa = Exa(os.environ["EXA_API_KEY"])
+
+            # Get a research task by ID (single check)
+            task_id = "your-task-id-here"
+            task = exa.research.get_task(task_id)
+            print(f"Task status: {task.status}")
+
+            # Poll until completion
+            result = exa.research.poll_task(task_id)
+            print(f"Final result: {result.data}")
+        - lang: javascript
+          label: Get research task
+          source: |
+            // npm install exa-js
+            import Exa from "exa-js";
+
+            const exa = new Exa(process.env.EXA_API_KEY);
+
+            async function getResearchTask() {
+              const taskId = "your-task-id-here";
+              
+              // Get a research task by ID (single check)
+              const task = await exa.research.getTask(taskId);
+              console.log("Task status:", task.status);
+              
+              // Poll until completion
+              const result = await exa.research.pollTask(taskId);
+              console.log("Final result:", result.data);
+            }
+
+            getResearchTask().catch(console.error);
 components:
   securitySchemes:
     apikey:
@@ -220,18 +790,20 @@ components:
         text:
           oneOf:
             - type: boolean
+              title: "Simple text retrieval"
               description: If true, returns full page text with default settings. If false, disables text return.
             - type: object
-              description: Parsed contents of the page with custom settings.
+              title: "Advanced text options"
+              description: Advanced options for controlling text extraction. Use this when you need to limit text length or include HTML structure.
               properties:
                 maxCharacters:
                   type: integer
-                  description: Maximum character limit for the full page text.
+                  description: Maximum character limit for the full page text. Useful for controlling response size and API costs.
                   example: 1000
                 includeHtmlTags:
                   type: boolean
                   default: false
-                  description: Include HTML tags, which can help LLMs understand text structure.
+                  description: Include HTML tags in the response, which can help LLMs understand text structure and formatting.
                   example: false
         highlights:
           type: object
@@ -259,15 +831,38 @@ components:
               type: string
               description: Custom query for the LLM-generated summary.
               example: "Main developments"
+            schema:
+              type: object
+              description: |
+                JSON schema for structured output from summary. 
+                See https://json-schema.org/overview/what-is-jsonschema for JSON Schema documentation.
+              example:
+                {
+                  "$schema": "http://json-schema.org/draft-07/schema#",
+                  "title": "Title",
+                  "type": "object",
+                  "properties":
+                    {
+                      "Property 1":
+                        { "type": "string", "description": "Description" },
+                      "Property 2":
+                        {
+                          "type": "string",
+                          "enum": ["option 1", "option 2", "option 3"],
+                          "description": "Description",
+                        },
+                    },
+                  "required": ["Property 1"],
+                }
         livecrawl:
           type: string
-          enum: [never, fallback, always, auto]
+          enum: [never, fallback, always, preferred]
           description: |
             Options for livecrawling pages.
             'never': Disable livecrawling (default for neural search).
             'fallback': Livecrawl when cache is empty (default for keyword search).
             'always': Always livecrawl.
-            'auto': Use an LLM to detect if query needs real-time content.
+            'preferred': Always try to livecrawl, but fall back to cache if crawling fails.
           example: "always"
         livecrawlTimeout:
           type: integer
@@ -301,6 +896,18 @@ components:
               default: 0
               description: Number of images to return for each result.
               example: 1
+        context:
+          oneOf:
+            - type: boolean
+              description: Formats the search resutls into a context string ready for LLMs.
+              example: true
+            - type: object
+              description: Formats the search resutls into a context string ready for LLMs.
+              properties:
+                maxCharacters:
+                  type: integer
+                  description: Maximum character limit.
+                  example: 10000
 
     CommonRequest:
       type: object
@@ -355,9 +962,22 @@ components:
           type: array
           items:
             type: string
-          description: List of strings that must not be present in webpage text of results. Currently, only 1 string is supported, of up to 5 words.
+          description: List of strings that must not be present in webpage text of results. Currently, only 1 string is supported, of up to 5 words. Checks from the first 1000 words of the webpage text.
           example:
             - course
+        context:
+          oneOf:
+            - type: boolean
+              description: Formats the search results into a context string ready for LLMs.
+              example: true
+            - type: object
+              description: Formats the search results into a context string ready for LLMs.
+              properties:
+                maxCharacters:
+                  type: integer
+                  description: Maximum character limit.
+                  example: 10000
+
         contents:
           $ref: "#/components/schemas/ContentsRequest"
 
@@ -417,7 +1037,7 @@ components:
               items:
                 type: string
               description: Array of highlights extracted from the search result content.
-              example: 
+              example:
                 - "Such requirements have limited their adoption..."
             highlightScores:
               type: array
@@ -435,21 +1055,23 @@ components:
               items:
                 $ref: "#/components/schemas/ResultWithContent"
               description: Array of subpages for the search result.
-              example: [{
-                "id": "https://arxiv.org/abs/2303.17580",
-                "url": "https://arxiv.org/pdf/2303.17580.pdf",
-                "title": "HuggingGPT: Solving AI Tasks with ChatGPT and its Friends in Hugging Face",
-                "author": "Yongliang  Shen, Microsoft Research Asia, Kaitao  Song, Microsoft Research Asia, Xu  Tan, Microsoft Research Asia, Dongsheng  Li, Microsoft Research Asia, Weiming  Lu, Microsoft Research Asia, Yueting  Zhuang, Microsoft Research Asia, yzhuang@zju.edu.cn, Zhejiang  University, Microsoft Research Asia, Microsoft  Research, Microsoft Research Asia",
-                "publishedDate": "2023-11-16T01:36:20.486Z",
-                "text": "HuggingGPT: Solving AI Tasks with ChatGPT and its Friends in Hugging Face Date Published: 2023-05-25 Authors: Yongliang Shen, Microsoft Research Asia Kaitao Song, Microsoft Research Asia Xu Tan, Microsoft Research Asia Dongsheng Li, Microsoft Research Asia Weiming Lu, Microsoft Research Asia Yueting Zhuang, Microsoft Research Asia, yzhuang@zju.edu.cn Zhejiang University, Microsoft Research Asia Microsoft Research, Microsoft Research Asia Abstract Solving complicated AI tasks with different domains and modalities is a key step toward artificial general intelligence. While there are abundant AI models available for different domains and modalities, they cannot handle complicated AI tasks. Considering large language models (LLMs) have exhibited exceptional ability in language understanding, generation, interaction, and reasoning, we advocate that LLMs could act as a controller to manage existing AI models to solve complicated AI tasks and language could be a generic interface to empower t",
-                "summary": "HuggingGPT is a framework using ChatGPT as a central controller to orchestrate various AI models from Hugging Face to solve complex tasks. ChatGPT plans the task, selects appropriate models based on their descriptions, executes subtasks, and summarizes the results. This approach addresses limitations of LLMs by allowing them to handle multimodal data (vision, speech) and coordinate multiple models for complex tasks, paving the way for more advanced AI systems.",
-                "highlights": [
-                  "2) Recently, some researchers started to investigate the integration of using tools or models in LLMs  ."
-                ],
-                "highlightScores": [
-                  0.32679107785224915
+              example:
+                [
+                  {
+                    "id": "https://arxiv.org/abs/2303.17580",
+                    "url": "https://arxiv.org/pdf/2303.17580.pdf",
+                    "title": "HuggingGPT: Solving AI Tasks with ChatGPT and its Friends in Hugging Face",
+                    "author": "Yongliang  Shen, Microsoft Research Asia, Kaitao  Song, Microsoft Research Asia, Xu  Tan, Microsoft Research Asia, Dongsheng  Li, Microsoft Research Asia, Weiming  Lu, Microsoft Research Asia, Yueting  Zhuang, Microsoft Research Asia, yzhuang@zju.edu.cn, Zhejiang  University, Microsoft Research Asia, Microsoft  Research, Microsoft Research Asia",
+                    "publishedDate": "2023-11-16T01:36:20.486Z",
+                    "text": "HuggingGPT: Solving AI Tasks with ChatGPT and its Friends in Hugging Face Date Published: 2023-05-25 Authors: Yongliang Shen, Microsoft Research Asia Kaitao Song, Microsoft Research Asia Xu Tan, Microsoft Research Asia Dongsheng Li, Microsoft Research Asia Weiming Lu, Microsoft Research Asia Yueting Zhuang, Microsoft Research Asia, yzhuang@zju.edu.cn Zhejiang University, Microsoft Research Asia Microsoft Research, Microsoft Research Asia Abstract Solving complicated AI tasks with different domains and modalities is a key step toward artificial general intelligence. While there are abundant AI models available for different domains and modalities, they cannot handle complicated AI tasks. Considering large language models (LLMs) have exhibited exceptional ability in language understanding, generation, interaction, and reasoning, we advocate that LLMs could act as a controller to manage existing AI models to solve complicated AI tasks and language could be a generic interface to empower t",
+                    "summary": "HuggingGPT is a framework using ChatGPT as a central controller to orchestrate various AI models from Hugging Face to solve complex tasks. ChatGPT plans the task, selects appropriate models based on their descriptions, executes subtasks, and summarizes the results. This approach addresses limitations of LLMs by allowing them to handle multimodal data (vision, speech) and coordinate multiple models for complex tasks, paving the way for more advanced AI systems.",
+                    "highlights":
+                      [
+                        "2) Recently, some researchers started to investigate the integration of using tools or models in LLMs  .",
+                      ],
+                    "highlightScores": [0.32679107785224915],
+                  },
                 ]
-              }]
             extras:
               type: object
               description: Results from extras.
@@ -461,6 +1083,168 @@ components:
                   description: Array of links from the search result.
                   example: []
 
+    CostDollars:
+      type: object
+      properties:
+        total:
+          type: number
+          format: float
+          description: Total dollar cost for your request
+          example: 0.005
+        breakDown:
+          type: array
+          description: Breakdown of costs by operation type
+          items:
+            type: object
+            properties:
+              search:
+                type: number
+                format: float
+                description: Cost of your search operations
+                example: 0.005
+              contents:
+                type: number
+                format: float
+                description: Cost of your content operations
+                example: 0
+              breakdown:
+                type: object
+                properties:
+                  keywordSearch:
+                    type: number
+                    format: float
+                    description: Cost of your keyword search operations
+                    example: 0
+                  neuralSearch:
+                    type: number
+                    format: float
+                    description: Cost of your neural search operations
+                    example: 0.005
+                  contentText:
+                    type: number
+                    format: float
+                    description: Cost of your text content retrieval
+                    example: 0
+                  contentHighlight:
+                    type: number
+                    format: float
+                    description: Cost of your highlight generation
+                    example: 0
+                  contentSummary:
+                    type: number
+                    format: float
+                    description: Cost of your summary generation
+                    example: 0
+        perRequestPrices:
+          type: object
+          description: Standard price per request for different operations
+          properties:
+            neuralSearch_1_25_results:
+              type: number
+              format: float
+              description: Standard price for neural search with 1-25 results
+              example: 0.005
+            neuralSearch_26_100_results:
+              type: number
+              format: float
+              description: Standard price for neural search with 26-100 results
+              example: 0.025
+            neuralSearch_100_plus_results:
+              type: number
+              format: float
+              description: Standard price for neural search with 100+ results
+              example: 1
+            keywordSearch_1_100_results:
+              type: number
+              format: float
+              description: Standard price for keyword search with 1-100 results
+              example: 0.0025
+            keywordSearch_100_plus_results:
+              type: number
+              format: float
+              description: Standard price for keyword search with 100+ results
+              example: 3
+        perPagePrices:
+          type: object
+          description: Standard price per page for different content operations
+          properties:
+            contentText:
+              type: number
+              format: float
+              description: Standard price per page for text content
+              example: 0.001
+            contentHighlight:
+              type: number
+              format: float
+              description: Standard price per page for highlights
+              example: 0.001
+            contentSummary:
+              type: number
+              format: float
+              description: Standard price per page for summaries
+              example: 0.001
+
+    ResearchTaskDto:
+      type:
+        - object
+      properties:
+        id:
+          type:
+            - string
+          description: The unique identifier for the research task
+        status:
+          type:
+            - string
+          enum:
+            - running
+            - completed
+            - failed
+          description: The current status of the research task
+        instructions:
+          type:
+            - string
+          description: The instructions or query for the research task
+        schema:
+          type:
+            - object
+          additionalProperties: {}
+          description: The JSON schema specification for the expected output format
+        data:
+          type:
+            - object
+          additionalProperties: {}
+          description: The research results data conforming to the specified schema
+        citations:
+          type:
+            - object
+          additionalProperties:
+            type:
+              - array
+            items:
+              type:
+                - object
+              properties:
+                id:
+                  type:
+                    - string
+                url:
+                  type:
+                    - string
+                title:
+                  type:
+                    - string
+                snippet:
+                  type:
+                    - string
+              required:
+                - id
+                - url
+                - snippet
+          description: Citations grouped by the root field they were used in
+      required:
+        - id
+        - status
+        - instructions
   responses:
     SearchResponse:
       description: OK
@@ -469,6 +1253,15 @@ components:
           schema:
             type: object
             properties:
+              requestId:
+                type: string
+                description: Unique identifier for the request
+                example: "b5947044c4b78efa9552a7c89b306d95"
+              resolvedSearchType:
+                type: string
+                enum: [neural, keyword]
+                description: The search type that was actually used for this request
+                example: "neural"
               results:
                 type: array
                 description: A list of search results containing title, URL, published date, author, and score.
@@ -479,6 +1272,11 @@ components:
                 enum: [neural, keyword]
                 description: For auto searches, indicates which search type was selected.
                 example: "auto"
+              context:
+                type: string
+                description: A formatted string of the search results ready for LLMs.
+              costDollars:
+                $ref: "#/components/schemas/CostDollars"
 
     FindSimilarResponse:
       description: OK
@@ -487,11 +1285,20 @@ components:
           schema:
             type: object
             properties:
+              requestId:
+                type: string
+                description: Unique identifier for the request
+                example: "c6958155d5c89ffa0663b7c90c407396"
+              context:
+                type: string
+                description: A formatted string of the search results ready for LLMs.
               results:
                 type: array
                 description: A list of search results containing title, URL, published date, author, and score.
                 items:
                   $ref: "#/components/schemas/ResultWithContent"
+              costDollars:
+                $ref: "#/components/schemas/CostDollars"
 
     ContentsResponse:
       description: OK
@@ -500,17 +1307,68 @@ components:
           schema:
             type: object
             properties:
+              requestId:
+                type: string
+                description: Unique identifier for the request
+                example: "e492118ccdedcba5088bfc4357a8a125"
               results:
                 type: array
                 items:
                   $ref: "#/components/schemas/ResultWithContent"
-                  
+              context:
+                type: string
+                description: A formatted string of the search results ready for LLMs.
+              statuses:
+                type: array
+                description: Status information for each requested URL
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: The URL that was requested
+                      example: "https://example.com"
+                    status:
+                      type: string
+                      enum: ["success", "error"]
+                      description: Status of the content fetch operation
+                      example: "success"
+                    error:
+                      type: object
+                      nullable: true
+                      description: Error details, only present when status is "error"
+                      properties:
+                        tag:
+                          type: string
+                          enum:
+                            [
+                              "CRAWL_NOT_FOUND",
+                              "CRAWL_TIMEOUT",
+                              "CRAWL_LIVECRAWL_TIMEOUT",
+                              "SOURCE_NOT_AVAILABLE",
+                              "CRAWL_UNKNOWN_ERROR",
+                            ]
+                          description: Specific error type
+                          example: "CRAWL_NOT_FOUND"
+                        httpStatusCode:
+                          type: integer
+                          nullable: true
+                          description: The corresponding HTTP status code
+                          example: 404
+              costDollars:
+                $ref: "#/components/schemas/CostDollars"
+
     AnswerResponse:
       description: OK
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/AnswerResult"
+            allOf:
+              - $ref: "#/components/schemas/AnswerResult"
+              - type: object
+                properties:
+                  costDollars:
+                    $ref: "#/components/schemas/CostDollars"
         text/event-stream:
           schema:
             type: object
@@ -522,3 +1380,44 @@ components:
                 type: array
                 items:
                   $ref: "#/components/schemas/AnswerCitation"
+    ResearchCreateTaskResponse:
+      description: Research task created
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The unique identifier for the research task
+                example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+    ListResearchTasksResponse:
+      description: List of research tasks
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              requestId:
+                type: string
+                description: Unique identifier for the request
+                example: "b5947044c4b78efa9552a7c89b306d95"
+              data:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResearchTaskDto"
+                description: The list of research tasks
+              hasMore:
+                type: boolean
+                description: Whether there are more results to paginate through
+              nextCursor:
+                type: string
+                nullable: true
+                description: The cursor to paginate through the next set of results
+    ResearchTaskResponse:
+      description: Research task details
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ResearchTaskDto"
