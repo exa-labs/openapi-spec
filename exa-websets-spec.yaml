@@ -405,7 +405,15 @@ paths:
             print(f'Cancelled webset: {webset.id}')
   /v0/websets/preview:
     post:
-      description: Preview a webset with the given parameters
+      description: >-
+        Preview how a search query will be decomposed before creating a webset.
+        This endpoint performs the same query analysis that happens during
+        webset creation, allowing you to see the detected entity type, generated
+        search criteria, and available enrichment columns in advance.
+
+
+        Use this to help users understand how their search will be interpreted
+        before committing to a full webset creation.
       operationId: websets-preview
       parameters: []
       requestBody:
@@ -726,6 +734,38 @@ paths:
 
             print(f'Created enrichment: {enrichment.id}')
   /v0/websets/{webset}/enrichments/{id}:
+    patch:
+      operationId: WebsetsEnrichmentsController_updateEnrichment_v0
+      parameters:
+        - name: webset
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEnrichmentParameters"
+      responses:
+        "200":
+          description: ""
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
+      tags: *ref_2
+      security:
+        - api_key: []
     get:
       operationId: websets-enrichments-get
       parameters:
@@ -1263,9 +1303,13 @@ paths:
               - webset.search.updated
               - import.created
               - import.completed
-              - import.processing
               - webset.item.created
               - webset.item.enriched
+              - monitor.created
+              - monitor.updated
+              - monitor.deleted
+              - monitor.run.created
+              - monitor.run.completed
               - webset.export.created
               - webset.export.completed
         - name: successful
@@ -1370,9 +1414,13 @@ paths:
                 - webset.search.updated
                 - import.created
                 - import.completed
-                - import.processing
                 - webset.item.created
                 - webset.item.enriched
+                - monitor.created
+                - monitor.updated
+                - monitor.deleted
+                - monitor.run.created
+                - monitor.run.completed
                 - webset.export.created
                 - webset.export.completed
         - name: createdBefore
@@ -2589,6 +2637,7 @@ components:
             - options
             - email
             - phone
+            - url
           description: >-
             Format of the enrichment response.
 
@@ -2725,6 +2774,50 @@ components:
                 Sources (existing imports or websets) to exclude from search
                 results. Any results found within these sources will be omitted
                 to prevent finding them during search.
+            scope:
+              type:
+                - array
+              items:
+                type:
+                  - object
+                properties:
+                  source:
+                    type:
+                      - string
+                    enum:
+                      - import
+                      - webset
+                  id:
+                    type:
+                      - string
+                    minLength: 1
+                    description: The ID of the source to search.
+                  relationship:
+                    type:
+                      - object
+                    properties:
+                      definition:
+                        type:
+                          - string
+                        description: >-
+                          What the relationship of the entities you hope to find
+                          is relative to the entities contained in the provided
+                          source.
+                      limit:
+                        type:
+                          - number
+                        minimum: 1
+                        maximum: 10
+                    required:
+                      - definition
+                      - limit
+                required:
+                  - source
+                  - id
+              description: >-
+                Limit the search to specific sources (existing imports or
+                websets). Any results found within these sources matching the
+                search criteria will be included in the Webset.
           required:
             - query
           description: Create initial search for the Webset.
@@ -2812,6 +2905,10 @@ components:
             - canceled
           description: The status of the search
           title: WebsetSearchStatus
+        websetId:
+          type:
+            - string
+          description: The unique identifier for the Webset this search belongs to
         query:
           type:
             - string
@@ -2900,6 +2997,50 @@ components:
           description: >-
             Sources (existing imports or websets) used to omit certain results
             to be found during the search.
+        scope:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              source:
+                type:
+                  - string
+                enum:
+                  - import
+                  - webset
+              id:
+                type:
+                  - string
+              relationship:
+                type:
+                  - object
+                properties:
+                  definition:
+                    type:
+                      - string
+                    description: >-
+                      What the relationship of the entities you hope to find is
+                      relative to the entities contained in the provided source.
+                  limit:
+                    type:
+                      - number
+                    minimum: 1
+                    maximum: 10
+                required:
+                  - definition
+                  - limit
+            required:
+              - source
+              - id
+          description: >-
+            The scope of the search. By default, there is no scope - thus
+            searching the web.
+
+
+            If provided during creation, the search will only be performed on
+            the sources provided.
         progress:
           type:
             - object
@@ -3009,12 +3150,14 @@ components:
       required:
         - id
         - object
+        - websetId
         - status
         - query
         - entity
         - criteria
         - count
         - exclude
+        - scope
         - progress
         - recall
         - canceledAt
@@ -4133,6 +4276,7 @@ components:
                 - type:
                     - object
                   $ref: "#/components/schemas/CustomEntity"
+              description: Detected entity from the query.
             criteria:
               type:
                 - array
@@ -4145,6 +4289,7 @@ components:
                       - string
                 required:
                   - description
+              description: Detected criteria from the query.
           required:
             - entity
             - criteria
@@ -4158,6 +4303,7 @@ components:
               description:
                 type:
                   - string
+                description: Description of the enrichment.
               format:
                 type:
                   - string
@@ -4168,6 +4314,8 @@ components:
                   - options
                   - email
                   - phone
+                  - url
+                description: Format of the enrichment.
               options:
                 type:
                   - array
@@ -4178,11 +4326,14 @@ components:
                     label:
                       type:
                         - string
+                      description: Label of the option.
                   required:
                     - label
+                description: When format is options, the options detected from the query.
             required:
               - description
               - format
+          description: Detected enrichments from the query.
       required:
         - search
         - enrichments
@@ -4210,6 +4361,61 @@ components:
         - data
         - hasMore
         - nextCursor
+    UpdateEnrichmentParameters:
+      type:
+        - object
+      properties:
+        description:
+          type:
+            - string
+          minLength: 1
+          maxLength: 5000
+          description: >-
+            Provide a description of the enrichment task you want to perform to
+            each Webset Item.
+        format:
+          type:
+            - string
+          enum:
+            - text
+            - date
+            - number
+            - options
+            - email
+            - phone
+            - url
+          description: >-
+            Format of the enrichment response.
+
+
+            We automatically select the best format based on the description. If
+            you want to explicitly specify the format, you can do so here.
+        options:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              label:
+                type:
+                  - string
+                description: The label of the option
+            required:
+              - label
+          minItems: 1
+          maxItems: 150
+          description: >-
+            When the format is options, the different options for the enrichment
+            agent to choose from.
+        metadata:
+          description: Set of key-value pairs you want to associate with this object.
+          type: object
+          additionalProperties:
+            type:
+              - string
+            maxLength: 1000
+          nullable: true
     CreateWebhookParameters:
       type:
         - object
@@ -4222,7 +4428,7 @@ components:
               - string
             $ref: "#/components/schemas/EventType"
           minItems: 1
-          maxItems: 15
+          maxItems: 19
           description: The events to trigger the webhook
         url:
           type:
@@ -4320,7 +4526,7 @@ components:
               - string
             $ref: "#/components/schemas/EventType"
           minItems: 1
-          maxItems: 15
+          maxItems: 19
           description: The events to trigger the webhook
         url:
           type:
@@ -4389,9 +4595,13 @@ components:
             - webset.search.updated
             - import.created
             - import.completed
-            - import.processing
             - webset.item.created
             - webset.item.enriched
+            - monitor.created
+            - monitor.updated
+            - monitor.deleted
+            - monitor.run.created
+            - monitor.run.completed
             - webset.export.created
             - webset.export.completed
           description: The type of event
@@ -4782,6 +4992,223 @@ components:
             - data
             - createdAt
           title: WebsetSearchCompletedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: import.created
+              default: import.created
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/Import"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: ImportCreatedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: import.completed
+              default: import.completed
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/Import"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: ImportCompletedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: monitor.created
+              default: monitor.created
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/Monitor"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: MonitorCreatedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: monitor.updated
+              default: monitor.updated
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/Monitor"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: MonitorUpdatedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: monitor.deleted
+              default: monitor.deleted
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/Monitor"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: MonitorDeletedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: monitor.run.created
+              default: monitor.run.created
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/MonitorRun"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: MonitorRunCreatedEvent
+        - type:
+            - object
+          properties:
+            id:
+              description: The unique identifier for the event
+              type:
+                - string
+            object:
+              type: string
+              const: event
+              default: event
+            type:
+              type: string
+              const: monitor.run.completed
+              default: monitor.run.completed
+            data:
+              type:
+                - object
+              $ref: "#/components/schemas/MonitorRun"
+            createdAt:
+              type:
+                - string
+              format: date-time
+              description: The date and time the event was created
+          required:
+            - id
+            - object
+            - type
+            - data
+            - createdAt
+          title: MonitorRunCompletedEvent
       title: Event
     ListEventsResponse:
       type:
@@ -4883,10 +5310,10 @@ components:
                   - import
                   - webset
               id:
+                description: The ID of the source to exclude.
                 type:
                   - string
                 minLength: 1
-                description: The ID of the source to exclude.
             required:
               - source
               - id
@@ -4894,6 +5321,49 @@ components:
             Sources (existing imports or websets) to exclude from search
             results. Any results found within these sources will be omitted to
             prevent finding them during search.
+        scope:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              source:
+                type:
+                  - string
+                enum:
+                  - import
+                  - webset
+              id:
+                type:
+                  - string
+                minLength: 1
+                description: The ID of the source to search.
+              relationship:
+                type:
+                  - object
+                properties:
+                  definition:
+                    type:
+                      - string
+                    description: >-
+                      What the relationship of the entities you hope to find is
+                      relative to the entities contained in the provided source.
+                  limit:
+                    type:
+                      - number
+                    minimum: 1
+                    maximum: 10
+                required:
+                  - definition
+                  - limit
+            required:
+              - source
+              - id
+          description: >-
+            Limit the search to specific sources (existing imports). Any results
+            found within these sources matching the search criteria will be
+            included in the Webset.
         recall:
           type:
             - boolean
@@ -5418,6 +5888,7 @@ components:
         - options
         - email
         - phone
+        - url
     EventType:
       type: string
       enum:
@@ -5431,9 +5902,13 @@ components:
         - webset.search.updated
         - import.created
         - import.completed
-        - import.processing
         - webset.item.created
         - webset.item.enriched
+        - monitor.created
+        - monitor.updated
+        - monitor.deleted
+        - monitor.run.created
+        - monitor.run.completed
         - webset.export.created
         - webset.export.completed
     WebsetSearchBehavior:
