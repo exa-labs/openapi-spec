@@ -2788,17 +2788,10 @@ components:
                       - import
                       - webset
                   id:
-<<<<<<< HEAD
                     type:
                       - string
                     minLength: 1
                     description: The ID of the source to search.
-=======
-                    description: The ID of the source to search.
-                    type:
-                      - string
-                    minLength: 1
->>>>>>> 140b0d486475ab8835368711f5cdc4f512e7c0e2
                   relationship:
                     type:
                       - object
@@ -3012,15 +3005,10 @@ components:
               - object
             properties:
               source:
-<<<<<<< HEAD
-=======
-                default: import
->>>>>>> 140b0d486475ab8835368711f5cdc4f512e7c0e2
                 type:
                   - string
                 enum:
                   - import
-<<<<<<< HEAD
                   - webset
               id:
                 type:
@@ -3045,12 +3033,6 @@ components:
                   - limit
             required:
               - source
-=======
-              id:
-                type:
-                  - string
-            required:
->>>>>>> 140b0d486475ab8835368711f5cdc4f512e7c0e2
               - id
           description: >-
             The scope of the search. By default, there is no scope - thus
@@ -4332,10 +4314,7 @@ components:
                   - options
                   - email
                   - phone
-<<<<<<< HEAD
                   - url
-=======
->>>>>>> 140b0d486475ab8835368711f5cdc4f512e7c0e2
                 description: Format of the enrichment.
               options:
                 type:
@@ -5356,17 +5335,10 @@ components:
                   - import
                   - webset
               id:
-<<<<<<< HEAD
                 type:
                   - string
                 minLength: 1
                 description: The ID of the source to search.
-=======
-                description: The ID of the source to search.
-                type:
-                  - string
-                minLength: 1
->>>>>>> 140b0d486475ab8835368711f5cdc4f512e7c0e2
               relationship:
                 type:
                   - object
