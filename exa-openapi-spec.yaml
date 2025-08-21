@@ -504,124 +504,10 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/AnswerResponse"
-  /research/v0/tasks:
-    post:
-      operationId: research-tasks-create
-      parameters: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                instructions:
-                  type: string
-                  maxLength: 4096
-                  description: Instructions for what the research task should accomplish
-                model:
-                  type: string
-                  enum:
-                    - exa-research
-                    - exa-research-pro
-                  default: exa-research
-                output:
-                  type: object
-                  properties:
-                    schema:
-                      description: >-
-                        A JsonSchema specification of the desired output. See
-                        https://json-schema.org/draft-07.
-                    inferSchema:
-                      type: boolean
-                      description: When set to true and no output schema is provided, an LLM will generate an output schema.
-              required:
-                - instructions
-              example:
-                instructions: "What species of ant are similar to honeypot ants?"
-                model: "exa-research"
-                output:
-                  schema:
-                    type: "object"
-                    properties:
-                      answer:
-                        type: "string"
-      responses:
-        "201":
-          $ref: "#/components/responses/ResearchCreateTaskResponse"
-      summary: Create a research task with instructions and an output schema
-      x-codeSamples:
-        - lang: python
-          label: Advanced search with filters
-          source: |
-            # pip install exa-py
-            import os
-            from exa_py import Exa
-
-            exa = Exa(os.environ["EXA_API_KEY"])
-
-            # Create a research task
-            instructions = "Summarize the history of San Francisco highlighting one or two major events for each decade from 1850 to 1950"
-            schema = {
-                "type": "object",
-                "required": ["timeline"],
-                "properties": {
-                    "timeline": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "required": ["decade", "notableEvents"],
-                            "properties": {
-                                "decade": {"type": "string"},
-                                "notableEvents": {"type": "string"},
-                            },
-                        },
-                    },
-                },
-                "additionalProperties": False,
-            }
-
-            task = exa.research.create_task(
-                model="exa_research",
-                instructions=instructions,
-                output_schema=schema,
-            )
-            # Poll until completion
-            result = exa.research.poll_task(task.id)
-            print(result)
-        - lang: javascript
-          label: Advanced search with filters
-          source: |
-            // npm install exa-js
-            import Exa, { ResearchModel } from "exa-js";
-
-            const exa = new Exa(process.env.EXA_API_KEY);
-
-            async function simpleResearchExample() {
-              // Create a research task
-              const task = await exa.research.createTask({
-                model: ResearchModel.exa_research,
-                instructions: "Summarize the history of San Francisco in 3 sentences.",
-                output: {
-                  schema: {
-                    type: "object",
-                    required: ["summary"],
-                    properties: {
-                      summary: { type: "string" },
-                    },
-                    additionalProperties: false,
-                  },
-                },
-              });
-
-              // Poll until completion
-              const result = await exa.research.pollTask(task.id);
-              console.log("Research result:", result);
-            }
-
-            simpleResearchExample().catch(console.error);
+  /research/v1:
     get:
-      operationId: research-tasks-list
+      description: Get a paginated list of research requests
+      operationId: ResearchController_listResearch
       parameters:
         - name: cursor
           required: false
@@ -636,90 +522,66 @@ paths:
           description: The number of results to return
           schema:
             minimum: 1
-            maximum: 200
-            default: 25
+            maximum: 50
+            default: 10
             type: number
       responses:
-        "200":
-          $ref: "#/components/responses/ListResearchTasksResponse"
-      summary: List research tasks
-      x-codeSamples:
-        - lang: python
-          label: Advanced search with filters
-          source: |
-            # pip install exa
-            import os
-            from exa import Exa
-
-            exa = Exa(os.environ["EXA_API_KEY"])
-
-            response = exa.research.list_tasks()
-            print("All research tasks:", response["data"])
-        - lang: javascript
-          label: Advanced search with filters
-          source: |
-            // npm install exa-js
-            import Exa from "exa-js";
-            const exa = new Exa(process.env.EXA_API_KEY);
-
-            async function listAllResearchTasks() {
-              const response = await exa.research.listTasks();
-              console.log("All research tasks:", response.data);
-            }
-
-            listAllResearchTasks().catch(console.error);
-  /research/v0/tasks/{id}:
+        '200':
+          description: List of research requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResearchResponseDto'
+      summary: List research requests
+      tags: &ref_0
+        - Research
+    post:
+      operationId: ResearchController_createResearch
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResearchCreateRequestDtoClass'
+      responses:
+        '201':
+          description: Research request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchDtoClass'
+      summary: Create a new research request
+      tags: *ref_0
+  /research/v1/{researchId}:
     get:
-      operationId: ResearchControllerV0_getResearchTask
+      description: Retrieve research by ID. Add ?stream=true for real-time SSE updates.
+      operationId: ResearchController_getResearch
       parameters:
-        - name: id
+        - name: researchId
           required: true
           in: path
           schema:
             type: string
+        - name: stream
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: events
+          required: true
+          in: query
+          schema:
+            type: string
       responses:
-        "200":
-          $ref: "#/components/responses/ResearchTaskResponse"
-      summary: Get a research task by id
-      x-codeSamples:
-        - lang: python
-          label: Get research task
-          source: |
-            # pip install exa-py
-            import os
-            from exa_py import Exa
-
-            exa = Exa(os.environ["EXA_API_KEY"])
-
-            # Get a research task by ID (single check)
-            task_id = "your-task-id-here"
-            task = exa.research.get_task(task_id)
-            print(f"Task status: {task.status}")
-
-            # Poll until completion
-            result = exa.research.poll_task(task_id)
-            print(f"Final result: {result.data}")
-        - lang: javascript
-          label: Get research task
-          source: |
-            // npm install exa-js
-            import Exa from "exa-js";
-
-            const exa = new Exa(process.env.EXA_API_KEY);
-
-            async function getResearchTask() {
-              const taskId = "your-task-id-here";
-              
-              // Get a research task by ID (single check)
-              const task = await exa.research.getTask(taskId);
-              console.log("Task status:", task.status);
-              
-              // Poll until completion
-              const result = await exa.research.pollTask(taskId);
-              console.log("Final result:", result.data);
-            }
-
-            getResearchTask().catch(console.error);
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchDtoClass'
+      summary: Get a research request by id
+      tags: *ref_0
 components:
   securitySchemes:
     apikey:
@@ -1184,67 +1046,729 @@ components:
               description: Standard price per page for summaries
               example: 0.001
 
-    ResearchTaskDto:
+    ListResearchResponseDto:
       type:
         - object
       properties:
-        id:
+        data:
+          type:
+            - array
+          items:
+            discriminator:
+              propertyName: status
+            examples: &ref_1
+              - researchId: 01jszdfs0052sg4jc552sg4jc5
+                model: exa-research
+                instructions: What species of ant are similar to honeypot ants?
+                status: running
+              - researchId: 01jszdfs0052sg4jc552sg4jc5
+                model: exa-research
+                instructions: What species of ant are similar to honeypot ants?
+                status: completed
+                output: Melophorus bagoti
+            $ref: '#/components/schemas/ResearchDtoClass'
+          description: The list of research requests
+        hasMore:
+          type:
+            - boolean
+          description: Whether there are more results to paginate through
+        nextCursor:
           type:
             - string
-          description: The unique identifier for the research task
-        status:
+            - 'null'
+          description: The cursor to paginate through the next set of results
+      required:
+        - data
+        - hasMore
+        - nextCursor
+    ResearchCreateRequestDtoClass:
+      type:
+        - object
+      properties:
+        model:
+          default: exa-research
           type:
             - string
           enum:
-            - running
-            - completed
-            - failed
-          description: The current status of the research task
+            - exa-research
+            - exa-research-pro
         instructions:
           type:
             - string
-          description: The instructions or query for the research task
-        schema:
+          maxLength: 4096
+          description: Instructions for what research should be conducted
+        outputSchema:
           type:
             - object
           additionalProperties: {}
-          description: The JSON schema specification for the expected output format
-        data:
-          type:
+      required:
+        - instructions
+      examples:
+        - model: exa-research
+          instructions: What species of ant are similar to honeypot ants?
+    ResearchDtoClass:
+      discriminator:
+        propertyName: status
+      oneOf:
+        - type:
             - object
-          additionalProperties: {}
-          description: The research results data conforming to the specified schema
-        citations:
-          type:
+          properties:
+            researchId:
+              type:
+                - string
+              description: The unique identifier for the research request
+            createdAt:
+              type:
+                - number
+              description: Milliseconds since epoch time
+            model:
+              default: exa-research
+              type:
+                - string
+              enum:
+                - exa-research
+                - exa-research-pro
+              description: The model used for the research request
+            instructions:
+              type:
+                - string
+              description: The instructions given to this research request
+            status:
+              type:
+                - string
+              enum:
+                - pending
+          required:
+            - researchId
+            - createdAt
+            - instructions
+            - status
+        - type:
             - object
-          additionalProperties:
-            type:
-              - array
-            items:
+          properties:
+            researchId:
+              type:
+                - string
+              description: The unique identifier for the research request
+            createdAt:
+              type:
+                - number
+              description: Milliseconds since epoch time
+            model:
+              default: exa-research
+              type:
+                - string
+              enum:
+                - exa-research
+                - exa-research-pro
+              description: The model used for the research request
+            instructions:
+              type:
+                - string
+              description: The instructions given to this research request
+            status:
+              type:
+                - string
+              enum:
+                - running
+            events:
+              type:
+                - array
+              items:
+                $ref: '#/components/schemas/ResearchEventDtoClass'
+          required:
+            - researchId
+            - createdAt
+            - instructions
+            - status
+        - type:
+            - object
+          properties:
+            researchId:
+              type:
+                - string
+              description: The unique identifier for the research request
+            createdAt:
+              type:
+                - number
+              description: Milliseconds since epoch time
+            model:
+              default: exa-research
+              type:
+                - string
+              enum:
+                - exa-research
+                - exa-research-pro
+              description: The model used for the research request
+            instructions:
+              type:
+                - string
+              description: The instructions given to this research request
+            status:
+              type:
+                - string
+              enum:
+                - completed
+            events:
+              type:
+                - array
+              items:
+                $ref: '#/components/schemas/ResearchEventDtoClass'
+            output:
               type:
                 - object
               properties:
-                id:
+                content:
                   type:
                     - string
+                parsed:
+                  type:
+                    - object
+                  additionalProperties: {}
+              required:
+                - content
+            costDollars:
+              type:
+                - object
+              properties:
+                total:
+                  type:
+                    - number
+                numSearches:
+                  type:
+                    - number
+                numPages:
+                  type:
+                    - number
+                reasoningTokens:
+                  type:
+                    - number
+              required:
+                - total
+                - numSearches
+                - numPages
+                - reasoningTokens
+          required:
+            - researchId
+            - createdAt
+            - instructions
+            - status
+            - output
+            - costDollars
+        - type:
+            - object
+          properties:
+            researchId:
+              type:
+                - string
+              description: The unique identifier for the research request
+            createdAt:
+              type:
+                - number
+              description: Milliseconds since epoch time
+            model:
+              default: exa-research
+              type:
+                - string
+              enum:
+                - exa-research
+                - exa-research-pro
+              description: The model used for the research request
+            instructions:
+              type:
+                - string
+              description: The instructions given to this research request
+            status:
+              type:
+                - string
+              enum:
+                - canceled
+            events:
+              type:
+                - array
+              items:
+                $ref: '#/components/schemas/ResearchEventDtoClass'
+          required:
+            - researchId
+            - createdAt
+            - instructions
+            - status
+        - type:
+            - object
+          properties:
+            researchId:
+              type:
+                - string
+              description: The unique identifier for the research request
+            createdAt:
+              type:
+                - number
+              description: Milliseconds since epoch time
+            model:
+              default: exa-research
+              type:
+                - string
+              enum:
+                - exa-research
+                - exa-research-pro
+              description: The model used for the research request
+            instructions:
+              type:
+                - string
+              description: The instructions given to this research request
+            status:
+              type:
+                - string
+              enum:
+                - failed
+            events:
+              type:
+                - array
+              items:
+                $ref: '#/components/schemas/ResearchEventDtoClass'
+            error:
+              type:
+                - string
+              description: A message indicating why the request failed
+          required:
+            - researchId
+            - createdAt
+            - instructions
+            - status
+            - error
+      examples: *ref_1
+    ResearchOperationDtoClass:
+      discriminator:
+        propertyName: type
+      oneOf:
+        - type:
+            - object
+          properties:
+            type:
+              type:
+                - string
+              enum:
+                - think
+            content:
+              type:
+                - string
+          required:
+            - type
+            - content
+        - type:
+            - object
+          properties:
+            type:
+              type:
+                - string
+              enum:
+                - search
+            searchType:
+              type:
+                - string
+              enum:
+                - neural
+                - keyword
+                - auto
+                - fast
+            goal:
+              type:
+                - string
+            query:
+              type:
+                - string
+            results:
+              type:
+                - array
+              items:
+                type:
+                  - object
+                properties:
+                  url:
+                    type:
+                      - string
+                required:
+                  - url
+            pageTokens:
+              type:
+                - number
+          required:
+            - type
+            - searchType
+            - query
+            - results
+            - pageTokens
+        - type:
+            - object
+          properties:
+            type:
+              type:
+                - string
+              enum:
+                - crawl
+            goal:
+              type:
+                - string
+            result:
+              type:
+                - object
+              properties:
                 url:
                   type:
                     - string
-                title:
+              required:
+                - url
+            pageTokens:
+              type:
+                - number
+          required:
+            - type
+            - result
+            - pageTokens
+    ResearchEventDtoClass:
+      oneOf:
+        - discriminator:
+            propertyName: eventType
+          oneOf:
+            - type:
+                - object
+              properties:
+                eventType:
                   type:
                     - string
-                snippet:
+                  enum:
+                    - research-definition
+                instructions:
+                  type:
+                    - string
+                outputSchema:
+                  type:
+                    - object
+                  additionalProperties: {}
+                createdAt:
+                  type:
+                    - number
+                  description: Milliseconds since epoch time
+                researchId:
                   type:
                     - string
               required:
-                - id
-                - url
-                - snippet
-          description: Citations grouped by the root field they were used in
-      required:
-        - id
-        - status
-        - instructions
+                - eventType
+                - instructions
+                - createdAt
+                - researchId
+            - type:
+                - object
+              properties:
+                eventType:
+                  type:
+                    - string
+                  enum:
+                    - research-output
+                output:
+                  discriminator:
+                    propertyName: outputType
+                  oneOf:
+                    - type:
+                        - object
+                      properties:
+                        outputType:
+                          type:
+                            - string
+                          enum:
+                            - completed
+                        costDollars:
+                          type:
+                            - object
+                          properties:
+                            total:
+                              type:
+                                - number
+                            numSearches:
+                              type:
+                                - number
+                            numPages:
+                              type:
+                                - number
+                            reasoningTokens:
+                              type:
+                                - number
+                          required:
+                            - total
+                            - numSearches
+                            - numPages
+                            - reasoningTokens
+                        content:
+                          type:
+                            - string
+                        parsed:
+                          type:
+                            - object
+                          additionalProperties: {}
+                      required:
+                        - outputType
+                        - costDollars
+                        - content
+                    - type:
+                        - object
+                      properties:
+                        outputType:
+                          type:
+                            - string
+                          enum:
+                            - failed
+                        error:
+                          type:
+                            - string
+                      required:
+                        - outputType
+                        - error
+                createdAt:
+                  type:
+                    - number
+                  description: Milliseconds since epoch time
+                researchId:
+                  type:
+                    - string
+              required:
+                - eventType
+                - output
+                - createdAt
+                - researchId
+        - discriminator:
+            propertyName: eventType
+          oneOf:
+            - type:
+                - object
+              properties:
+                eventType:
+                  type:
+                    - string
+                  enum:
+                    - plan-definition
+                planId:
+                  type:
+                    - string
+                createdAt:
+                  type:
+                    - number
+                  description: Milliseconds since epoch time
+                researchId:
+                  type:
+                    - string
+              required:
+                - eventType
+                - planId
+                - createdAt
+                - researchId
+            - type:
+                - object
+              properties:
+                eventType:
+                  type:
+                    - string
+                  enum:
+                    - plan-operation
+                planId:
+                  type:
+                    - string
+                operationId:
+                  type:
+                    - string
+                data:
+                  discriminator:
+                    propertyName: type
+                  $ref: '#/components/schemas/ResearchOperationDtoClass'
+                createdAt:
+                  type:
+                    - number
+                  description: Milliseconds since epoch time
+                researchId:
+                  type:
+                    - string
+              required:
+                - eventType
+                - planId
+                - operationId
+                - data
+                - createdAt
+                - researchId
+            - type:
+                - object
+              properties:
+                eventType:
+                  type:
+                    - string
+                  enum:
+                    - plan-output
+                planId:
+                  type:
+                    - string
+                output:
+                  discriminator:
+                    propertyName: outputType
+                  oneOf:
+                    - type:
+                        - object
+                      properties:
+                        outputType:
+                          type:
+                            - string
+                          enum:
+                            - tasks
+                        reasoning:
+                          type:
+                            - string
+                        tasksInstructions:
+                          type:
+                            - array
+                          items:
+                            type:
+                              - string
+                      required:
+                        - outputType
+                        - reasoning
+                        - tasksInstructions
+                    - type:
+                        - object
+                      properties:
+                        outputType:
+                          type:
+                            - string
+                          enum:
+                            - stop
+                        reasoning:
+                          type:
+                            - string
+                      required:
+                        - outputType
+                        - reasoning
+                createdAt:
+                  type:
+                    - number
+                  description: Milliseconds since epoch time
+                researchId:
+                  type:
+                    - string
+              required:
+                - eventType
+                - planId
+                - output
+                - createdAt
+                - researchId
+        - discriminator:
+            propertyName: eventType
+          oneOf:
+            - type:
+                - object
+              properties:
+                eventType:
+                  type:
+                    - string
+                  enum:
+                    - task-definition
+                planId:
+                  type:
+                    - string
+                taskId:
+                  type:
+                    - string
+                instructions:
+                  type:
+                    - string
+                createdAt:
+                  type:
+                    - number
+                  description: Milliseconds since epoch time
+                researchId:
+                  type:
+                    - string
+              required:
+                - eventType
+                - planId
+                - taskId
+                - instructions
+                - createdAt
+                - researchId
+            - type:
+                - object
+              properties:
+                eventType:
+                  type:
+                    - string
+                  enum:
+                    - task-operation
+                planId:
+                  type:
+                    - string
+                taskId:
+                  type:
+                    - string
+                operationId:
+                  type:
+                    - string
+                data:
+                  discriminator:
+                    propertyName: type
+                  $ref: '#/components/schemas/ResearchOperationDtoClass'
+                createdAt:
+                  type:
+                    - number
+                  description: Milliseconds since epoch time
+                researchId:
+                  type:
+                    - string
+              required:
+                - eventType
+                - planId
+                - taskId
+                - operationId
+                - data
+                - createdAt
+                - researchId
+            - type:
+                - object
+              properties:
+                eventType:
+                  type:
+                    - string
+                  enum:
+                    - task-output
+                planId:
+                  type:
+                    - string
+                taskId:
+                  type:
+                    - string
+                output:
+                  type:
+                    - object
+                  properties:
+                    outputType:
+                      type:
+                        - string
+                      enum:
+                        - completed
+                    content:
+                      type:
+                        - string
+                  required:
+                    - outputType
+                    - content
+                createdAt:
+                  type:
+                    - number
+                  description: Milliseconds since epoch time
+                researchId:
+                  type:
+                    - string
+              required:
+                - eventType
+                - planId
+                - taskId
+                - output
+                - createdAt
+                - researchId
   responses:
     SearchResponse:
       description: OK
