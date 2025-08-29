@@ -673,12 +673,12 @@ components:
           properties:
             numSentences:
               type: integer
-              default: 5
+              minimum: 1
               description: The number of sentences to return for each snippet.
               example: 1
             highlightsPerUrl:
               type: integer
-              default: 1
+              minimum: 1
               description: The number of snippets to return for each result.
               example: 1
             query:
