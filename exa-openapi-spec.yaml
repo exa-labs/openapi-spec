@@ -778,6 +778,7 @@ components:
           type: integer
           maximum: 100
           default: 10
+          minimum: 1
           description: Number of results to return (up to thousands of results available for custom plans)
           example: 10
         includeDomains:
