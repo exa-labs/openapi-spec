@@ -436,6 +436,15 @@ paths:
               description: Unique identifier for the request.
               example: req_N6SsgoiaOQOPqsYKKiw5
               required: true
+        "422":
+          description: Unable to detect entity or criteria from query
+          headers:
+            X-Request-Id:
+              schema:
+                type: string
+              description: Unique identifier for the request.
+              example: req_N6SsgoiaOQOPqsYKKiw5
+              required: true
       summary: Preview a webset
       tags:
         - Websets Preview
@@ -735,7 +744,8 @@ paths:
             print(f'Created enrichment: {enrichment.id}')
   /v0/websets/{webset}/enrichments/{id}:
     patch:
-      operationId: WebsetsEnrichmentsController_updateEnrichment_v0
+      description: Update an Enrichment configuration for a Webset.
+      operationId: websets-enrichments-update
       parameters:
         - name: webset
           required: true
@@ -763,9 +773,47 @@ paths:
               description: Unique identifier for the request.
               example: req_N6SsgoiaOQOPqsYKKiw5
               required: true
+      summary: Update an Enrichment
       tags: *ref_2
       security:
         - api_key: []
+      x-codeSamples:
+        - lang: javascript
+          label: JavaScript
+          source: >-
+            // npm install exa-js
+
+            import Exa from 'exa-js';
+
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+
+            const enrichment = await exa.websets.enrichments.update('webset_id',
+            'enrichment_id', {
+              description: 'Updated company revenue and growth metrics',
+              format: 'number'
+            });
+
+
+            console.log(`Updated enrichment: ${enrichment.id}`);
+        - lang: python
+          label: Python
+          source: >-
+            # pip install exa-py
+
+            from exa_py import Exa
+
+            exa = Exa('YOUR_EXA_API_KEY')
+
+
+            enrichment = exa.websets.enrichments.update('webset_id',
+            'enrichment_id', params={
+                'description': 'Updated company revenue and growth metrics',
+                'format': 'number'
+            })
+
+
+            print(f'Updated enrichment: {enrichment.id}')
     get:
       operationId: websets-enrichments-get
       parameters:
@@ -958,6 +1006,25 @@ paths:
             print(f'Cancelled enrichment: {enrichment.id}')
   /v0/webhooks:
     post:
+      description: >-
+        Webhooks let you get notifications when things happen in your Websets.
+        When you create a webhook, you choose which events you want to know
+        about and where to send the notifications.
+
+
+        When an event happens, Exa sends an HTTP POST request to your webhook
+        URL with:
+
+        - Event details (type, time, ID)
+
+        - Full data of what triggered the event
+
+        - A signature to verify the request came from Exa
+
+
+        The webhook starts as `active` and begins getting notifications right
+        away. You'll get a secret key for checking webhook signatures - save
+        this safely as it's only shown once when you create the webhook.
       operationId: webhooks-create
       parameters: []
       requestBody:
@@ -1013,6 +1080,11 @@ paths:
 
             print(f'Created webhook: {webhook.id}')
     get:
+      description: >-
+        Get a list of all webhooks in your account.
+
+        The results come in pages. Use `limit` to set how many webhooks to get
+        per page (up to 200). Use `cursor` to get the next page of results.
       operationId: webhooks-list
       parameters:
         - name: cursor
@@ -1077,6 +1149,11 @@ paths:
                 print(f'- {webhook.id}: {webhook.url}')
   /v0/webhooks/{id}:
     get:
+      description: >-
+        Get information about a webhook using its ID.
+
+        The webhook secret is not shown here for security - you only get it
+        when you first create the webhook.
       operationId: webhooks-get
       parameters:
         - name: id
@@ -1134,6 +1211,20 @@ paths:
 
             print(f'Webhook: {webhook.id} - {webhook.url}')
     patch:
+      description: >-
+        Change a webhook's settings. You can update:
+
+        - Events: Add or remove which events you want to hear about
+        - URL: Change where notifications are sent
+        - Metadata: Update custom data linked to the webhook
+
+
+        Changes happen right away. If you change the events list, the webhook
+        will start or stop getting notifications for those events immediately.
+
+
+        The webhook keeps its current status (`active` or `inactive`) when you
+        update it.
       operationId: webhooks-update
       parameters:
         - name: id
@@ -1203,6 +1294,16 @@ paths:
 
             print(f'Updated webhook: {webhook.id}')
     delete:
+      description: >-
+        Remove a webhook from your account. Once deleted, the webhook stops
+        getting notifications right away and cannot be brought back.
+
+
+        Important notes:
+        - The webhook stops working as soon as you delete it
+        - You cannot undo this - you'll need to create a new webhook if you want
+        it back
+        - Any notifications currently being sent may still complete
       operationId: webhooks-delete
       parameters:
         - name: id
@@ -2858,6 +2959,31 @@ components:
             Enrichments automatically search for and extract specific
             information (like contact details, funding data, employee counts,
             etc.) from each item added to your Webset.
+        exclude:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              source:
+                type:
+                  - string
+                enum:
+                  - import
+                  - webset
+              id:
+                type:
+                  - string
+                minLength: 1
+                description: The ID of the source to exclude.
+            required:
+              - source
+              - id
+          description: >-
+            Global exclusion sources (existing imports or websets) that apply to
+            all operations within this Webset. Any results found within these
+            sources will be omitted across all search and import operations.
         externalId:
           type:
             - string
@@ -2910,11 +3036,11 @@ components:
             - string
           description: The unique identifier for the Webset this search belongs to
         query:
+          description: The query used to create the search.
           type:
             - string
           minLength: 1
           maxLength: 5000
-          description: The query used to create the search.
         entity:
           $ref: "#/components/schemas/Entity"
           description: >-
@@ -2932,11 +3058,11 @@ components:
               - object
             properties:
               description:
+                description: The description of the criterion
                 type:
                   - string
                 minLength: 1
                 maxLength: 1000
-                description: The description of the criterion
               successRate:
                 type:
                   - number
@@ -5377,7 +5503,6 @@ components:
           default: override
           type:
             - string
-          $ref: "#/components/schemas/WebsetSearchBehavior"
           description: >-
             How this search interacts with existing items in the Webset:
 
@@ -5387,6 +5512,7 @@ components:
 
             - **append**: Add new items to existing ones, keeping items that
             match the new criteria
+          $ref: "#/components/schemas/WebsetSearchBehavior"
         metadata:
           description: Set of key-value pairs you want to associate with this object.
           type:
@@ -5672,7 +5798,7 @@ components:
               type:
                 - number
               maximum: 50000000
-              description: The size of the file in megabytes. Maximum size is 50 MB.
+              description: The size of the file in bytes. Maximum size is 50 MB.
             count:
               type:
                 - number
