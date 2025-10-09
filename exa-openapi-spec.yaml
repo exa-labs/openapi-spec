@@ -673,12 +673,12 @@ components:
           properties:
             numSentences:
               type: integer
-              default: 5
+              minimum: 1
               description: The number of sentences to return for each snippet.
               example: 1
             highlightsPerUrl:
               type: integer
-              default: 1
+              minimum: 1
               description: The number of snippets to return for each result.
               example: 1
             query:
@@ -778,6 +778,7 @@ components:
           type: integer
           maximum: 100
           default: 10
+          minimum: 1
           description: Number of results to return (up to thousands of results available for custom plans)
           example: 10
         includeDomains:
@@ -1904,44 +1905,3 @@ components:
                 type: array
                 items:
                   $ref: "#/components/schemas/AnswerCitation"
-    ResearchCreateTaskResponse:
-      description: Research task created
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              id:
-                type: string
-                description: The unique identifier for the research task
-                example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-    ListResearchTasksResponse:
-      description: List of research tasks
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              requestId:
-                type: string
-                description: Unique identifier for the request
-                example: "b5947044c4b78efa9552a7c89b306d95"
-              data:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ResearchTaskDto"
-                description: The list of research tasks
-              hasMore:
-                type: boolean
-                description: Whether there are more results to paginate through
-              nextCursor:
-                type: string
-                nullable: true
-                description: The cursor to paginate through the next set of results
-    ResearchTaskResponse:
-      description: Research task details
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: "#/components/schemas/ResearchTaskDto"
