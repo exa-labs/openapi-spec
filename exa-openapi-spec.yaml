@@ -669,7 +669,7 @@ components:
                   example: false
         highlights:
           type: object
-          description: Text snippets the LLM identifies as most relevant from each page.
+          description: Text snippets the LLM identifies as most relevant from each page. We recommend you using context instead of highlights for LLMs.
           properties:
             numSentences:
               type: integer
@@ -761,10 +761,10 @@ components:
         context:
           oneOf:
             - type: boolean
-              description: Formats the search resutls into a context string ready for LLMs.
+              description: Return page contents as a context string for LLM. When true, combines all result contents into one string. Context strings often perform better than highlights for LLMs.
               example: true
             - type: object
-              description: Formats the search resutls into a context string ready for LLMs.
+              description: Return page contents as a context string for LLM. When true, combines all result contents into one string. Context strings often perform better than highlights for LLMs.
               properties:
                 maxCharacters:
                   type: integer
@@ -831,10 +831,10 @@ components:
         context:
           oneOf:
             - type: boolean
-              description: Formats the search results into a context string ready for LLMs.
+              description: Return page contents as a context string for LLM. When true, combines all result contents into one string. Context strings often perform better than highlights for LLMs.
               example: true
             - type: object
-              description: Formats the search results into a context string ready for LLMs.
+              description: Return page contents as a context string for LLM. When true, combines all result contents into one string. Context strings often perform better than highlights for LLMs.
               properties:
                 maxCharacters:
                   type: integer
