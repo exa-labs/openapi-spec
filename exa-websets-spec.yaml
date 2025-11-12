@@ -77,6 +77,88 @@ paths:
             })
 
             print(f'Created webset: {webset.id}')
+        - lang: javascript
+          label: Filter within CSV Import
+          source: |-
+            // Filter a CSV import by criteria (no top-level import needed)
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const webset = await exa.websets.create({
+              search: {
+                query: "people who changed jobs",
+                criteria: ["changed jobs in the last 6 months"],
+                count: 10,
+                scope: [{
+                  source: "import",
+                  id: "import_abc123"  // Your existing import ID
+                }]
+              }
+            });
+
+            console.log(`Filtered webset: ${webset.id}`);
+        - lang: python
+          label: Filter within CSV Import
+          source: |-
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            webset = exa.websets.create(params={
+                'search': {
+                    'query': 'people who changed jobs',
+                    'criteria': ['changed jobs in the last 6 months'],
+                    'count': 10,
+                    'scope': [{
+                        'source': 'import',
+                        'id': 'import_abc123'  # Your existing import ID
+                    }]
+                }
+            })
+
+            print(f'Filtered webset: {webset.id}')
+        - lang: javascript
+          label: Hop Search (Graph Traversal)
+          source: |-
+            // Find related entities (e.g., companies -> investors)
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const webset = await exa.websets.create({
+              search: {
+                query: "investors",
+                scope: [{
+                  source: "webset",
+                  id: "webset_companies",
+                  relationship: {
+                    definition: "investors of",
+                    limit: 3  // Find up to 3 investors per company
+                  }
+                }]
+              }
+            });
+
+            console.log(`Hop search webset: ${webset.id}`);
+        - lang: python
+          label: Hop Search (Graph Traversal)
+          source: |-
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            webset = exa.websets.create(params={
+                'search': {
+                    'query': 'investors',
+                    'scope': [{
+                        'source': 'webset',
+                        'id': 'webset_companies',
+                        'relationship': {
+                            'definition': 'investors of',
+                            'limit': 3  # Find up to 3 investors per company
+                        }
+                    }]
+                }
+            })
+
+            print(f'Hop search webset: {webset.id}')
     get:
       description: |-
         Returns a list of Websets.
@@ -415,9 +497,16 @@ paths:
         Use this to help users understand how their search will be interpreted
         before committing to a full webset creation.
       operationId: websets-preview
-      parameters: []
+      parameters:
+        - name: search
+          required: false
+          in: path
+          description: Weather you want to search for a preview list of items or not
+          schema:
+            type: boolean
       requestBody:
         required: true
+        description: Search parameters
         content:
           application/json:
             schema:
@@ -2903,12 +2992,18 @@ components:
                         description: >-
                           What the relationship of the entities you hope to find
                           is relative to the entities contained in the provided
-                          source.
+                          source. Only needed for hop searches (graph traversal)
+                          from the source entities to related targets. Examples:
+                          "investors of", "current employer", "employees at".
+                          Omit for simple filtering within the source.
                       limit:
                         type:
                           - number
                         minimum: 1
                         maximum: 10
+                        description: >-
+                          Number of related entities to find per source entity
+                          (fanout). Only used for hop searches. Range: 1-10.
                     required:
                       - definition
                       - limit
@@ -2916,9 +3011,13 @@ components:
                   - source
                   - id
               description: >-
-                Limit the search to specific sources (existing imports or
-                websets). Any results found within these sources matching the
-                search criteria will be included in the Webset.
+                Limit this search to only consider candidates from the listed
+                sources (existing Imports or Websets). Scope applies per-search;
+                if you run another search and want to stay within the same dataset,
+                pass scope again. When scope is present, the search behavior is
+                OVERRIDE (replaces results rather than appending). Note: Using the
+                same Import in both top-level import and search.scope will return
+                a 400 error.
           required:
             - query
           description: Create initial search for the Webset.
@@ -2943,7 +3042,12 @@ components:
             required:
               - source
               - id
-          description: Import data from existing Websets and Imports into this Webset.
+          description: >-
+            Attach/load data from existing Imports or Websets into this Webset.
+            For CSV Imports, this schedules ingestion and creates a staging pool
+            of items (ImportItems do not automatically appear as Webset Items;
+            searches create Webset Items). This does not filter searches. To filter
+            a search to only look within an Import or Webset, use search.scope instead.
         enrichments:
           type:
             - array
@@ -3774,11 +3878,29 @@ components:
               - object
             $ref: "#/components/schemas/Monitor"
           description: The Monitors for the Webset.
-        streams:
+        excludes:
           type:
             - array
-          items: {}
-          description: The Streams for the Webset.
+          items:
+            type:
+              - object
+            properties:
+              source:
+                type:
+                  - string
+                enum:
+                  - import
+                  - webset
+              id:
+                type:
+                  - string
+            required:
+              - source
+              - id
+          description: >-
+            The Excludes sources (existing imports or websets) that apply to all
+            operations within this Webset. Any results found within these
+            sources will be omitted across all search and import operations.
         metadata:
           default: {}
           description: Set of key-value pairs you want to associate with this object.
@@ -3808,7 +3930,6 @@ components:
         - imports
         - enrichments
         - monitors
-        - streams
         - createdAt
         - updatedAt
     WebsetItemPersonProperties:
@@ -4348,35 +4469,42 @@ components:
       type:
         - object
       properties:
-        query:
+        search:
           type:
-            - string
-          minLength: 1
-          maxLength: 5000
-          description: >-
-            Natural language search query describing what you are looking for.
+            - object
+          properties:
+            query:
+              type:
+                - string
+              minLength: 1
+              maxLength: 5000
+              description: >-
+                Natural language search query describing what you are looking
+                for.
 
 
-            Be specific and descriptive about your requirements,
-            characteristics, and any constraints that help narrow down the
-            results.
-          examples:
-            - >-
-              Marketing agencies based in the US, that focus on consumer
-              products. Get brands worked with and city
-            - AI startups in Europe that raised Series A funding in 2024
-            - SaaS companies with 50-200 employees in the fintech space
-        entity:
-          $ref: "#/components/schemas/Entity"
-          description: >-
-            Entity used to inform the decomposition.
+                Be specific and descriptive about your requirements,
+                characteristics, and any constraints that help narrow down the
+                results.
+              examples:
+                - >-
+                  Marketing agencies based in the US, that focus on consumer
+                  products. Get brands worked with and city
+                - AI startups in Europe that raised Series A funding in 2024
+                - SaaS companies with 50-200 employees in the fintech space
+            entity:
+              $ref: "#/components/schemas/Entity"
+              description: >-
+                Entity used to inform the decomposition.
 
 
-            It is not required to provide it, we automatically detect the entity
-            from all the information provided in the query. Only use this when
-            you need more fine control.
+                It is not required to provide it, we automatically detect the
+                entity from all the information provided in the query. Only use
+                this when you need more fine control.
+          required:
+            - query
       required:
-        - query
+        - search
     PreviewWebsetResponse:
       type:
         - object
@@ -4460,9 +4588,59 @@ components:
               - description
               - format
           description: Detected enrichments from the query.
+        items:
+          type:
+            - array
+          items:
+            type:
+              - object
+            properties:
+              id:
+                type:
+                  - string
+                description: The unique identifier for the preview item
+              entityId:
+                type:
+                  - string
+                description: The entity identifier (URL) for the item
+              properties:
+                oneOf:
+                  - type:
+                      - object
+                    $ref: "#/components/schemas/WebsetItemPersonProperties"
+                    title: Person
+                  - type:
+                      - object
+                    $ref: "#/components/schemas/WebsetItemCompanyProperties"
+                    title: Company
+                  - type:
+                      - object
+                    $ref: "#/components/schemas/WebsetItemArticleProperties"
+                    title: Article
+                  - type:
+                      - object
+                    $ref: "#/components/schemas/WebsetItemResearchPaperProperties"
+                    title: Research Paper
+                  - type:
+                      - object
+                    $ref: "#/components/schemas/WebsetItemCustomProperties"
+                    title: Custom
+                description: The properties of the preview item
+              createdAt:
+                type:
+                  - string
+                format: date-time
+                description: The date and time the preview was created
+            required:
+              - id
+              - entityId
+              - properties
+              - createdAt
+          description: Preview items
       required:
         - search
         - enrichments
+        - items
     ListWebsetItemResponse:
       type:
         - object
