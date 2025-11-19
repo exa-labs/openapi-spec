@@ -548,11 +548,13 @@ paths:
             const exa = new Exa('YOUR_EXA_API_KEY');
 
             const preview = await exa.websets.preview({
-              query: "Marketing agencies based in the US, that focus on consumer products. Get brands worked with and city"
+              search: {
+                query:
+                  'Marketing agencies based in the US, that focus on consumer products. Get brands worked with and city',
+              },
             });
 
             console.log('Search criteria:', preview.search.criteria);
-            console.log('Available enrichments:', preview.enrichments.length);
         - lang: python
           label: Python
           source: |-
@@ -4505,6 +4507,46 @@ components:
             - query
       required:
         - search
+    WebsetItemPreview:
+      type:
+        - object
+      properties:
+        id:
+          type:
+            - string
+          description: The unique identifier for the preview item
+        properties:
+          oneOf:
+            - type:
+                - object
+              $ref: "#/components/schemas/WebsetItemPersonProperties"
+              title: Person
+            - type:
+                - object
+              $ref: "#/components/schemas/WebsetItemCompanyProperties"
+              title: Company
+            - type:
+                - object
+              $ref: "#/components/schemas/WebsetItemArticleProperties"
+              title: Article
+            - type:
+                - object
+              $ref: "#/components/schemas/WebsetItemResearchPaperProperties"
+              title: Research Paper
+            - type:
+                - object
+              $ref: "#/components/schemas/WebsetItemCustomProperties"
+              title: Custom
+          description: The properties of the preview item
+        createdAt:
+          type:
+            - string
+          format: date-time
+          description: The date and time the preview was created
+      required:
+        - id
+        - properties
+        - createdAt
     PreviewWebsetResponse:
       type:
         - object
@@ -4594,49 +4636,8 @@ components:
           items:
             type:
               - object
-            properties:
-              id:
-                type:
-                  - string
-                description: The unique identifier for the preview item
-              entityId:
-                type:
-                  - string
-                description: The entity identifier (URL) for the item
-              properties:
-                oneOf:
-                  - type:
-                      - object
-                    $ref: "#/components/schemas/WebsetItemPersonProperties"
-                    title: Person
-                  - type:
-                      - object
-                    $ref: "#/components/schemas/WebsetItemCompanyProperties"
-                    title: Company
-                  - type:
-                      - object
-                    $ref: "#/components/schemas/WebsetItemArticleProperties"
-                    title: Article
-                  - type:
-                      - object
-                    $ref: "#/components/schemas/WebsetItemResearchPaperProperties"
-                    title: Research Paper
-                  - type:
-                      - object
-                    $ref: "#/components/schemas/WebsetItemCustomProperties"
-                    title: Custom
-                description: The properties of the preview item
-              createdAt:
-                type:
-                  - string
-                format: date-time
-                description: The date and time the preview was created
-            required:
-              - id
-              - entityId
-              - properties
-              - createdAt
-          description: Preview items
+            $ref: "#/components/schemas/WebsetItemPreview"
+          description: Preview items matching the search criteria.
       required:
         - search
         - enrichments
