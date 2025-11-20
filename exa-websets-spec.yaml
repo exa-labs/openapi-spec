@@ -4503,6 +4503,15 @@ components:
                 It is not required to provide it, we automatically detect the
                 entity from all the information provided in the query. Only use
                 this when you need more fine control.
+            count:
+              default: 10
+              type:
+                - number
+              minimum: 1
+              maximum: 10
+              description: >-
+                When query parameter search=true, the number of preview items to
+                return.
           required:
             - query
       required:
