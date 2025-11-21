@@ -135,6 +135,53 @@ paths:
             });
 
             console.log(results);
+        - lang: bash
+          label: Deep search with query variations
+          source: |
+            curl --request POST \
+              --url https://api.exa.ai/search \
+              --header 'x-api-key: <token>' \
+              --header 'Content-Type: application/json' \
+              --data '{
+              "query": "blog post about AI",
+              "additionalQueries": ["AI blogpost", "machine learning blogs"],
+              "type": "deep",
+              "contents": {
+                "text": true,
+                "context": true
+              }
+            }'
+        - lang: python
+          label: Deep search with query variations
+          source: |
+            # pip install exa-py
+            from exa_py import Exa
+            exa = Exa('YOUR_EXA_API_KEY')
+
+            results = exa.search_and_contents(
+                "blog post about AI",
+                type="deep",
+                additional_queries=["AI blogpost", "machine learning blogs"],
+                text=True,
+                context=True
+            )
+
+            print(results)
+        - lang: javascript
+          label: Deep search with query variations
+          source: |
+            // npm install exa-js
+            import Exa from 'exa-js';
+            const exa = new Exa('YOUR_EXA_API_KEY');
+
+            const results = await exa.searchAndContents('blog post about AI', {
+                type: 'deep',
+                additionalQueries: ['AI blogpost', 'machine learning blogs'],
+                text: true,
+                context: true
+            });
+
+            console.log(results);
         - lang: php
           label: Advanced search with filters
           source: ""
@@ -156,6 +203,12 @@ paths:
                       type: string
                       example: "Latest developments in LLM capabilities"
                       description: The query string for the search.
+                    additionalQueries:
+                      type: array
+                      items:
+                        type: string
+                      description: Additional query variations for deep search. Only works with type="deep". When provided, these queries are used alongside the main query for comprehensive results.
+                      example: ["LLM advancements", "large language model progress"]
                     type:
                       type: string
                       enum:
@@ -163,7 +216,8 @@ paths:
                         - neural
                         - fast
                         - auto
-                      description: The type of search. Neural uses an embeddings-based model, keyword is google-like SERP, and auto (default) intelligently combines the two. Fast uses streamlined versions of the neural and keyword models.
+                        - deep
+                      description: The type of search. Neural uses an embeddings-based model, keyword is google-like SERP, auto (default) intelligently combines the two, fast uses streamlined versions of the neural and keyword models, and deep provides comprehensive search with query expansion and detailed context.
                       example: "auto"
                       default: "auto"
                     category:
@@ -722,7 +776,7 @@ components:
           description: |
             Options for livecrawling pages.
             'never': Disable livecrawling (default for neural search).
-            'fallback': Livecrawl when cache is empty (default for keyword search).
+            'fallback': Livecrawl when cache is empty (default for keyword and deep search).
             'always': Always livecrawl.
             'preferred': Always try to livecrawl, but fall back to cache if crawling fails.
           example: "always"
@@ -983,6 +1037,11 @@ components:
                     format: float
                     description: Cost of your neural search operations
                     example: 0.005
+                  deepSearch:
+                    type: number
+                    format: float
+                    description: Cost of your deep search operations
+                    example: 0.015
                   contentText:
                     type: number
                     format: float
@@ -1027,6 +1086,16 @@ components:
               format: float
               description: Standard price for keyword search with 100+ results
               example: 3
+            deepSearch_1_25_results:
+              type: number
+              format: float
+              description: Standard price for deep search with 1-25 results
+              example: 0.015
+            deepSearch_26_100_results:
+              type: number
+              format: float
+              description: Standard price for deep search with 26-100 results
+              example: 0.075
         perPagePrices:
           type: object
           description: Standard price per page for different content operations
@@ -1784,7 +1853,7 @@ components:
                 example: "b5947044c4b78efa9552a7c89b306d95"
               resolvedSearchType:
                 type: string
-                enum: [neural, keyword]
+                enum: [neural, keyword, deep]
                 description: The search type that was actually used for this request
                 example: "neural"
               results:
@@ -1794,7 +1863,7 @@ components:
                   $ref: "#/components/schemas/ResultWithContent"
               searchType:
                 type: string
-                enum: [neural, keyword]
+                enum: [neural, keyword, deep]
                 description: For auto searches, indicates which search type was selected.
                 example: "auto"
               context:
