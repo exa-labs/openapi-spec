@@ -212,12 +212,11 @@ paths:
                     type:
                       type: string
                       enum:
-                        - keyword
                         - neural
                         - fast
                         - auto
                         - deep
-                      description: The type of search. Neural uses an embeddings-based model, keyword is google-like SERP, auto (default) intelligently combines the two, fast uses streamlined versions of the neural and keyword models, and deep provides comprehensive search with query expansion and detailed context.
+                      description: The type of search. Neural uses an embeddings-based model, auto (default) intelligently combines available search methods, fast uses streamlined versions of the neural model, and deep provides comprehensive search with query expansion and detailed context.
                       example: "auto"
                       default: "auto"
                     category:
@@ -776,7 +775,7 @@ components:
           description: |
             Options for livecrawling pages.
             'never': Disable livecrawling (default for neural search).
-            'fallback': Livecrawl when cache is empty (default for keyword and deep search).
+            'fallback': Livecrawl when cache is empty.
             'always': Always livecrawl.
             'preferred': Always try to livecrawl, but fall back to cache if crawling fails.
           example: "always"
@@ -1027,11 +1026,6 @@ components:
               breakdown:
                 type: object
                 properties:
-                  keywordSearch:
-                    type: number
-                    format: float
-                    description: Cost of your keyword search operations
-                    example: 0
                   neuralSearch:
                     type: number
                     format: float
@@ -1076,16 +1070,6 @@ components:
               format: float
               description: Standard price for neural search with 100+ results
               example: 1
-            keywordSearch_1_100_results:
-              type: number
-              format: float
-              description: Standard price for keyword search with 1-100 results
-              example: 0.0025
-            keywordSearch_100_plus_results:
-              type: number
-              format: float
-              description: Standard price for keyword search with 100+ results
-              example: 3
             deepSearch_1_25_results:
               type: number
               format: float
@@ -1438,9 +1422,9 @@ components:
                 - string
               enum:
                 - neural
-                - keyword
                 - auto
                 - fast
+                - deep
             goal:
               type:
                 - string
@@ -1853,7 +1837,7 @@ components:
                 example: "b5947044c4b78efa9552a7c89b306d95"
               resolvedSearchType:
                 type: string
-                enum: [neural, keyword, deep]
+                enum: [neural, deep]
                 description: The search type that was actually used for this request
                 example: "neural"
               results:
@@ -1863,7 +1847,7 @@ components:
                   $ref: "#/components/schemas/ResultWithContent"
               searchType:
                 type: string
-                enum: [neural, keyword, deep]
+                enum: [neural, deep]
                 description: For auto searches, indicates which search type was selected.
                 example: "auto"
               context:
