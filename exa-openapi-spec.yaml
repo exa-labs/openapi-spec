@@ -229,7 +229,7 @@ paths:
                         - github
                         - tweet
                         - personal site
-                        - linkedin profile
+                        - people
                         - financial report
                       description: A data category to focus on.
                       example: "research paper"
