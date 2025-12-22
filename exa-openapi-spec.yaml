@@ -1835,11 +1835,6 @@ components:
                 type: string
                 description: Unique identifier for the request
                 example: "b5947044c4b78efa9552a7c89b306d95"
-              resolvedSearchType:
-                type: string
-                enum: [neural, deep]
-                description: The search type that was actually used for this request
-                example: "neural"
               results:
                 type: array
                 description: A list of search results containing title, URL, published date, author, and score.
