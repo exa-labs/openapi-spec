@@ -897,6 +897,222 @@ components:
         contents:
           $ref: "#/components/schemas/ContentsRequest"
 
+    EntityWorkforce:
+      type: object
+      description: Company workforce information.
+      properties:
+        total:
+          type: integer
+          nullable: true
+          description: Total number of employees.
+          example: 500
+
+    EntityHeadquarters:
+      type: object
+      description: Company headquarters information.
+      properties:
+        address:
+          type: string
+          nullable: true
+          description: Street address.
+          example: "123 Main St"
+        city:
+          type: string
+          nullable: true
+          description: City name.
+          example: "San Francisco"
+        postalCode:
+          type: string
+          nullable: true
+          description: Postal/ZIP code.
+          example: "94105"
+        country:
+          type: string
+          nullable: true
+          description: Country code or name.
+          example: "US"
+
+    EntityFinancials:
+      type: object
+      description: Company financial information.
+      properties:
+        revenueAnnual:
+          type: integer
+          nullable: true
+          description: Annual revenue in USD.
+          example: 1000000000
+        fundingTotal:
+          type: integer
+          nullable: true
+          description: Total funding raised in USD.
+          example: 500000000
+
+    EntityCompanyProperties:
+      type: object
+      description: Structured properties for a company entity.
+      properties:
+        name:
+          type: string
+          nullable: true
+          description: Company name.
+          example: "Exa"
+        foundedYear:
+          type: integer
+          nullable: true
+          description: Year the company was founded.
+          example: 2022
+        description:
+          type: string
+          nullable: true
+          description: Brief description of the company.
+          example: "AI-powered search engine"
+        workforce:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/EntityWorkforce"
+        headquarters:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/EntityHeadquarters"
+        financials:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/EntityFinancials"
+
+    EntityDateRange:
+      type: object
+      description: Date range for work history entries.
+      properties:
+        from:
+          type: string
+          nullable: true
+          description: Start date (YYYY-MM-DD format).
+          example: "2020-01-15"
+        to:
+          type: string
+          nullable: true
+          description: End date (YYYY-MM-DD format).
+          example: "2023-06-30"
+
+    EntityCompanyRef:
+      type: object
+      description: Reference to a company in work history.
+      properties:
+        id:
+          type: string
+          nullable: true
+          description: Exa entity ID for the company.
+          example: "https://exa.ai/library/company/exa"
+        name:
+          type: string
+          nullable: true
+          description: Company name.
+          example: "Exa"
+
+    EntityWorkHistoryEntry:
+      type: object
+      description: A single work history entry for a person.
+      properties:
+        title:
+          type: string
+          nullable: true
+          description: Job title.
+          example: "Software Engineer"
+        location:
+          type: string
+          nullable: true
+          description: Work location.
+          example: "San Francisco, CA"
+        dates:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/EntityDateRange"
+        company:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/EntityCompanyRef"
+
+    EntityPersonProperties:
+      type: object
+      description: Structured properties for a person entity.
+      properties:
+        name:
+          type: string
+          nullable: true
+          description: Person's full name.
+          example: "John Doe"
+        location:
+          type: string
+          nullable: true
+          description: Person's location.
+          example: "San Francisco, CA"
+        workHistory:
+          type: array
+          description: List of work history entries.
+          items:
+            $ref: "#/components/schemas/EntityWorkHistoryEntry"
+
+    CompanyEntity:
+      type: object
+      description: Structured entity data for a company.
+      required:
+        - id
+        - type
+        - version
+        - properties
+      properties:
+        id:
+          type: string
+          description: Exa entity ID.
+          example: "https://exa.ai/library/company/exa"
+        type:
+          type: string
+          enum: [company]
+          description: Entity type discriminator.
+          example: "company"
+        version:
+          type: integer
+          description: Schema version number.
+          example: 1
+        properties:
+          $ref: "#/components/schemas/EntityCompanyProperties"
+
+    PersonEntity:
+      type: object
+      description: Structured entity data for a person.
+      required:
+        - id
+        - type
+        - version
+        - properties
+      properties:
+        id:
+          type: string
+          description: Exa entity ID.
+          example: "https://exa.ai/library/person/john-doe"
+        type:
+          type: string
+          enum: [person]
+          description: Entity type discriminator.
+          example: "person"
+        version:
+          type: integer
+          description: Schema version number.
+          example: 1
+        properties:
+          $ref: "#/components/schemas/EntityPersonProperties"
+
+    Entity:
+      oneOf:
+        - $ref: "#/components/schemas/CompanyEntity"
+        - $ref: "#/components/schemas/PersonEntity"
+      discriminator:
+        propertyName: type
+        mapping:
+          company: "#/components/schemas/CompanyEntity"
+          person: "#/components/schemas/PersonEntity"
+      description: Structured entity data for company or person search results. Only returned for category=company or category=people searches.
+
     Result:
       type: object
       properties:
@@ -998,6 +1214,11 @@ components:
                     type: string
                   description: Array of links from the search result.
                   example: []
+            entities:
+              type: array
+              description: Structured entity data for company or person search results. Only returned for category=company or category=people searches.
+              items:
+                $ref: "#/components/schemas/Entity"
 
     CostDollars:
       type: object
