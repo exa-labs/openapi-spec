@@ -897,7 +897,7 @@ components:
         contents:
           $ref: "#/components/schemas/ContentsRequest"
 
-    EntityWorkforce:
+    EntityCompanyPropertiesWorkforce:
       type: object
       description: Company workforce information.
       properties:
@@ -907,7 +907,7 @@ components:
           description: Total number of employees.
           example: 500
 
-    EntityHeadquarters:
+    EntityCompanyPropertiesHeadquarters:
       type: object
       description: Company headquarters information.
       properties:
@@ -929,10 +929,30 @@ components:
         country:
           type: string
           nullable: true
-          description: Country code or name.
-          example: "US"
+          description: Full country name.
+          example: "United States"
 
-    EntityFinancials:
+    EntityCompanyPropertiesFundingRound:
+      type: object
+      description: Funding round information.
+      properties:
+        name:
+          type: string
+          nullable: true
+          description: Name of the funding round (e.g., "Series A", "Seed").
+          example: "Series B"
+        date:
+          type: string
+          nullable: true
+          description: Date of the funding round.
+          example: "2023-06-15"
+        amount:
+          type: integer
+          nullable: true
+          description: Amount raised in USD.
+          example: 50000000
+
+    EntityCompanyPropertiesFinancials:
       type: object
       description: Company financial information.
       properties:
@@ -946,6 +966,10 @@ components:
           nullable: true
           description: Total funding raised in USD.
           example: 500000000
+        fundingLatestRound:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/EntityCompanyPropertiesFundingRound"
 
     EntityCompanyProperties:
       type: object
@@ -969,15 +993,15 @@ components:
         workforce:
           nullable: true
           allOf:
-            - $ref: "#/components/schemas/EntityWorkforce"
+            - $ref: "#/components/schemas/EntityCompanyPropertiesWorkforce"
         headquarters:
           nullable: true
           allOf:
-            - $ref: "#/components/schemas/EntityHeadquarters"
+            - $ref: "#/components/schemas/EntityCompanyPropertiesHeadquarters"
         financials:
           nullable: true
           allOf:
-            - $ref: "#/components/schemas/EntityFinancials"
+            - $ref: "#/components/schemas/EntityCompanyPropertiesFinancials"
 
     EntityDateRange:
       type: object
@@ -994,7 +1018,7 @@ components:
           description: End date (YYYY-MM-DD format).
           example: "2023-06-30"
 
-    EntityCompanyRef:
+    EntityPersonPropertiesCompanyRef:
       type: object
       description: Reference to a company in work history.
       properties:
@@ -1009,7 +1033,7 @@ components:
           description: Company name.
           example: "Exa"
 
-    EntityWorkHistoryEntry:
+    EntityPersonPropertiesWorkHistoryEntry:
       type: object
       description: A single work history entry for a person.
       properties:
@@ -1030,7 +1054,7 @@ components:
         company:
           nullable: true
           allOf:
-            - $ref: "#/components/schemas/EntityCompanyRef"
+            - $ref: "#/components/schemas/EntityPersonPropertiesCompanyRef"
 
     EntityPersonProperties:
       type: object
@@ -1050,7 +1074,7 @@ components:
           type: array
           description: List of work history entries.
           items:
-            $ref: "#/components/schemas/EntityWorkHistoryEntry"
+            $ref: "#/components/schemas/EntityPersonPropertiesWorkHistoryEntry"
 
     CompanyEntity:
       type: object
