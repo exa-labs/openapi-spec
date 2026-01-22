@@ -971,6 +971,16 @@ components:
           allOf:
             - $ref: "#/components/schemas/EntityCompanyPropertiesFundingRound"
 
+    EntityCompanyPropertiesWebTraffic:
+      type: object
+      description: Company web traffic information.
+      properties:
+        visitsMonthly:
+          type: integer
+          nullable: true
+          description: Estimated monthly website visits.
+          example: 266306714
+
     EntityCompanyProperties:
       type: object
       description: Structured properties for a company entity.
@@ -1002,6 +1012,10 @@ components:
           nullable: true
           allOf:
             - $ref: "#/components/schemas/EntityCompanyPropertiesFinancials"
+        webTraffic:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/EntityCompanyPropertiesWebTraffic"
 
     EntityDateRange:
       type: object
