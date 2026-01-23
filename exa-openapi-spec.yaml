@@ -2101,8 +2101,9 @@ components:
                   $ref: "#/components/schemas/ResultWithContent"
               searchType:
                 type: string
-                enum: [neural, deep]
-                description: For auto searches, indicates which search type was selected.
+                enum: [neural, keyword, auto, deep]
+                nullable: true
+                description: The search type that was used. May be null; see resolvedSearchType for the actual search type used.
                 example: "auto"
               context:
                 type: string
