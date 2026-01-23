@@ -671,7 +671,7 @@ components:
         publishedDate:
           type: string
           nullable: true
-          description: An estimate of the creation date, from parsing HTML content. Format is YYYY-MM-DD.
+          description: An estimate of the creation date, from parsing HTML content. Format is ISO 8601 (e.g., 2023-11-16T01:36:32.547Z).
           example: "2023-11-16T01:36:32.547Z"
         text:
           type: string
@@ -1166,7 +1166,7 @@ components:
         publishedDate:
           type: string
           nullable: true
-          description: An estimate of the creation date, from parsing HTML content. Format is YYYY-MM-DD.
+          description: An estimate of the creation date, from parsing HTML content. Format is ISO 8601 (e.g., 2023-11-16T01:36:32.547Z).
           example: "2023-11-16T01:36:32.547Z"
         author:
           type: string
