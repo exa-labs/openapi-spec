@@ -257,7 +257,9 @@ paths:
               -H 'Content-Type: application/json' \
               -d '{
                 "url": "https://arxiv.org/abs/2307.06435",
-                "text": true
+                "contents": {
+                  "text": true
+                }
               }'
         - lang: python
           label: Find similar links
