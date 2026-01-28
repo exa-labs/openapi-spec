@@ -784,6 +784,15 @@ components:
           default: 10000
           description: The timeout for livecrawling in milliseconds.
           example: 1000
+        maxAgeHours:
+          type: integer
+          description: |
+            Maximum age of cached content in hours. Controls when livecrawling is triggered based on content freshness.
+            - Positive value (e.g. 24): Use cached content if it's less than this many hours old, otherwise livecrawl.
+            - 0: Always livecrawl, never use cache.
+            - -1: Never livecrawl, always use cache.
+            - Omit (default): Livecrawl as fallback only when no cached content exists.
+          example: 24
         subpages:
           type: integer
           default: 0
