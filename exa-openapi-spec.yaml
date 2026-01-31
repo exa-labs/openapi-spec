@@ -838,10 +838,9 @@ components:
       properties:
         numResults:
           type: integer
-          maximum: 100
           default: 10
           minimum: 1
-          description: Number of results to return (up to thousands of results available for custom plans)
+          description: Number of results to return. Default is 10. Higher limits may be available depending on your plan. Contact sales (hello@exa.ai) for increased limits.
           example: 10
         includeDomains:
           type: array
