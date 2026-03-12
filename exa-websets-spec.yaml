@@ -3452,13 +3452,13 @@ components:
               - string
             maxLength: 1000
         failedReason:
-          type:
-            - string
-            - "null"
-          enum:
-            - invalid_format
-            - invalid_file_content
-            - missing_identifier
+          oneOf:
+            - type: string
+              enum:
+                - invalid_format
+                - invalid_file_content
+                - missing_identifier
+            - type: "null"
           description: The reason the import failed
         failedAt:
           type:
@@ -6159,13 +6159,13 @@ components:
               - string
             maxLength: 1000
         failedReason:
-          type:
-            - string
-            - "null"
-          enum:
-            - invalid_format
-            - invalid_file_content
-            - missing_identifier
+          oneOf:
+            - type: string
+              enum:
+                - invalid_format
+                - invalid_file_content
+                - missing_identifier
+            - type: "null"
           description: The reason the import failed
         failedAt:
           type:
