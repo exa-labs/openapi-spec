@@ -664,13 +664,15 @@ components:
           description: The title of the search result.
           example: "SpaceX valued at $350bn as company agrees to buy shares from ..."
         author:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: If available, the author of the content.
           example: "Dan Milmon"
         publishedDate:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: An estimate of the creation date, from parsing HTML content. Format is YYYY-MM-DD.
           example: "2023-11-16T01:36:32.547Z"
         text:
@@ -911,8 +913,9 @@ components:
       description: Company workforce information.
       properties:
         total:
-          type: integer
-          nullable: true
+          type:
+            - integer
+            - "null"
           description: Total number of employees.
           example: 500
 
@@ -921,23 +924,27 @@ components:
       description: Company headquarters information.
       properties:
         address:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Street address.
           example: "123 Main St"
         city:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: City name.
           example: "San Francisco"
         postalCode:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Postal/ZIP code.
           example: "94105"
         country:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Full country name.
           example: "United States"
 
@@ -946,18 +953,21 @@ components:
       description: Funding round information.
       properties:
         name:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Name of the funding round (e.g., "Series A", "Seed").
           example: "Series B"
         date:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Date of the funding round.
           example: "2023-06-15"
         amount:
-          type: integer
-          nullable: true
+          type:
+            - integer
+            - "null"
           description: Amount raised in USD.
           example: 50000000
 
@@ -966,27 +976,30 @@ components:
       description: Company financial information.
       properties:
         revenueAnnual:
-          type: integer
-          nullable: true
+          type:
+            - integer
+            - "null"
           description: Annual revenue in USD.
           example: 1000000000
         fundingTotal:
-          type: integer
-          nullable: true
+          type:
+            - integer
+            - "null"
           description: Total funding raised in USD.
           example: 500000000
         fundingLatestRound:
-          nullable: true
-          allOf:
+          oneOf:
             - $ref: "#/components/schemas/EntityCompanyPropertiesFundingRound"
+            - type: "null"
 
     EntityCompanyPropertiesWebTraffic:
       type: object
       description: Company web traffic information.
       properties:
         visitsMonthly:
-          type: integer
-          nullable: true
+          type:
+            - integer
+            - "null"
           description: Estimated monthly website visits.
           example: 266306714
 
@@ -995,49 +1008,54 @@ components:
       description: Structured properties for a company entity.
       properties:
         name:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Company name.
           example: "Exa"
         foundedYear:
-          type: integer
-          nullable: true
+          type:
+            - integer
+            - "null"
           description: Year the company was founded.
           example: 2022
         description:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Brief description of the company.
           example: "AI-powered search engine"
         workforce:
-          nullable: true
-          allOf:
+          oneOf:
             - $ref: "#/components/schemas/EntityCompanyPropertiesWorkforce"
+            - type: "null"
         headquarters:
-          nullable: true
-          allOf:
+          oneOf:
             - $ref: "#/components/schemas/EntityCompanyPropertiesHeadquarters"
+            - type: "null"
         financials:
-          nullable: true
-          allOf:
+          oneOf:
             - $ref: "#/components/schemas/EntityCompanyPropertiesFinancials"
+            - type: "null"
         webTraffic:
-          nullable: true
-          allOf:
+          oneOf:
             - $ref: "#/components/schemas/EntityCompanyPropertiesWebTraffic"
+            - type: "null"
 
     EntityDateRange:
       type: object
       description: Date range for work history entries.
       properties:
         from:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Start date (YYYY-MM-DD format).
           example: "2020-01-15"
         to:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: End date (YYYY-MM-DD format).
           example: "2023-06-30"
 
@@ -1046,13 +1064,15 @@ components:
       description: Reference to a company in work history.
       properties:
         id:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Exa entity ID for the company.
           example: "https://exa.ai/library/company/exa"
         name:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Company name.
           example: "Exa"
 
@@ -1061,36 +1081,40 @@ components:
       description: A single work history entry for a person.
       properties:
         title:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Job title.
           example: "Software Engineer"
         location:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Work location.
           example: "San Francisco, CA"
         dates:
-          nullable: true
-          allOf:
+          oneOf:
             - $ref: "#/components/schemas/EntityDateRange"
+            - type: "null"
         company:
-          nullable: true
-          allOf:
+          oneOf:
             - $ref: "#/components/schemas/EntityPersonPropertiesCompanyRef"
+            - type: "null"
 
     EntityPersonProperties:
       type: object
       description: Structured properties for a person entity.
       properties:
         name:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Person's full name.
           example: "John Doe"
         location:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: Person's location.
           example: "San Francisco, CA"
         workHistory:
@@ -1173,18 +1197,21 @@ components:
           description: The URL of the search result.
           example: "https://arxiv.org/pdf/2307.06435.pdf"
         publishedDate:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: An estimate of the creation date, from parsing HTML content. Format is YYYY-MM-DD.
           example: "2023-11-16T01:36:32.547Z"
         author:
-          type: string
-          nullable: true
+          type:
+            - string
+            - "null"
           description: If available, the author of the content.
           example: "Humza  Naveed, University of Engineering and Technology (UET), Lahore, Pakistan"
         score:
-          type: number
-          nullable: true
+          type:
+            - number
+            - "null"
           description: A number from 0 to 1 representing similarity between the query/url and the result.
           example: 0.4600165784358978
         id:
@@ -2175,8 +2202,9 @@ components:
                       description: Status of the content fetch operation
                       example: "success"
                     error:
-                      type: object
-                      nullable: true
+                      type:
+                        - object
+                        - "null"
                       description: Error details, only present when status is "error"
                       properties:
                         tag:
@@ -2192,8 +2220,9 @@ components:
                           description: Specific error type
                           example: "CRAWL_NOT_FOUND"
                         httpStatusCode:
-                          type: integer
-                          nullable: true
+                          type:
+                            - integer
+                            - "null"
                           description: The corresponding HTTP status code
                           example: 404
               costDollars:

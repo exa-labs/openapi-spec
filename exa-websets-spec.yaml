@@ -3148,14 +3148,15 @@ components:
           minLength: 1
           maxLength: 5000
         entity:
-          $ref: "#/components/schemas/Entity"
+          oneOf:
+            - $ref: "#/components/schemas/Entity"
+            - type: "null"
           description: >-
             The entity the search will return results for.
 
 
             When no entity is provided during creation, we will automatically
             select the best entity based on the query.
-          nullable: true
         criteria:
           type:
             - array
@@ -3292,9 +3293,10 @@ components:
               maximum: 100
               description: The completion percentage of the search
             timeLeft:
-              type: number
+              type:
+                - number
+                - "null"
               description: The estimated time remaining in seconds, null if unknown
-              nullable: true
           required:
             - found
             - analyzed
@@ -3302,7 +3304,9 @@ components:
             - timeLeft
           description: The progress of the search
         recall:
-          type: object
+          type:
+            - object
+            - "null"
           properties:
             expected:
               type:
@@ -3349,7 +3353,6 @@ components:
           description: >-
             Recall metrics for the search, null if not yet computed or
             requested.
-          nullable: true
         metadata:
           default: {}
           description: Set of key-value pairs you want to associate with this object.
@@ -3360,15 +3363,16 @@ components:
               - string
             maxLength: 1000
         canceledAt:
-          type: string
+          type:
+            - string
+            - "null"
           format: date-time
           description: The date and time the search was canceled
-          nullable: true
         canceledReason:
-          type: string
-          $ref: "#/components/schemas/WebsetSearchCanceledReason"
+          oneOf:
+            - $ref: "#/components/schemas/WebsetSearchCanceledReason"
+            - type: "null"
           description: The reason the search was canceled
-          nullable: true
         createdAt:
           type:
             - string
@@ -3427,9 +3431,10 @@ components:
             - webset
           description: The format of the import.
         entity:
-          $ref: "#/components/schemas/Entity"
+          oneOf:
+            - $ref: "#/components/schemas/Entity"
+            - type: "null"
           description: The type of entity the import contains.
-          nullable: true
         title:
           type:
             - string
@@ -3447,22 +3452,25 @@ components:
               - string
             maxLength: 1000
         failedReason:
-          type: string
-          enum:
-            - invalid_format
-            - invalid_file_content
-            - missing_identifier
+          oneOf:
+            - type: string
+              enum:
+                - invalid_format
+                - invalid_file_content
+                - missing_identifier
+            - type: "null"
           description: The reason the import failed
-          nullable: true
         failedAt:
-          type: string
+          type:
+            - string
+            - "null"
           format: date-time
           description: When the import failed
-          nullable: true
         failedMessage:
-          type: string
+          type:
+            - string
+            - "null"
           description: A human readable message of the import failure
-          nullable: true
         createdAt:
           type:
             - string
@@ -3513,14 +3521,15 @@ components:
             - string
           description: The unique identifier for the Webset this enrichment belongs to.
         title:
-          type: string
+          type:
+            - string
+            - "null"
           description: >-
             The title of the enrichment.
 
 
             This will be automatically generated based on the description and
             format.
-          nullable: true
         description:
           type:
             - string
@@ -3528,12 +3537,14 @@ components:
             The description of the enrichment task provided during the creation
             of the enrichment.
         format:
-          type: string
-          $ref: "#/components/schemas/WebsetEnrichmentFormat"
+          oneOf:
+            - $ref: "#/components/schemas/WebsetEnrichmentFormat"
+            - type: "null"
           description: The format of the enrichment response.
-          nullable: true
         options:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             type:
               - object
@@ -3548,16 +3559,16 @@ components:
             When the format is options, the different options for the enrichment
             agent to choose from.
           title: WebsetEnrichmentOptions
-          nullable: true
         instructions:
-          type: string
+          type:
+            - string
+            - "null"
           description: >-
             The instructions for the enrichment Agent.
 
 
             This will be automatically generated based on the description and
             format.
-          nullable: true
         metadata:
           default: {}
           description: The metadata of the enrichment
@@ -3625,24 +3636,28 @@ components:
             - refresh
           description: The type of the Monitor Run
         completedAt:
-          type: string
+          type:
+            - string
+            - "null"
           format: date-time
           description: When the run completed
-          nullable: true
         failedAt:
-          type: string
+          type:
+            - string
+            - "null"
           format: date-time
           description: When the run failed
-          nullable: true
         failedReason:
-          type: string
+          type:
+            - string
+            - "null"
           description: The reason the run failed
-          nullable: true
         canceledAt:
-          type: string
+          type:
+            - string
+            - "null"
           format: date-time
           description: When the run was canceled
-          nullable: true
         createdAt:
           type:
             - string
@@ -3778,16 +3793,17 @@ components:
             - config
           description: Behavior to perform when monitor runs
         lastRun:
-          type: object
-          $ref: "#/components/schemas/MonitorRun"
+          oneOf:
+            - $ref: "#/components/schemas/MonitorRun"
+            - type: "null"
           title: MonitorRun
           description: The last run of the monitor
-          nullable: true
         nextRunAt:
-          type: string
+          type:
+            - string
+            - "null"
           format: date-time
           description: Date and time when the next run will occur in
-          nullable: true
         metadata:
           description: Set of key-value pairs you want to associate with this object.
           type:
@@ -3841,13 +3857,15 @@ components:
           description: The status of the webset
           title: WebsetStatus
         externalId:
-          type: string
+          type:
+            - string
+            - "null"
           description: The external identifier for the webset
-          nullable: true
         title:
-          type: string
+          type:
+            - string
+            - "null"
           description: The title of the webset
-          nullable: true
         searches:
           type:
             - array
@@ -3960,34 +3978,39 @@ components:
                 - string
               description: The name of the person
             location:
-              type: string
+              type:
+                - string
+                - "null"
               description: The location of the person
-              nullable: true
             position:
-              type: string
+              type:
+                - string
+                - "null"
               description: The current work position of the person
-              nullable: true
             company:
-              type: object
+              type:
+                - object
+                - "null"
               properties:
                 name:
                   type:
                     - string
                   description: The name of the company
                 location:
-                  type: string
+                  type:
+                    - string
+                    - "null"
                   description: The location the person is working at the company
-                  nullable: true
               required:
                 - name
                 - location
               title: WebsetItemPersonCompanyPropertiesFields
-              nullable: true
             pictureUrl:
-              type: string
+              type:
+                - string
+                - "null"
               format: uri
               description: The image URL of the person
-              nullable: true
           required:
             - name
             - location
@@ -4018,9 +4041,10 @@ components:
             - string
           description: Short description of the relevance of the company
         content:
-          type: string
+          type:
+            - string
+            - "null"
           description: The text content of the company website
-          nullable: true
         company:
           type:
             - object
@@ -4030,26 +4054,31 @@ components:
                 - string
               description: The name of the company
             location:
-              type: string
+              type:
+                - string
+                - "null"
               description: The main location of the company
-              nullable: true
             employees:
-              type: number
+              type:
+                - number
+                - "null"
               description: The number of employees of the company
-              nullable: true
             industry:
-              type: string
+              type:
+                - string
+                - "null"
               description: The industry of the company
-              nullable: true
             about:
-              type: string
+              type:
+                - string
+                - "null"
               description: A short description of the company
-              nullable: true
             logoUrl:
-              type: string
+              type:
+                - string
+                - "null"
               format: uri
               description: The logo URL of the company
-              nullable: true
           required:
             - name
             - location
@@ -4082,25 +4111,29 @@ components:
             - string
           description: Short description of the relevance of the article
         content:
-          type: string
+          type:
+            - string
+            - "null"
           description: The text content for the article
-          nullable: true
         article:
           type:
             - object
           properties:
             title:
-              type: string
+              type:
+                - string
+                - "null"
               description: The title of the article
-              nullable: true
             author:
-              type: string
+              type:
+                - string
+                - "null"
               description: The author(s) of the article
-              nullable: true
             publishedAt:
-              type: string
+              type:
+                - string
+                - "null"
               description: The date and time the article was published
-              nullable: true
           required:
             - title
             - author
@@ -4130,25 +4163,29 @@ components:
             - string
           description: Short description of the relevance of the research paper
         content:
-          type: string
+          type:
+            - string
+            - "null"
           description: The text content of the research paper
-          nullable: true
         researchPaper:
           type:
             - object
           properties:
             title:
-              type: string
+              type:
+                - string
+                - "null"
               description: The title of the research paper
-              nullable: true
             author:
-              type: string
+              type:
+                - string
+                - "null"
               description: The author(s) of the research paper
-              nullable: true
             publishedAt:
-              type: string
+              type:
+                - string
+                - "null"
               description: The date and time the research paper was published
-              nullable: true
           required:
             - title
             - author
@@ -4178,25 +4215,29 @@ components:
             - string
           description: Short description of the Item
         content:
-          type: string
+          type:
+            - string
+            - "null"
           description: The text content of the Item
-          nullable: true
         custom:
           type:
             - object
           properties:
             title:
-              type: string
+              type:
+                - string
+                - "null"
               description: The title of the website
-              nullable: true
             author:
-              type: string
+              type:
+                - string
+                - "null"
               description: The author(s) of the website
-              nullable: true
             publishedAt:
-              type: string
+              type:
+                - string
+                - "null"
               description: The date and time the website was published
-              nullable: true
           required:
             - title
             - author
@@ -4237,13 +4278,15 @@ components:
               - object
             properties:
               title:
-                type: string
+                type:
+                  - string
+                  - "null"
                 description: The title of the reference
-                nullable: true
               snippet:
-                type: string
+                type:
+                  - string
+                  - "null"
                 description: The relevant snippet of the reference content
-                nullable: true
               url:
                 type:
                   - string
@@ -4279,16 +4322,18 @@ components:
             - string
           $ref: "#/components/schemas/WebsetEnrichmentFormat"
         result:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             type:
               - string
           description: The result of the enrichment.
-          nullable: true
         reasoning:
-          type: string
+          type:
+            - string
+            - "null"
           description: The reasoning for the result when an Agent is used.
-          nullable: true
         references:
           type:
             - array
@@ -4297,13 +4342,15 @@ components:
               - object
             properties:
               title:
-                type: string
+                type:
+                  - string
+                  - "null"
                 description: The title of the reference
-                nullable: true
               snippet:
-                type: string
+                type:
+                  - string
+                  - "null"
                 description: The relevant snippet of the reference content
-                nullable: true
               url:
                 type:
                   - string
@@ -4385,13 +4432,12 @@ components:
             $ref: "#/components/schemas/WebsetItemEvaluation"
           description: The criteria evaluations of the item
         enrichments:
-          type: array
-          items:
-            type:
-              - object
-            $ref: "#/components/schemas/EnrichmentResult"
+          oneOf:
+            - type: array
+              items:
+                $ref: "#/components/schemas/EnrichmentResult"
+            - type: "null"
           description: The enrichments results of the Webset item
-          nullable: true
         createdAt:
           type:
             - string
@@ -4437,12 +4483,13 @@ components:
       properties:
         metadata:
           description: Set of key-value pairs you want to associate with this object.
-          type: object
+          type:
+            - object
+            - "null"
           additionalProperties:
             type:
               - string
             maxLength: 1000
-          nullable: true
     ListWebsetsResponse:
       type:
         - object
@@ -4460,9 +4507,10 @@ components:
             - boolean
           description: Whether there are more results to paginate through
         nextCursor:
-          type: string
+          type:
+            - string
+            - "null"
           description: The cursor to paginate through the next set of results
-          nullable: true
       required:
         - data
         - hasMore
@@ -4668,9 +4716,10 @@ components:
             - boolean
           description: Whether there are more Items to paginate through
         nextCursor:
-          type: string
+          type:
+            - string
+            - "null"
           description: The cursor to paginate through the next set of Items
-          nullable: true
       required:
         - data
         - hasMore
@@ -4724,12 +4773,13 @@ components:
             agent to choose from.
         metadata:
           description: Set of key-value pairs you want to associate with this object.
-          type: object
+          type:
+            - object
+            - "null"
           additionalProperties:
             type:
               - string
             maxLength: 1000
-          nullable: true
     CreateWebhookParameters:
       type:
         - object
@@ -4795,11 +4845,12 @@ components:
           format: uri
           description: The URL to send the webhook to
         secret:
-          type: string
+          type:
+            - string
+            - "null"
           description: >-
             The secret to verify the webhook signature. Only returned on Webhook
             creation.
-          nullable: true
         metadata:
           default: {}
           description: The metadata of the webhook
@@ -4872,9 +4923,10 @@ components:
             - boolean
           description: Whether there are more results to paginate through
         nextCursor:
-          type: string
+          type:
+            - string
+            - "null"
           description: The cursor to paginate through the next set of results
-          nullable: true
       required:
         - data
         - hasMore
@@ -4939,9 +4991,10 @@ components:
               - string
           description: The headers of the response
         responseBody:
-          type: string
+          type:
+            - string
+            - "null"
           description: The body of the response
-          nullable: true
         responseStatusCode:
           type:
             - number
@@ -4985,9 +5038,10 @@ components:
             - boolean
           description: Whether there are more results to paginate through
         nextCursor:
-          type: string
+          type:
+            - string
+            - "null"
           description: The cursor to paginate through the next set of results
-          nullable: true
       required:
         - data
         - hasMore
@@ -5541,9 +5595,10 @@ components:
             - boolean
           description: Whether there are more results to paginate through
         nextCursor:
-          type: string
+          type:
+            - string
+            - "null"
           description: The cursor to paginate through the next set of results
-          nullable: true
       required:
         - data
         - hasMore
@@ -5834,9 +5889,10 @@ components:
             - boolean
           description: Whether there are more results to paginate through
         nextCursor:
-          type: string
+          type:
+            - string
+            - "null"
           description: The cursor to paginate through the next set of results
-          nullable: true
       required:
         - data
         - hasMore
@@ -5968,9 +6024,10 @@ components:
             - boolean
           description: Whether there are more results to paginate through
         nextCursor:
-          type: string
+          type:
+            - string
+            - "null"
           description: The cursor to paginate through the next set of results
-          nullable: true
       required:
         - data
         - hasMore
@@ -6081,9 +6138,10 @@ components:
             - webset
           description: The format of the import.
         entity:
-          $ref: "#/components/schemas/Entity"
+          oneOf:
+            - $ref: "#/components/schemas/Entity"
+            - type: "null"
           description: The type of entity the import contains.
-          nullable: true
         title:
           type:
             - string
@@ -6101,22 +6159,25 @@ components:
               - string
             maxLength: 1000
         failedReason:
-          type: string
-          enum:
-            - invalid_format
-            - invalid_file_content
-            - missing_identifier
+          oneOf:
+            - type: string
+              enum:
+                - invalid_format
+                - invalid_file_content
+                - missing_identifier
+            - type: "null"
           description: The reason the import failed
-          nullable: true
         failedAt:
-          type: string
+          type:
+            - string
+            - "null"
           format: date-time
           description: When the import failed
-          nullable: true
         failedMessage:
-          type: string
+          type:
+            - string
+            - "null"
           description: A human readable message of the import failure
-          nullable: true
         createdAt:
           type:
             - string
@@ -6173,9 +6234,10 @@ components:
             - boolean
           description: Whether there are more results to paginate through
         nextCursor:
-          type: string
+          type:
+            - string
+            - "null"
           description: The cursor to paginate through the next set of results
-          nullable: true
       required:
         - data
         - hasMore
