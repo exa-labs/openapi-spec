@@ -3369,10 +3369,9 @@ components:
           format: date-time
           description: The date and time the search was canceled
         canceledReason:
-          type:
-            - string
-            - "null"
-          $ref: "#/components/schemas/WebsetSearchCanceledReason"
+          oneOf:
+            - $ref: "#/components/schemas/WebsetSearchCanceledReason"
+            - type: "null"
           description: The reason the search was canceled
         createdAt:
           type:
@@ -3538,10 +3537,9 @@ components:
             The description of the enrichment task provided during the creation
             of the enrichment.
         format:
-          type:
-            - string
-            - "null"
-          $ref: "#/components/schemas/WebsetEnrichmentFormat"
+          oneOf:
+            - $ref: "#/components/schemas/WebsetEnrichmentFormat"
+            - type: "null"
           description: The format of the enrichment response.
         options:
           type:
@@ -3795,10 +3793,9 @@ components:
             - config
           description: Behavior to perform when monitor runs
         lastRun:
-          type:
-            - object
-            - "null"
-          $ref: "#/components/schemas/MonitorRun"
+          oneOf:
+            - $ref: "#/components/schemas/MonitorRun"
+            - type: "null"
           title: MonitorRun
           description: The last run of the monitor
         nextRunAt:
@@ -4435,13 +4432,11 @@ components:
             $ref: "#/components/schemas/WebsetItemEvaluation"
           description: The criteria evaluations of the item
         enrichments:
-          type:
-            - array
-            - "null"
-          items:
-            type:
-              - object
-            $ref: "#/components/schemas/EnrichmentResult"
+          oneOf:
+            - type: array
+              items:
+                $ref: "#/components/schemas/EnrichmentResult"
+            - type: "null"
           description: The enrichments results of the Webset item
         createdAt:
           type:
