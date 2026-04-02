@@ -827,42 +827,27 @@ components:
               title: "Advanced highlights options"
               description: Advanced options for controlling highlight extraction. Use this when you need to customize the number of sentences, highlights per URL, or provide a custom query.
               properties:
+                maxCharacters:
+                  type: integer
+                  minimum: 1
+                  description: Maximum number of characters to return for highlights. Controls the total length of highlight text returned per URL.
+                  example: 2000
                 numSentences:
                   type: integer
                   minimum: 1
-                  description: The number of sentences to return for each snippet.
+                  description: "Deprecated: use maxCharacters instead. The number of sentences to return for each snippet."
                   example: 1
+                  deprecated: true
                 highlightsPerUrl:
                   type: integer
                   minimum: 1
-                  description: The number of snippets to return for each result.
-                  example: 1
+                  description: "Deprecated: use maxCharacters instead. The number of snippets to return for each result."
+                  deprecated: true
                 query:
                   type: string
                   description: Custom query to direct the LLM's selection of highlights.
                   example: "Key advancements"
           description: Text snippets the LLM identifies as most relevant from each page.
-          properties:
-            maxCharacters:
-              type: integer
-              minimum: 1
-              description: Maximum number of characters to return for highlights. Controls the total length of highlight text returned per URL.
-              example: 2000
-            numSentences:
-              type: integer
-              minimum: 1
-              description: "Deprecated: use maxCharacters instead. The number of sentences to return for each snippet."
-              example: 1
-              deprecated: true
-            highlightsPerUrl:
-              type: integer
-              minimum: 1
-              description: "Deprecated: use maxCharacters instead. The number of snippets to return for each result."
-              deprecated: true
-            query:
-              type: string
-              description: Custom query to direct the LLM's selection of highlights.
-              example: "Key advancements"
         summary:
           type: object
           description: Summary of the webpage
