@@ -207,7 +207,7 @@ paths:
                       type: array
                       items:
                         type: string
-                      description: Additional query variations for deep search. Only works with type="deep". When provided, these queries are used alongside the main query for comprehensive results.
+                      description: Additional query variations for deep search. Only works with type="deep" or type="deep-reasoning". When provided, these queries are used alongside the main query for comprehensive results.
                       example: ["LLM advancements", "large language model progress"]
                     type:
                       type: string
@@ -216,9 +216,17 @@ paths:
                         - fast
                         - auto
                         - deep
-                      description: The type of search. Neural uses an embeddings-based model, auto (default) intelligently combines available search methods, fast uses streamlined versions of the neural model, and deep provides comprehensive search with query expansion and detailed context.
+                        - deep-reasoning
+                        - instant
+                      description: The type of search. Neural uses an embeddings-based model, auto (default) intelligently combines neural and other search methods, fast uses streamlined versions of the search models, deep is light deep search, deep-reasoning is base deep search, and instant provides the lowest latency search optimized for real-time applications.
                       example: "auto"
                       default: "auto"
+                    outputSchema:
+                      type: object
+                      description: >-
+                        JSON schema for deep search structured output mode. When provided, the
+                        output.content field is returned as structured JSON matching this schema.
+                      additionalProperties: {}
                     category:
                       type: string
                       enum:
@@ -230,7 +238,7 @@ paths:
                         - personal site
                         - people
                         - financial report
-                      description: A data category to focus on.
+                      description: "A data category to focus on. The `people` and `company` categories have improved quality for finding LinkedIn profiles and company pages. Note: The `company` and `people` categories only support a limited set of filters. The following parameters are NOT supported for these categories: `startPublishedDate`, `endPublishedDate`, `startCrawlDate`, `endCrawlDate`, `includeText`, `excludeText`, `excludeDomains`. For `people` category, `includeDomains` only accepts LinkedIn domains. Using unsupported parameters will result in a 400 error."
                       example: "research paper"
                     userLocation:
                       type: string
@@ -305,6 +313,10 @@ paths:
                       type: string
                       example: "https://arxiv.org/abs/2307.06435"
                       description: The url for which you would like to find similar links.
+                    excludeSourceDomain:
+                      type: boolean
+                      description: If true, excludes links from the same domain as the provided URL from the results.
+                      example: true
                   required:
                     - url
                 - $ref: "#/components/schemas/CommonRequest"
@@ -553,13 +565,87 @@ paths:
                   type: boolean
                   default: false
                   description: If true, the response includes full text content in the search results
+                outputSchema:
+                  type: object
+                  description: >-
+                    A [JSON Schema Draft 7](https://json-schema.org/draft-07) specification
+                    for the desired answer structure. When provided, the answer will be
+                    returned as a structured object matching the schema instead of a plain string.
+                  properties:
+                    type:
+                      type: string
+                      description: The root schema type (typically "object").
+                      example: "object"
+                    properties:
+                      type: object
+                      description: >-
+                        An object where each key is a property name and each value is
+                        a JSON Schema describing that property (with `type`, `description`, etc).
+                    required:
+                      type: array
+                      items:
+                        type: string
+                      description: List of required property names.
+                    description:
+                      type: string
+                      description: A description of the schema.
+                    additionalProperties:
+                      type: boolean
+                      description: Whether to allow properties not listed in `properties`.
+                      default: false
       responses:
         "200":
           $ref: "#/components/responses/AnswerResponse"
-  /research/v1:
+  /research/v0/tasks:
+    post:
+      operationId: research-tasks-create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                instructions:
+                  type: string
+                  maxLength: 4096
+                  description: Instructions for what the research task should accomplish
+                model:
+                  type: string
+                  enum:
+                    - exa-research
+                    - exa-research-pro
+                  default: exa-research
+                output:
+                  type: object
+                  properties:
+                    schema:
+                      description: >-
+                        A JsonSchema specification of the desired output. See
+                        https://json-schema.org/draft-07.
+                    inferSchema:
+                      type: boolean
+                      description: When set to true and no output schema is provided, an LLM will generate an output schema.
+              required:
+                - instructions
+              example:
+                instructions: "What species of ant are similar to honeypot ants?"
+                model: "exa-research"
+                output:
+                  schema:
+                    type: "object"
+                    properties:
+                      answer:
+                        type: "string"
+      responses:
+        "201":
+          $ref: "#/components/responses/ResearchCreateTaskResponse"
+      summary: Create a research task with instructions and an output schema
+      tags: &ref_0
+        - Research
     get:
-      description: Get a paginated list of research requests
-      operationId: ResearchController_listResearch
+      operationId: research-tasks-list
       parameters:
         - name: cursor
           required: false
@@ -574,65 +660,27 @@ paths:
           description: The number of results to return
           schema:
             minimum: 1
-            maximum: 50
-            default: 10
+            maximum: 200
+            default: 25
             type: number
       responses:
-        '200':
-          description: List of research requests
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ListResearchResponseDto'
-      summary: List research requests
-      tags: &ref_0
-        - Research
-    post:
-      operationId: ResearchController_createResearch
-      parameters: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResearchCreateRequestDtoClass'
-      responses:
-        '201':
-          description: Research request created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResearchDtoClass'
-      summary: Create a new research request
+        "200":
+          $ref: "#/components/responses/ListResearchTasksResponse"
+      summary: List research tasks
       tags: *ref_0
-  /research/v1/{researchId}:
+  /research/v0/tasks/{id}:
     get:
-      description: Retrieve research by ID. Add ?stream=true for real-time SSE updates.
-      operationId: ResearchController_getResearch
+      operationId: ResearchControllerV0_getResearchTask
       parameters:
-        - name: researchId
+        - name: id
           required: true
           in: path
           schema:
             type: string
-        - name: stream
-          required: true
-          in: query
-          schema:
-            type: string
-        - name: events
-          required: true
-          in: query
-          schema:
-            type: string
       responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ResearchDtoClass'
-      summary: Get a research request by id
+        "200":
+          $ref: "#/components/responses/ResearchTaskResponse"
+      summary: Get a research task by id
       tags: *ref_0
 components:
   securitySchemes:
@@ -692,8 +740,13 @@ components:
       type: object
       properties:
         answer:
-          type: string
-          description: The generated answer based on search results.
+          oneOf:
+            - type: string
+            - type: object
+              additionalProperties: {}
+          description: >-
+            The generated answer based on search results. Returns a string by
+            default, or a structured object matching the provided outputSchema.
           example: "$350 billion."
         citations:
           type: array
@@ -721,20 +774,91 @@ components:
                   default: false
                   description: Include HTML tags in the response, which can help LLMs understand text structure and formatting.
                   example: false
+                verbosity:
+                  type: string
+                  enum: ["compact", "standard", "full"]
+                  default: "compact"
+                  description: |
+                    Controls the verbosity level of returned content. Requires livecrawl: "always" to take effect.
+                    - compact: Most concise output, main content only (default)
+                    - standard: Balanced content with more detail
+                    - full: Complete content including all sections
+                  example: "standard"
+                includeSections:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      [
+                        "header",
+                        "navigation",
+                        "banner",
+                        "body",
+                        "sidebar",
+                        "footer",
+                        "metadata",
+                      ]
+                  description: |
+                    Only include content from these semantic page sections. Requires livecrawl: "always" to take effect.
+                  example: ["body", "header"]
+                excludeSections:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      [
+                        "header",
+                        "navigation",
+                        "banner",
+                        "body",
+                        "sidebar",
+                        "footer",
+                        "metadata",
+                      ]
+                  description: |
+                    Exclude content from these semantic page sections. Requires livecrawl: "always" to take effect.
+                  example: ["navigation", "footer", "sidebar"]
         highlights:
-          type: object
-          description: Text snippets the LLM identifies as most relevant from each page. We recommend you using context instead of highlights for LLMs.
+          oneOf:
+            - type: boolean
+              title: "Simple highlights retrieval"
+              description: If true, returns highlights with default settings. If false, disables highlights.
+            - type: object
+              title: "Advanced highlights options"
+              description: Advanced options for controlling highlight extraction. Use this when you need to customize the number of sentences, highlights per URL, or provide a custom query.
+              properties:
+                numSentences:
+                  type: integer
+                  minimum: 1
+                  description: The number of sentences to return for each snippet.
+                  example: 1
+                highlightsPerUrl:
+                  type: integer
+                  minimum: 1
+                  description: The number of snippets to return for each result.
+                  example: 1
+                query:
+                  type: string
+                  description: Custom query to direct the LLM's selection of highlights.
+                  example: "Key advancements"
+          description: Text snippets the LLM identifies as most relevant from each page.
           properties:
+            maxCharacters:
+              type: integer
+              minimum: 1
+              description: Maximum number of characters to return for highlights. Controls the total length of highlight text returned per URL.
+              example: 2000
             numSentences:
               type: integer
               minimum: 1
-              description: The number of sentences to return for each snippet.
+              description: "Deprecated: use maxCharacters instead. The number of sentences to return for each snippet."
               example: 1
+              deprecated: true
             highlightsPerUrl:
               type: integer
               minimum: 1
-              description: The number of snippets to return for each result.
-              example: 1
+              description: "Deprecated: use maxCharacters instead. The number of snippets to return for each result."
+              deprecated: true
             query:
               type: string
               description: Custom query to direct the LLM's selection of highlights.
@@ -772,14 +896,17 @@ components:
                 }
         livecrawl:
           type: string
-          enum: [never, fallback, always, preferred]
+          enum: [never, fallback, preferred, always]
+          deprecated: true
           description: |
+            **Deprecated**: Use `maxAgeHours` instead for more precise control over content freshness.
+
             Options for livecrawling pages.
             'never': Disable livecrawling (default for neural search).
             'fallback': Livecrawl when cache is empty.
-            'always': Always livecrawl.
             'preferred': Always try to livecrawl, but fall back to cache if crawling fails.
-          example: "always"
+            'always': Always live-crawl, never use cache. Only use if you cannot tolerate any cached content. This option is not recommended unless consulted with the Exa team.
+          example: "preferred"
         livecrawlTimeout:
           type: integer
           default: 10000
@@ -824,14 +951,16 @@ components:
         context:
           oneOf:
             - type: boolean
-              description: Return page contents as a context string for LLM. When true, combines all result contents into one string. Context strings often perform better than highlights for LLMs.
+              deprecated: true
+              description: "Deprecated: Use highlights or text instead. Returns page contents as a combined context string."
               example: true
             - type: object
-              description: Return page contents as a context string for LLM. When true, combines all result contents into one string. Context strings often perform better than highlights for LLMs.
+              deprecated: true
+              description: "Deprecated: Use highlights or text instead. Returns page contents as a combined context string."
               properties:
                 maxCharacters:
                   type: integer
-                  description: Maximum character limit.
+                  description: "Deprecated. Maximum character limit for the context string."
                   example: 10000
 
     CommonRequest:
@@ -894,16 +1023,23 @@ components:
         context:
           oneOf:
             - type: boolean
-              description: Return page contents as a context string for LLM. When true, combines all result contents into one string. Context strings often perform better than highlights for LLMs.
+              deprecated: true
+              description: "Deprecated: Use highlights or text instead. Returns page contents as a combined context string."
               example: true
             - type: object
-              description: Return page contents as a context string for LLM. When true, combines all result contents into one string. Context strings often perform better than highlights for LLMs.
+              deprecated: true
+              description: "Deprecated: Use highlights or text instead. Returns page contents as a combined context string."
               properties:
                 maxCharacters:
                   type: integer
-                  description: Maximum character limit.
+                  description: "Deprecated. Maximum character limit for the context string."
                   example: 10000
 
+        moderation:
+          type: boolean
+          default: false
+          description: Enable content moderation to filter unsafe content from search results.
+          example: true
         contents:
           $ref: "#/components/schemas/ContentsRequest"
 
@@ -1394,729 +1530,67 @@ components:
               description: Standard price per page for summaries
               example: 0.001
 
-    ListResearchResponseDto:
+    ResearchTaskDto:
       type:
         - object
       properties:
-        data:
-          type:
-            - array
-          items:
-            discriminator:
-              propertyName: status
-            examples: &ref_1
-              - researchId: 01jszdfs0052sg4jc552sg4jc5
-                model: exa-research
-                instructions: What species of ant are similar to honeypot ants?
-                status: running
-              - researchId: 01jszdfs0052sg4jc552sg4jc5
-                model: exa-research
-                instructions: What species of ant are similar to honeypot ants?
-                status: completed
-                output: Melophorus bagoti
-            $ref: '#/components/schemas/ResearchDtoClass'
-          description: The list of research requests
-        hasMore:
-          type:
-            - boolean
-          description: Whether there are more results to paginate through
-        nextCursor:
+        id:
           type:
             - string
-            - 'null'
-          description: The cursor to paginate through the next set of results
-      required:
-        - data
-        - hasMore
-        - nextCursor
-    ResearchCreateRequestDtoClass:
-      type:
-        - object
-      properties:
-        model:
-          default: exa-research
+          description: The unique identifier for the research task
+        status:
           type:
             - string
           enum:
-            - exa-research
-            - exa-research-pro
+            - running
+            - completed
+            - failed
+          description: The current status of the research task
         instructions:
           type:
             - string
-          maxLength: 4096
-          description: Instructions for what research should be conducted
-        outputSchema:
+          description: The instructions or query for the research task
+        schema:
           type:
             - object
           additionalProperties: {}
-      required:
-        - instructions
-      examples:
-        - model: exa-research
-          instructions: What species of ant are similar to honeypot ants?
-    ResearchDtoClass:
-      discriminator:
-        propertyName: status
-      oneOf:
-        - type:
+          description: The JSON schema specification for the expected output format
+        data:
+          type:
             - object
-          properties:
-            researchId:
-              type:
-                - string
-              description: The unique identifier for the research request
-            createdAt:
-              type:
-                - number
-              description: Milliseconds since epoch time
-            model:
-              default: exa-research
-              type:
-                - string
-              enum:
-                - exa-research
-                - exa-research-pro
-              description: The model used for the research request
-            instructions:
-              type:
-                - string
-              description: The instructions given to this research request
-            status:
-              type:
-                - string
-              enum:
-                - pending
-          required:
-            - researchId
-            - createdAt
-            - instructions
-            - status
-        - type:
+          additionalProperties: {}
+          description: The research results data conforming to the specified schema
+        citations:
+          type:
             - object
-          properties:
-            researchId:
-              type:
-                - string
-              description: The unique identifier for the research request
-            createdAt:
-              type:
-                - number
-              description: Milliseconds since epoch time
-            model:
-              default: exa-research
-              type:
-                - string
-              enum:
-                - exa-research
-                - exa-research-pro
-              description: The model used for the research request
-            instructions:
-              type:
-                - string
-              description: The instructions given to this research request
-            status:
-              type:
-                - string
-              enum:
-                - running
-            events:
-              type:
-                - array
-              items:
-                $ref: '#/components/schemas/ResearchEventDtoClass'
-          required:
-            - researchId
-            - createdAt
-            - instructions
-            - status
-        - type:
-            - object
-          properties:
-            researchId:
-              type:
-                - string
-              description: The unique identifier for the research request
-            createdAt:
-              type:
-                - number
-              description: Milliseconds since epoch time
-            model:
-              default: exa-research
-              type:
-                - string
-              enum:
-                - exa-research
-                - exa-research-pro
-              description: The model used for the research request
-            instructions:
-              type:
-                - string
-              description: The instructions given to this research request
-            status:
-              type:
-                - string
-              enum:
-                - completed
-            events:
-              type:
-                - array
-              items:
-                $ref: '#/components/schemas/ResearchEventDtoClass'
-            output:
+          additionalProperties:
+            type:
+              - array
+            items:
               type:
                 - object
               properties:
-                content:
+                id:
                   type:
                     - string
-                parsed:
-                  type:
-                    - object
-                  additionalProperties: {}
-              required:
-                - content
-            costDollars:
-              type:
-                - object
-              properties:
-                total:
-                  type:
-                    - number
-                numSearches:
-                  type:
-                    - number
-                numPages:
-                  type:
-                    - number
-                reasoningTokens:
-                  type:
-                    - number
-              required:
-                - total
-                - numSearches
-                - numPages
-                - reasoningTokens
-          required:
-            - researchId
-            - createdAt
-            - instructions
-            - status
-            - output
-            - costDollars
-        - type:
-            - object
-          properties:
-            researchId:
-              type:
-                - string
-              description: The unique identifier for the research request
-            createdAt:
-              type:
-                - number
-              description: Milliseconds since epoch time
-            model:
-              default: exa-research
-              type:
-                - string
-              enum:
-                - exa-research
-                - exa-research-pro
-              description: The model used for the research request
-            instructions:
-              type:
-                - string
-              description: The instructions given to this research request
-            status:
-              type:
-                - string
-              enum:
-                - canceled
-            events:
-              type:
-                - array
-              items:
-                $ref: '#/components/schemas/ResearchEventDtoClass'
-          required:
-            - researchId
-            - createdAt
-            - instructions
-            - status
-        - type:
-            - object
-          properties:
-            researchId:
-              type:
-                - string
-              description: The unique identifier for the research request
-            createdAt:
-              type:
-                - number
-              description: Milliseconds since epoch time
-            model:
-              default: exa-research
-              type:
-                - string
-              enum:
-                - exa-research
-                - exa-research-pro
-              description: The model used for the research request
-            instructions:
-              type:
-                - string
-              description: The instructions given to this research request
-            status:
-              type:
-                - string
-              enum:
-                - failed
-            events:
-              type:
-                - array
-              items:
-                $ref: '#/components/schemas/ResearchEventDtoClass'
-            error:
-              type:
-                - string
-              description: A message indicating why the request failed
-          required:
-            - researchId
-            - createdAt
-            - instructions
-            - status
-            - error
-      examples: *ref_1
-    ResearchOperationDtoClass:
-      discriminator:
-        propertyName: type
-      oneOf:
-        - type:
-            - object
-          properties:
-            type:
-              type:
-                - string
-              enum:
-                - think
-            content:
-              type:
-                - string
-          required:
-            - type
-            - content
-        - type:
-            - object
-          properties:
-            type:
-              type:
-                - string
-              enum:
-                - search
-            searchType:
-              type:
-                - string
-              enum:
-                - neural
-                - auto
-                - fast
-                - deep
-            goal:
-              type:
-                - string
-            query:
-              type:
-                - string
-            results:
-              type:
-                - array
-              items:
-                type:
-                  - object
-                properties:
-                  url:
-                    type:
-                      - string
-                required:
-                  - url
-            pageTokens:
-              type:
-                - number
-          required:
-            - type
-            - searchType
-            - query
-            - results
-            - pageTokens
-        - type:
-            - object
-          properties:
-            type:
-              type:
-                - string
-              enum:
-                - crawl
-            goal:
-              type:
-                - string
-            result:
-              type:
-                - object
-              properties:
                 url:
                   type:
                     - string
+                title:
+                  type:
+                    - string
+                snippet:
+                  type:
+                    - string
               required:
+                - id
                 - url
-            pageTokens:
-              type:
-                - number
-          required:
-            - type
-            - result
-            - pageTokens
-    ResearchEventDtoClass:
-      oneOf:
-        - discriminator:
-            propertyName: eventType
-          oneOf:
-            - type:
-                - object
-              properties:
-                eventType:
-                  type:
-                    - string
-                  enum:
-                    - research-definition
-                instructions:
-                  type:
-                    - string
-                outputSchema:
-                  type:
-                    - object
-                  additionalProperties: {}
-                createdAt:
-                  type:
-                    - number
-                  description: Milliseconds since epoch time
-                researchId:
-                  type:
-                    - string
-              required:
-                - eventType
-                - instructions
-                - createdAt
-                - researchId
-            - type:
-                - object
-              properties:
-                eventType:
-                  type:
-                    - string
-                  enum:
-                    - research-output
-                output:
-                  discriminator:
-                    propertyName: outputType
-                  oneOf:
-                    - type:
-                        - object
-                      properties:
-                        outputType:
-                          type:
-                            - string
-                          enum:
-                            - completed
-                        costDollars:
-                          type:
-                            - object
-                          properties:
-                            total:
-                              type:
-                                - number
-                            numSearches:
-                              type:
-                                - number
-                            numPages:
-                              type:
-                                - number
-                            reasoningTokens:
-                              type:
-                                - number
-                          required:
-                            - total
-                            - numSearches
-                            - numPages
-                            - reasoningTokens
-                        content:
-                          type:
-                            - string
-                        parsed:
-                          type:
-                            - object
-                          additionalProperties: {}
-                      required:
-                        - outputType
-                        - costDollars
-                        - content
-                    - type:
-                        - object
-                      properties:
-                        outputType:
-                          type:
-                            - string
-                          enum:
-                            - failed
-                        error:
-                          type:
-                            - string
-                      required:
-                        - outputType
-                        - error
-                createdAt:
-                  type:
-                    - number
-                  description: Milliseconds since epoch time
-                researchId:
-                  type:
-                    - string
-              required:
-                - eventType
-                - output
-                - createdAt
-                - researchId
-        - discriminator:
-            propertyName: eventType
-          oneOf:
-            - type:
-                - object
-              properties:
-                eventType:
-                  type:
-                    - string
-                  enum:
-                    - plan-definition
-                planId:
-                  type:
-                    - string
-                createdAt:
-                  type:
-                    - number
-                  description: Milliseconds since epoch time
-                researchId:
-                  type:
-                    - string
-              required:
-                - eventType
-                - planId
-                - createdAt
-                - researchId
-            - type:
-                - object
-              properties:
-                eventType:
-                  type:
-                    - string
-                  enum:
-                    - plan-operation
-                planId:
-                  type:
-                    - string
-                operationId:
-                  type:
-                    - string
-                data:
-                  discriminator:
-                    propertyName: type
-                  $ref: '#/components/schemas/ResearchOperationDtoClass'
-                createdAt:
-                  type:
-                    - number
-                  description: Milliseconds since epoch time
-                researchId:
-                  type:
-                    - string
-              required:
-                - eventType
-                - planId
-                - operationId
-                - data
-                - createdAt
-                - researchId
-            - type:
-                - object
-              properties:
-                eventType:
-                  type:
-                    - string
-                  enum:
-                    - plan-output
-                planId:
-                  type:
-                    - string
-                output:
-                  discriminator:
-                    propertyName: outputType
-                  oneOf:
-                    - type:
-                        - object
-                      properties:
-                        outputType:
-                          type:
-                            - string
-                          enum:
-                            - tasks
-                        reasoning:
-                          type:
-                            - string
-                        tasksInstructions:
-                          type:
-                            - array
-                          items:
-                            type:
-                              - string
-                      required:
-                        - outputType
-                        - reasoning
-                        - tasksInstructions
-                    - type:
-                        - object
-                      properties:
-                        outputType:
-                          type:
-                            - string
-                          enum:
-                            - stop
-                        reasoning:
-                          type:
-                            - string
-                      required:
-                        - outputType
-                        - reasoning
-                createdAt:
-                  type:
-                    - number
-                  description: Milliseconds since epoch time
-                researchId:
-                  type:
-                    - string
-              required:
-                - eventType
-                - planId
-                - output
-                - createdAt
-                - researchId
-        - discriminator:
-            propertyName: eventType
-          oneOf:
-            - type:
-                - object
-              properties:
-                eventType:
-                  type:
-                    - string
-                  enum:
-                    - task-definition
-                planId:
-                  type:
-                    - string
-                taskId:
-                  type:
-                    - string
-                instructions:
-                  type:
-                    - string
-                createdAt:
-                  type:
-                    - number
-                  description: Milliseconds since epoch time
-                researchId:
-                  type:
-                    - string
-              required:
-                - eventType
-                - planId
-                - taskId
-                - instructions
-                - createdAt
-                - researchId
-            - type:
-                - object
-              properties:
-                eventType:
-                  type:
-                    - string
-                  enum:
-                    - task-operation
-                planId:
-                  type:
-                    - string
-                taskId:
-                  type:
-                    - string
-                operationId:
-                  type:
-                    - string
-                data:
-                  discriminator:
-                    propertyName: type
-                  $ref: '#/components/schemas/ResearchOperationDtoClass'
-                createdAt:
-                  type:
-                    - number
-                  description: Milliseconds since epoch time
-                researchId:
-                  type:
-                    - string
-              required:
-                - eventType
-                - planId
-                - taskId
-                - operationId
-                - data
-                - createdAt
-                - researchId
-            - type:
-                - object
-              properties:
-                eventType:
-                  type:
-                    - string
-                  enum:
-                    - task-output
-                planId:
-                  type:
-                    - string
-                taskId:
-                  type:
-                    - string
-                output:
-                  type:
-                    - object
-                  properties:
-                    outputType:
-                      type:
-                        - string
-                      enum:
-                        - completed
-                    content:
-                      type:
-                        - string
-                  required:
-                    - outputType
-                    - content
-                createdAt:
-                  type:
-                    - number
-                  description: Milliseconds since epoch time
-                researchId:
-                  type:
-                    - string
-              required:
-                - eventType
-                - planId
-                - taskId
-                - output
-                - createdAt
-                - researchId
+                - snippet
+          description: Citations grouped by the root field they were used in
+      required:
+        - id
+        - status
+        - instructions
   responses:
     SearchResponse:
       description: OK
@@ -2131,17 +1605,59 @@ components:
                 example: "b5947044c4b78efa9552a7c89b306d95"
               results:
                 type: array
-                description: A list of search results containing title, URL, published date, author, and score.
+                description: A list of search results containing title, URL, published date, and author.
                 items:
                   $ref: "#/components/schemas/ResultWithContent"
               searchType:
                 type: string
-                enum: [neural, deep]
+                enum: [neural, deep, deep-reasoning]
                 description: For auto searches, indicates which search type was selected.
                 example: "auto"
               context:
                 type: string
-                description: A formatted string of the search results ready for LLMs.
+                description: "Deprecated. Combined context string from search results. Use highlights or text instead."
+              output:
+                type: object
+                description: Deep-search synthesized output. Returned for deep search variants.
+                properties:
+                  content:
+                    oneOf:
+                      - type: string
+                      - type: object
+                        additionalProperties: {}
+                    description: Deep-search synthesized content. String by default, or object when outputSchema is provided.
+                  grounding:
+                    type: array
+                    description: Field-level grounding for synthesized output.
+                    items:
+                      type: object
+                      required:
+                        - field
+                        - citations
+                        - confidence
+                      properties:
+                        field:
+                          type: string
+                          description: Field path in output.content (for example, content or companies[0].funding).
+                        citations:
+                          type: array
+                          description: Sources supporting this output field.
+                          items:
+                            type: object
+                            required:
+                              - url
+                              - title
+                            properties:
+                              url:
+                                type: string
+                              title:
+                                type: string
+                        confidence:
+                          type: string
+                          enum: [low, medium, high]
+                required:
+                  - content
+                  - grounding
               costDollars:
                 $ref: "#/components/schemas/CostDollars"
 
@@ -2158,10 +1674,10 @@ components:
                 example: "c6958155d5c89ffa0663b7c90c407396"
               context:
                 type: string
-                description: A formatted string of the search results ready for LLMs.
+                description: "Deprecated. Combined context string from search results. Use highlights or text instead."
               results:
                 type: array
-                description: A list of search results containing title, URL, published date, author, and score.
+                description: A list of search results containing title, URL, published date, and author.
                 items:
                   $ref: "#/components/schemas/ResultWithContent"
               costDollars:
@@ -2184,7 +1700,7 @@ components:
                   $ref: "#/components/schemas/ResultWithContent"
               context:
                 type: string
-                description: A formatted string of the search results ready for LLMs.
+                description: "Deprecated. Combined context string from search results. Use highlights or text instead."
               statuses:
                 type: array
                 description: Status information for each requested URL
@@ -2201,9 +1717,8 @@ components:
                       description: Status of the content fetch operation
                       example: "success"
                     error:
-                      type:
-                        - object
-                        - "null"
+                      type: object
+                      nullable: true
                       description: Error details, only present when status is "error"
                       properties:
                         tag:
@@ -2214,14 +1729,14 @@ components:
                               "CRAWL_TIMEOUT",
                               "CRAWL_LIVECRAWL_TIMEOUT",
                               "SOURCE_NOT_AVAILABLE",
+                              "UNSUPPORTED_URL",
                               "CRAWL_UNKNOWN_ERROR",
                             ]
                           description: Specific error type
                           example: "CRAWL_NOT_FOUND"
                         httpStatusCode:
-                          type:
-                            - integer
-                            - "null"
+                          type: integer
+                          nullable: true
                           description: The corresponding HTTP status code
                           example: 404
               costDollars:
@@ -2249,3 +1764,45 @@ components:
                 type: array
                 items:
                   $ref: "#/components/schemas/AnswerCitation"
+
+    ResearchCreateTaskResponse:
+      description: Research task created
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The unique identifier for the research task
+                example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+    ListResearchTasksResponse:
+      description: List of research tasks
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              requestId:
+                type: string
+                description: Unique identifier for the request
+                example: "b5947044c4b78efa9552a7c89b306d95"
+              data:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResearchTaskDto"
+                description: The list of research tasks
+              hasMore:
+                type: boolean
+                description: Whether there are more results to paginate through
+              nextCursor:
+                type: string
+                nullable: true
+                description: The cursor to paginate through the next set of results
+    ResearchTaskResponse:
+      description: Research task details
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ResearchTaskDto"
