@@ -22,7 +22,9 @@ paths:
               -H 'Content-Type: application/json' \
               -d '{
                 "query": "Latest research in LLMs",
-                "text": true
+                "contents": {
+                  "text": true
+                }
               }'
         - lang: python
           label: Simple search and contents
