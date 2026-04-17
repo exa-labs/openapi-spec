@@ -217,7 +217,11 @@ paths:
                         - deep
                         - deep-reasoning
                         - instant
-                      description: The type of search. auto (default) is our most balanced search type, fast is optimized for lower latency, deep is agentic, high quality search, deep-reasoning is agentic search with more depth, and instant provides the lowest latency search optimized for real-time applications.
+                        - neural
+                      description: |
+                        The type of search. auto (default) is our most balanced search type, fast is optimized for lower latency, deep is agentic, high quality search, deep-reasoning is agentic search with more depth, and instant provides the lowest latency search optimized for real-time applications.
+
+                        `neural` is deprecated; use `auto` instead.
                       example: "auto"
                       default: "auto"
                     outputSchema:
@@ -1445,6 +1449,12 @@ components:
                     format: float
                     description: Cost of your search operations
                     example: 0.007
+                  neuralSearch:
+                    type: number
+                    format: float
+                    deprecated: true
+                    description: "Deprecated: use `search` instead."
+                    example: 0.007
                   deepSearch:
                     type: number
                     format: float
@@ -1478,6 +1488,18 @@ components:
               type: number
               format: float
               description: Standard price per additional result beyond 10
+              example: 0.001
+            neuralSearch_1_10_results:
+              type: number
+              format: float
+              deprecated: true
+              description: "Deprecated: use `search_1_10_results` instead."
+              example: 0.007
+            neuralSearch_additional_result:
+              type: number
+              format: float
+              deprecated: true
+              description: "Deprecated: use `search_additional_result` instead."
               example: 0.001
             deepSearch:
               type: number
@@ -1589,8 +1611,8 @@ components:
                   $ref: "#/components/schemas/ResultWithContent"
               searchType:
                 type: string
-                enum: [auto, fast, deep, deep-reasoning, instant]
-                description: For auto searches, indicates which search type was selected.
+                enum: [auto, fast, deep, deep-reasoning, instant, neural]
+                description: For auto searches, indicates which search type was selected. `neural` is deprecated; treat it as equivalent to `auto`.
                 example: "auto"
               context:
                 type: string
