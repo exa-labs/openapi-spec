@@ -217,7 +217,7 @@ paths:
                         - deep
                         - deep-reasoning
                         - instant
-                      description: The type of search. auto (default) picks the best strategy for the query, fast uses lighter-weight models for lower latency, deep is light deep search, deep-reasoning is base deep search, and instant provides the lowest latency search optimized for real-time applications.
+                      description: The type of search. auto (default) is our most balanced search type, fast is optimized for lower latency, deep is agentic, high quality search, deep-reasoning is agentic search with more depth, and instant provides the lowest latency search optimized for real-time applications.
                       example: "auto"
                       default: "auto"
                     outputSchema:
