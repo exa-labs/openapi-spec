@@ -212,13 +212,12 @@ paths:
                     type:
                       type: string
                       enum:
-                        - neural
-                        - fast
                         - auto
+                        - fast
                         - deep
                         - deep-reasoning
                         - instant
-                      description: The type of search. Neural uses an embeddings-based model, auto (default) intelligently combines neural and other search methods, fast uses streamlined versions of the search models, deep is light deep search, deep-reasoning is base deep search, and instant provides the lowest latency search optimized for real-time applications.
+                      description: The type of search. auto (default) picks the best strategy for the query, fast uses lighter-weight models for lower latency, deep is light deep search, deep-reasoning is base deep search, and instant provides the lowest latency search optimized for real-time applications.
                       example: "auto"
                       default: "auto"
                     outputSchema:
@@ -887,7 +886,7 @@ components:
             **Deprecated**: Use `maxAgeHours` instead for more precise control over content freshness.
 
             Options for livecrawling pages.
-            'never': Disable livecrawling (default for neural search).
+            'never': Disable livecrawling (default).
             'fallback': Livecrawl when cache is empty.
             'preferred': Always try to livecrawl, but fall back to cache if crawling fails.
             'always': Always live-crawl, never use cache. Only use if you cannot tolerate any cached content. This option is not recommended unless consulted with the Exa team.
@@ -1441,16 +1440,16 @@ components:
               breakdown:
                 type: object
                 properties:
-                  neuralSearch:
+                  search:
                     type: number
                     format: float
-                    description: Cost of your neural search operations
-                    example: 0.005
+                    description: Cost of your search operations
+                    example: 0.007
                   deepSearch:
                     type: number
                     format: float
                     description: Cost of your deep search operations
-                    example: 0.015
+                    example: 0.012
                   contentText:
                     type: number
                     format: float
@@ -1470,31 +1469,26 @@ components:
           type: object
           description: Standard price per request for different operations
           properties:
-            neuralSearch_1_25_results:
+            search_1_10_results:
               type: number
               format: float
-              description: Standard price for neural search with 1-25 results
-              example: 0.005
-            neuralSearch_26_100_results:
+              description: Standard price for search with 1-10 results (contents for 10 results included)
+              example: 0.007
+            search_additional_result:
               type: number
               format: float
-              description: Standard price for neural search with 26-100 results
-              example: 0.025
-            neuralSearch_100_plus_results:
+              description: Standard price per additional result beyond 10
+              example: 0.001
+            deepSearch:
               type: number
               format: float
-              description: Standard price for neural search with 100+ results
-              example: 1
-            deepSearch_1_25_results:
+              description: Standard price for deep search per request
+              example: 0.012
+            deepReasoningSearch:
               type: number
               format: float
-              description: Standard price for deep search with 1-25 results
+              description: Standard price for deep-reasoning search per request
               example: 0.015
-            deepSearch_26_100_results:
-              type: number
-              format: float
-              description: Standard price for deep search with 26-100 results
-              example: 0.075
         perPagePrices:
           type: object
           description: Standard price per page for different content operations
@@ -1595,7 +1589,7 @@ components:
                   $ref: "#/components/schemas/ResultWithContent"
               searchType:
                 type: string
-                enum: [neural, deep, deep-reasoning]
+                enum: [auto, fast, deep, deep-reasoning, instant]
                 description: For auto searches, indicates which search type was selected.
                 example: "auto"
               context:
